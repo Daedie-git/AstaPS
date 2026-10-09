@@ -88,6 +88,7 @@ public class GachaSystem extends BaseGameSystem {
                 for (var banner : getGachaBanners().values()) {
                     banner.ensureFallback4Pools();
                 }
+                CatalogRotation.initialize(this);
                 Grasscutter.getLogger().debug("Banners successfully loaded.");
             } else {
                 Grasscutter.getLogger().error("Unable to load banners. Banners size is 0.");
@@ -542,6 +543,7 @@ public class GachaSystem extends BaseGameSystem {
     }
 
     private synchronized GetGachaInfoRsp createProto(Player player) {
+        CatalogRotation.refresh(this);
         GetGachaInfoRsp.Builder proto = GetGachaInfoRsp.newBuilder().setGachaRandom(12345);
 
         long currentTime = System.currentTimeMillis() / 1000L;

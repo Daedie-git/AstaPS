@@ -358,5 +358,6 @@ public final class CommandMap {
                                         exception);
                     }
                 });
+        registerCommand("catalog", new emu.grasscutter.command.commands.CatalogCommand());
     }
 }
