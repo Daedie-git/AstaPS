@@ -60,11 +60,37 @@ public final class CheckRotation {
             check(found[0], "Missing installed hook: " + spec[1]);
         }
     }
-    private static void validateCatalog(JsonObject config, JsonObject baseline) throws Exception {
+    private static Set<Integer> fiveStarCards(Path resources) throws Exception {
+        Map<Integer, JsonObject> avatars = new HashMap<>();
+        for (var row : JsonParser.parseString(Files.readString(resources.resolve("AvatarExcelConfigData.json"))).getAsJsonArray()) {
+            var avatar = row.getAsJsonObject(); avatars.put(avatar.get("id").getAsInt(), avatar);
+        }
+        Set<Integer> cards = new HashSet<>();
+        for (var row : JsonParser.parseString(Files.readString(resources.resolve("MaterialExcelConfigData.json"))).getAsJsonArray()) {
+            var material = row.getAsJsonObject();
+            if (!material.has("materialType") || !material.get("materialType").getAsString().equals("MATERIAL_AVATAR") || !material.has("itemUse")) continue;
+            for (var useRow : material.getAsJsonArray("itemUse")) {
+                var use = useRow.getAsJsonObject();
+                if (!use.has("useOp") || !use.get("useOp").getAsString().equals("ITEM_USE_GAIN_AVATAR")) continue;
+                int id = Integer.parseInt(use.getAsJsonArray("useParam").get(0).getAsString());
+                var avatar = avatars.get(id);
+                if (avatar == null || !avatar.has("useType") || !avatar.get("useType").getAsString().equals("AVATAR_FORMAL")) continue;
+                String quality = avatar.get("qualityType").getAsString();
+                if (!quality.equals("QUALITY_ORANGE") && !quality.equals("QUALITY_ORANGE_SP")) continue;
+                int canonical = id - 10000000 + (id < 10000100 ? 1000 : 4000);
+                if (material.get("id").getAsInt() == canonical && canonical != 1005 && canonical != 1007) cards.add(canonical);
+            }
+        }
+        check(!cards.isEmpty(), "Resource roster must not be empty");
+        return cards;
+    }
+    private static void validateCatalog(JsonObject config, JsonObject baseline, Set<Integer> expected) throws Exception {
         var phases = config.getAsJsonArray("phases");
-        check(phases.size() == 9, "Nine themes");
+        check(phases.size() >= 3, "Catalog includes current, Diluc and Mavuika sets");
         Map<Integer, Integer> roster = new HashMap<>();
         check(phases.get(1).getAsJsonObject().get("name").getAsString().equals("Diluc plunge and classic Mondstadt"), "Diluc set immediately follows current set");
+        check(phases.get(2).getAsJsonObject().getAsJsonArray("characters").get(0).getAsJsonObject().get("card").getAsInt() == 4106, "Mavuika leads cycle 3, immediately after Diluc");
+        check(phases.get(2).getAsJsonObject().getAsJsonArray("characters").get(1).getAsJsonObject().get("card").getAsInt() == 4102, "Mualani pairs with Mavuika in cycle 3");
         for (var entry : phases) {
             var phase = entry.getAsJsonObject();
             var objects = phase.getAsJsonArray("banners");
@@ -95,9 +121,14 @@ public final class CheckRotation {
                 }
             }
         }
-        check(roster.size() == 35 && roster.get(1093) == 2, "35 distinct five-stars; Xianyun twice");
-        for (var entry : roster.entrySet()) check(entry.getValue() == (entry.getKey() == 1093 ? 2 : 1), "Only Xianyun repeats");
-        for (int index : new int[]{1, 7}) {
+        Set<Integer> missing = new TreeSet<>(expected); missing.removeAll(roster.keySet());
+        Set<Integer> unexpected = new TreeSet<>(roster.keySet()); unexpected.removeAll(expected);
+        check(missing.isEmpty() && unexpected.isEmpty(), "Complete resource roster: missing=" + missing + ", unexpected=" + unexpected);
+        check(roster.containsKey(4106), "Mavuika appears in the catalog");
+        check(roster.get(1093) == 2, "Xianyun appears twice");
+        check(!roster.containsKey(1005) && !roster.containsKey(1007), "Travelers are excluded");
+        for (var entry : roster.entrySet()) check(entry.getValue() == (Set.of(1093, 4106, 1089).contains(entry.getKey()) ? 2 : 1), "Only Xianyun, Mavuika and Furina repeat");
+        for (int index : new int[]{1, 8}) {
             var characters = phases.get(index).getAsJsonObject().getAsJsonArray("characters");
             check(characters.get(0).getAsJsonObject().get("card").getAsInt() == (index == 1 ? 1016 : 1026), "Diluc/Xiao lead their sets");
             check(characters.get(1).getAsJsonObject().get("card").getAsInt() == 1093, "Xianyun shares their weapon pair");
@@ -109,19 +140,22 @@ public final class CheckRotation {
         String catalog = Files.readString(work.resolve("rotation-catalog.json"));
         Files.writeString(root.resolve("rotation-catalog.json"), catalog);
         var baseline = GSON.fromJson(Files.readString(work.resolve("Banners.json")), JsonArray.class).get(0).getAsJsonObject();
-        validateCatalog(GSON.fromJson(catalog, JsonObject.class), baseline);
+        var expectedRoster = fiveStarCards(Path.of(System.getProperty("catalog.resources", "resources/ExcelBinOutput")));
+        validateCatalog(GSON.fromJson(catalog, JsonObject.class), baseline, expectedRoster);
         var clock = new TestClock(Instant.EPOCH); clock.day("2026-10-09");
         var store = new CatalogStore(root, clock);
         check(store.current(false).index() == 0, "Initial set");
         var next = store.current(true);
         check(next.index() == 1 && next.banners()[1].getRateUpItems5()[0] == 1016 && next.banners()[2].getRateUpItems5()[0] == 1093, "Next set is Diluc/Xianyun");
-        check(store.current(true).index() == 2, "Manual advances");
+        var third = store.current(true);
+        check(third.index() == 2 && third.banners()[1].getRateUpItems5()[0] == 4106 && third.banners()[2].getRateUpItems5()[0] == 4102, "Cycle 3 is Mavuika/Mualani");
         check(new CatalogStore(root, clock).current(false).index() == 2, "Restart persistence");
         clock.day("2026-10-12"); check(store.current(false).index() == 5, "Offline catch-up");
         check(store.current(false).index() == 5, "No repeated advance same day");
-        clock.day("2026-10-21"); check(store.current(false).index() == 5, "Full nine-day cycle wraps");
-        clock.day("2026-10-20"); check(store.current(false).day().equals(LocalDate.parse("2026-10-21")), "Backward clock does not roll back");
-        writeState(root,8,"2026-10-08"); clock.day("2026-10-09");
+        var wrapDay = LocalDate.parse("2026-10-12").plusDays(store.size());
+        clock.day(wrapDay.toString()); check(store.current(false).index() == 5, "Full catalog cycle wraps");
+        clock.day(wrapDay.minusDays(1).toString()); check(store.current(false).day().equals(wrapDay), "Backward clock does not roll back");
+        writeState(root,store.size()-1,"2026-10-08"); clock.day("2026-10-09");
         check(store.current(true).index() == 1, "Daily plus manual each advance once");
         for (String day : new String[]{"2026-03-29","2026-10-25"}) {
             var date = LocalDate.parse(day); writeState(root,0,date.minusDays(1).toString());
@@ -144,7 +178,7 @@ public final class CheckRotation {
         Files.writeString(root.resolve("rotation-catalog.json"),GSON.toJson(invalid));
         try { new CatalogStore(root,clock); throw new AssertionError("Invalid layout accepted"); } catch(java.io.IOException expected) {}
         Files.writeString(root.resolve("rotation-catalog.json"),catalog);
-        System.out.println("PASS: nine themed sets, Diluc/Xiao with Xianyun, rates/pairs, midnight/DST, restart/catch-up, wrap, backward clock, 40 concurrent advances and rejected corrupt configuration.");
+        System.out.println("PASS: " + store.size() + " sets cover all " + expectedRoster.size() + " resource five-stars; Diluc/Xiao with Xianyun, rates/pairs, midnight/DST, restart/catch-up, wrap, backward clock, 40 concurrent advances and rejected corrupt configuration.");
         if (args.length > 2 && args[2].equals("--store-only")) return;
         checkHooks(args[0]);
         System.setProperty("astaps.rotation.root",root.toString());
@@ -164,14 +198,17 @@ public final class CheckRotation {
         check(annotation.label().equals("catalog") && annotation.permission().equals("server.catalog"),"Command identity and permission");
         new CatalogCommand().execute(null,null,List.of("next"));
         check(system.getGachaBanners().get(7101).getRateUpItems5()[0]==1016 && system.getGachaBanners().get(7102).getRateUpItems5()[0]==1093,"Actual next command selects Diluc/Xianyun");
-        check(Arrays.equals(system.getGachaBanners().get(7200).getRateUpItems5(),new int[]{12501,14515}),"Actual next command selects matching weapons");
-        writeState(root,3,today); CatalogRotation.initialize(system);
+        check(Arrays.equals(system.getGachaBanners().get(7200).getRateUpItems5(),new int[]{12502,14515}),"Actual next command selects matching weapons");
+        new CatalogCommand().execute(null,null,List.of("next"));
+        check(system.getGachaBanners().get(7101).getRateUpItems5()[0]==4106 && system.getGachaBanners().get(7102).getRateUpItems5()[0]==4102,"Actual next command selects Mavuika/Mualani after Diluc");
+        check(Arrays.equals(system.getGachaBanners().get(7200).getRateUpItems5(),new int[]{12514,14516}),"Mavuika/Mualani weapon pair");
+        writeState(root,4,today); CatalogRotation.initialize(system);
         check(system.getGachaBanners().get(7101).getRateUpItems5()[0]==1052,"Actual reload applies persisted Raiden set");
         new CatalogCommand().execute(null,null,List.of("next"));
         check(system.getGachaBanners().get(7101).getRateUpItems5()[0]==1002,"Actual command advances to Ayaka set");
         new CatalogCommand().execute(null,null,List.of());
         check(system.getGachaBanners().get(7101).getRateUpItems5()[0]==1002,"Status does not advance");
-        writeState(root,4,LocalDate.now(ZONE).minusDays(1).toString());
+        writeState(root,5,LocalDate.now(ZONE).minusDays(1).toString());
         CatalogRotation.refresh(system);
         check(system.getGachaBanners().get(7101).getRateUpItems5()[0]==1087,"Actual daily refresh advances to Neuvillette set");
         var old=system.getGachaBanners().get(7101);
