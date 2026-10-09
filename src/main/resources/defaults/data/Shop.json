@@ -52,5 +52,4941 @@
         "maxLevel": 99
       }
     ]
+  },
+  {
+    "shopId": 1001,
+    "items": [
+      {
+        "goodsId": 102001,
+        "goodsItem": {
+          "id": 223,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [],
+        "boughtNum": 0,
+        "buyLimit": 0,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 160,
+        "disableType": 0,
+        "secondarySheetId": 1,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102002,
+        "goodsItem": {
+          "id": 224,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [],
+        "boughtNum": 0,
+        "buyLimit": 0,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 160,
+        "disableType": 0,
+        "secondarySheetId": 1,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102003,
+        "goodsItem": {
+          "id": 223,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 0,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102004,
+        "goodsItem": {
+          "id": 224,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 0,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102005,
+        "goodsItem": {
+          "id": 0,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 34
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 1,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102006,
+        "goodsItem": {
+          "id": 0,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 34
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 1,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102007,
+        "goodsItem": {
+          "id": 0,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 24
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 3,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102008,
+        "goodsItem": {
+          "id": 0,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 24
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 3,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102009,
+        "goodsItem": {
+          "id": 0,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 24
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 3,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102010,
+        "goodsItem": {
+          "id": 0,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 24
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 3,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102011,
+        "goodsItem": {
+          "id": 0,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 24
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 3,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102012,
+        "goodsItem": {
+          "id": 104319,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 50
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 1,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102013,
+        "goodsItem": {
+          "id": 112016,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102014,
+        "goodsItem": {
+          "id": 112019,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102015,
+        "goodsItem": {
+          "id": 112022,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102016,
+        "goodsItem": {
+          "id": 112025,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102017,
+        "goodsItem": {
+          "id": 112028,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102018,
+        "goodsItem": {
+          "id": 112031,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102019,
+        "goodsItem": {
+          "id": 112043,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102020,
+        "goodsItem": {
+          "id": 112004,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102021,
+        "goodsItem": {
+          "id": 112007,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102022,
+        "goodsItem": {
+          "id": 112010,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102023,
+        "goodsItem": {
+          "id": 112013,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102024,
+        "goodsItem": {
+          "id": 112034,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102025,
+        "goodsItem": {
+          "id": 112037,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102026,
+        "goodsItem": {
+          "id": 112040,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102027,
+        "goodsItem": {
+          "id": 1020,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 34
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 1,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102028,
+        "goodsItem": {
+          "id": 1021,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 34
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 1,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102029,
+        "goodsItem": {
+          "id": 11404,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 24
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 3,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102030,
+        "goodsItem": {
+          "id": 12404,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 24
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 3,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102031,
+        "goodsItem": {
+          "id": 13404,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 24
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 3,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102032,
+        "goodsItem": {
+          "id": 14404,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 24
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 3,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102033,
+        "goodsItem": {
+          "id": 15404,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 24
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 3,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102034,
+        "goodsItem": {
+          "id": 112046,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102035,
+        "goodsItem": {
+          "id": 112049,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102036,
+        "goodsItem": {
+          "id": 112052,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102037,
+        "goodsItem": {
+          "id": 112055,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102038,
+        "goodsItem": {
+          "id": 112058,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102039,
+        "goodsItem": {
+          "id": 112061,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102040,
+        "goodsItem": {
+          "id": 112064,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102041,
+        "goodsItem": {
+          "id": 112067,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102042,
+        "goodsItem": {
+          "id": 112070,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102043,
+        "goodsItem": {
+          "id": 112073,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102044,
+        "goodsItem": {
+          "id": 112076,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102045,
+        "goodsItem": {
+          "id": 112079,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102046,
+        "goodsItem": {
+          "id": 112082,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102047,
+        "goodsItem": {
+          "id": 112085,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102048,
+        "goodsItem": {
+          "id": 112088,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102049,
+        "goodsItem": {
+          "id": 112091,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102050,
+        "goodsItem": {
+          "id": 112094,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102051,
+        "goodsItem": {
+          "id": 112097,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102052,
+        "goodsItem": {
+          "id": 112100,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102053,
+        "goodsItem": {
+          "id": 112103,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102054,
+        "goodsItem": {
+          "id": 112106,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102055,
+        "goodsItem": {
+          "id": 112109,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102056,
+        "goodsItem": {
+          "id": 112112,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102057,
+        "goodsItem": {
+          "id": 112115,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102058,
+        "goodsItem": {
+          "id": 112118,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102059,
+        "goodsItem": {
+          "id": 112121,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102060,
+        "goodsItem": {
+          "id": 112124,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102061,
+        "goodsItem": {
+          "id": 112127,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102062,
+        "goodsItem": {
+          "id": 112130,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102063,
+        "goodsItem": {
+          "id": 112133,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102064,
+        "goodsItem": {
+          "id": 112136,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102065,
+        "goodsItem": {
+          "id": 112139,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102066,
+        "goodsItem": {
+          "id": 112142,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102067,
+        "goodsItem": {
+          "id": 112145,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102068,
+        "goodsItem": {
+          "id": 112148,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102069,
+        "goodsItem": {
+          "id": 112151,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 25,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102070,
+        "goodsItem": {
+          "id": 112154,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102071,
+        "goodsItem": {
+          "id": 112157,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 221,
+            "count": 2
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 8,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 35,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 2,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102501,
+        "goodsItem": {
+          "id": 223,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 75
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 5,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_DAILY"
+      },
+      {
+        "goodsId": 102502,
+        "goodsItem": {
+          "id": 224,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 75
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 5,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 4,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_DAILY"
+      },
+      {
+        "goodsId": 102503,
+        "goodsItem": {
+          "id": 104002,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 8
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 100,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102504,
+        "goodsItem": {
+          "id": 104013,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 60,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102505,
+        "goodsItem": {
+          "id": 202,
+          "count": 10000
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 10
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102506,
+        "goodsItem": {
+          "id": 202,
+          "count": 10000
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 20
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 0,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102507,
+        "goodsItem": {
+          "id": 112015,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 25,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102508,
+        "goodsItem": {
+          "id": 112018,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 25,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102509,
+        "goodsItem": {
+          "id": 112021,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 25,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102510,
+        "goodsItem": {
+          "id": 112024,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 25,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102511,
+        "goodsItem": {
+          "id": 112027,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 25,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102512,
+        "goodsItem": {
+          "id": 112030,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 25,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102513,
+        "goodsItem": {
+          "id": 112042,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 25,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102514,
+        "goodsItem": {
+          "id": 112003,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102515,
+        "goodsItem": {
+          "id": 112006,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102516,
+        "goodsItem": {
+          "id": 112009,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102517,
+        "goodsItem": {
+          "id": 112012,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102518,
+        "goodsItem": {
+          "id": 112033,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102519,
+        "goodsItem": {
+          "id": 112036,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102520,
+        "goodsItem": {
+          "id": 112039,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102521,
+        "goodsItem": {
+          "id": 112014,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102522,
+        "goodsItem": {
+          "id": 112017,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102523,
+        "goodsItem": {
+          "id": 112020,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102524,
+        "goodsItem": {
+          "id": 112023,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102525,
+        "goodsItem": {
+          "id": 112026,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102526,
+        "goodsItem": {
+          "id": 112029,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102527,
+        "goodsItem": {
+          "id": 112041,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102528,
+        "goodsItem": {
+          "id": 112002,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102529,
+        "goodsItem": {
+          "id": 112005,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102530,
+        "goodsItem": {
+          "id": 112008,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102531,
+        "goodsItem": {
+          "id": 112011,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102532,
+        "goodsItem": {
+          "id": 112032,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102533,
+        "goodsItem": {
+          "id": 112035,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102534,
+        "goodsItem": {
+          "id": 112038,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102535,
+        "goodsItem": {
+          "id": 104201,
+          "count": 10
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 100,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102537,
+        "goodsItem": {
+          "id": 112044,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102538,
+        "goodsItem": {
+          "id": 112045,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102539,
+        "goodsItem": {
+          "id": 112047,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102540,
+        "goodsItem": {
+          "id": 112048,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102541,
+        "goodsItem": {
+          "id": 112050,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102542,
+        "goodsItem": {
+          "id": 112051,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102543,
+        "goodsItem": {
+          "id": 112053,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102544,
+        "goodsItem": {
+          "id": 112054,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102545,
+        "goodsItem": {
+          "id": 112056,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102546,
+        "goodsItem": {
+          "id": 112057,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102547,
+        "goodsItem": {
+          "id": 112059,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102548,
+        "goodsItem": {
+          "id": 112060,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102549,
+        "goodsItem": {
+          "id": 112062,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102550,
+        "goodsItem": {
+          "id": 112063,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102551,
+        "goodsItem": {
+          "id": 112065,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102552,
+        "goodsItem": {
+          "id": 112066,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102553,
+        "goodsItem": {
+          "id": 112068,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102554,
+        "goodsItem": {
+          "id": 112069,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102555,
+        "goodsItem": {
+          "id": 112071,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102556,
+        "goodsItem": {
+          "id": 112072,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102557,
+        "goodsItem": {
+          "id": 112074,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102558,
+        "goodsItem": {
+          "id": 112075,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102559,
+        "goodsItem": {
+          "id": 112077,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102560,
+        "goodsItem": {
+          "id": 112078,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102561,
+        "goodsItem": {
+          "id": 112080,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102562,
+        "goodsItem": {
+          "id": 112081,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102563,
+        "goodsItem": {
+          "id": 112083,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102564,
+        "goodsItem": {
+          "id": 112084,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102565,
+        "goodsItem": {
+          "id": 112086,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102566,
+        "goodsItem": {
+          "id": 112087,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102567,
+        "goodsItem": {
+          "id": 112089,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102568,
+        "goodsItem": {
+          "id": 112090,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102569,
+        "goodsItem": {
+          "id": 112092,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102570,
+        "goodsItem": {
+          "id": 112093,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102571,
+        "goodsItem": {
+          "id": 112095,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102572,
+        "goodsItem": {
+          "id": 112096,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102573,
+        "goodsItem": {
+          "id": 112098,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102574,
+        "goodsItem": {
+          "id": 112099,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102575,
+        "goodsItem": {
+          "id": 104013,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 10
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 0,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102576,
+        "goodsItem": {
+          "id": 112101,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102577,
+        "goodsItem": {
+          "id": 112102,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102578,
+        "goodsItem": {
+          "id": 112104,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102579,
+        "goodsItem": {
+          "id": 112105,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102580,
+        "goodsItem": {
+          "id": 112107,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102581,
+        "goodsItem": {
+          "id": 112108,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102582,
+        "goodsItem": {
+          "id": 112110,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102583,
+        "goodsItem": {
+          "id": 112111,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102584,
+        "goodsItem": {
+          "id": 112113,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102585,
+        "goodsItem": {
+          "id": 112114,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102586,
+        "goodsItem": {
+          "id": 112116,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102587,
+        "goodsItem": {
+          "id": 112117,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102588,
+        "goodsItem": {
+          "id": 112119,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102589,
+        "goodsItem": {
+          "id": 112120,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102590,
+        "goodsItem": {
+          "id": 112122,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102591,
+        "goodsItem": {
+          "id": 112123,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102592,
+        "goodsItem": {
+          "id": 112125,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102593,
+        "goodsItem": {
+          "id": 112126,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102594,
+        "goodsItem": {
+          "id": 112128,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102595,
+        "goodsItem": {
+          "id": 112129,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102596,
+        "goodsItem": {
+          "id": 112131,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102597,
+        "goodsItem": {
+          "id": 112132,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102598,
+        "goodsItem": {
+          "id": 112134,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102599,
+        "goodsItem": {
+          "id": 112135,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102600,
+        "goodsItem": {
+          "id": 112137,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102601,
+        "goodsItem": {
+          "id": 112138,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102602,
+        "goodsItem": {
+          "id": 112140,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102603,
+        "goodsItem": {
+          "id": 112141,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102604,
+        "goodsItem": {
+          "id": 112143,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102605,
+        "goodsItem": {
+          "id": 112144,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102606,
+        "goodsItem": {
+          "id": 112146,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102607,
+        "goodsItem": {
+          "id": 112147,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102608,
+        "goodsItem": {
+          "id": 112149,
+          "count": 3
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 30,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102609,
+        "goodsItem": {
+          "id": 112150,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 120,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102610,
+        "goodsItem": {
+          "id": 112152,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102611,
+        "goodsItem": {
+          "id": 112153,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102612,
+        "goodsItem": {
+          "id": 112155,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 5
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 16,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      },
+      {
+        "goodsId": 102613,
+        "goodsItem": {
+          "id": 112156,
+          "count": 1
+        },
+        "scoin": 0,
+        "costItemList": [
+          {
+            "id": 222,
+            "count": 15
+          }
+        ],
+        "boughtNum": 0,
+        "buyLimit": 12,
+        "beginTime": 0,
+        "endTime": 1924992000,
+        "minLevel": 10,
+        "maxLevel": 99,
+        "preGoodsIdList": [],
+        "mcoin": 0,
+        "hcoin": 0,
+        "disableType": 0,
+        "secondarySheetId": 3,
+        "shopRefreshParam": 1,
+        "refreshType": "SHOP_REFRESH_WEEKLY"
+      }
+    ]
   }
 ]
