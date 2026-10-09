@@ -255,7 +255,7 @@ public class GameItem {
         WeightedList<ReliquaryAffixData> randomList = new WeightedList<>();
         for (ReliquaryAffixData affix : affixList) {
             if (!blacklist.contains(affix.getFightProp())) {
-                randomList.add(affix.getWeight() * bias.weigh(affix), affix);
+                randomList.add(ArtifactDropWeights.weight(affix, bias) * bias.weigh(affix), affix);
             }
         }
 
