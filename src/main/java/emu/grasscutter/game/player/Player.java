@@ -697,7 +697,7 @@ public class Player implements PlayerHook, FieldFetch {
     }
 
     public boolean setPrimogems(int primogem) {
-        return this.setProperty(PlayerProperty.PROP_PLAYER_HCOIN, primogem);
+        return emu.grasscutter.game.inventory.PrimogemAutoConvert.setPrimogems(this, primogem);
     }
 
     public int getMora() {
