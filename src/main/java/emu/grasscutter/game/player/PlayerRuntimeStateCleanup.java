@@ -2,6 +2,7 @@ package emu.grasscutter.game.player;
 
 import emu.grasscutter.Grasscutter;
 import emu.grasscutter.game.ability.ArlecchinoBoLUtil;
+import emu.grasscutter.game.ability.AmberSupport;
 import emu.grasscutter.game.ability.ArlecchinoBurstBoL;
 import emu.grasscutter.game.ability.BurstInvulnHelper;
 import emu.grasscutter.game.ability.ClorindeBoLUtil;
@@ -36,6 +37,7 @@ public final class PlayerRuntimeStateCleanup {
         }
 
         int uid = player.getUid();
+        run("Amber support", () -> AmberSupport.clearPlayerState(player));
         run("Arlecchino", () -> ArlecchinoBoLUtil.clearPlayerState(player));
         run("Arlecchino burst", () -> ArlecchinoBurstBoL.clearPlayerState(player));
         run("BurstInvuln", () -> BurstInvulnHelper.clearPlayerState(uid));

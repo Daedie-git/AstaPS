@@ -5,6 +5,7 @@ import emu.grasscutter.data.binout.OpenConfigEntry;
 import emu.grasscutter.data.binout.OpenConfigEntry.AbilityVarSetter;
 import emu.grasscutter.data.binout.OpenConfigEntry.TalentParamEntry;
 import emu.grasscutter.data.excels.ProudSkillData;
+import emu.grasscutter.game.ability.AmberSupport;
 import emu.grasscutter.data.excels.avatar.AvatarSkillDepotData;
 import emu.grasscutter.data.excels.avatar.AvatarTalentData;
 import emu.grasscutter.game.avatar.Avatar;
@@ -178,7 +179,7 @@ public class PacketPlayerEnterSceneInfoNotify extends BasePacket {
             OpenConfigEntry entry = GameData.getOpenConfigEntries().get(talentData.getOpenConfig());
             if (entry == null || entry.getTalentParamEntries() == null) continue;
             for (TalentParamEntry param : entry.getTalentParamEntries()) {
-                info.addAppliedAbilities(buildTalentParamAbility(param));
+                info.addAppliedAbilities(AmberSupport.tuneAppliedAbility(avatar, buildTalentParamAbility(param)));
             }
         }
     }

@@ -215,6 +215,7 @@ public final class AbilityManager extends BasePlayerManager {
                     this.player
                             .getEnergyManager()
                             .confirmBurstCast(entityAvatar.getAvatar(), confirmedSkillId);
+                    AmberSupport.onConfirmedBurst(this.player, entityAvatar, ability, confirmedSkillId);
                 }
             } catch (Throwable ignored) {
                 // Energy confirm must not break invulnerability arming.
@@ -747,6 +748,7 @@ public final class AbilityManager extends BasePlayerManager {
         var ability = entity.getInstancedAbilities().get(instancedAbilityIndex);
         if (ability == null) return;
         setAbilityOverrideValue(ability, valueChange);
+        AmberSupport.syncC6Special(entity, ability, head.getInstancedAbilityId(), false);
     }
 
     private void handleReinitOverrideMap(AbilityInvokeEntry invoke) throws Exception {
@@ -909,6 +911,7 @@ public final class AbilityManager extends BasePlayerManager {
         if (finalAbility != null) {
             computedVarOverrides.forEach((k, v) -> finalAbility.getAbilitySpecials().put(k, v));
         }
+        AmberSupport.syncC6Special(entity, ability, head.getInstancedAbilityId(), true);
     }
 
     private void handleModifierChange(AbilityInvokeEntry invoke) throws Exception {
@@ -1476,6 +1479,7 @@ public final class AbilityManager extends BasePlayerManager {
         } else {
             abilities.add(newAbility);
         }
+        AmberSupport.syncC6Special(entity, newAbility, invoke.getHead().getInstancedAbilityId(), true);
 
         if (abilityName != null && entity instanceof EntityClientGadget clientGadget) {
             var talentVars = GameData.getAbilityTalentVarMap().get(abilityName);

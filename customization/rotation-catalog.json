@@ -1,0 +1,8375 @@
+{
+  "timezone": "Europe/Amsterdam",
+  "phases": [
+    {
+      "name": "Versatile supports and Vaporize",
+      "characters": [
+        {
+          "name": "Kazuha",
+          "card": 1047,
+          "signature": 11503
+        },
+        {
+          "name": "Xilonen",
+          "card": 4103,
+          "signature": 11516
+        },
+        {
+          "name": "Yelan",
+          "card": 1060,
+          "signature": 15508
+        },
+        {
+          "name": "Arlecchino",
+          "card": 1096,
+          "signature": 13512
+        }
+      ],
+      "banners": [
+        {
+          "comment": "Standard: Wanderlust Invocation, normal non-featured character and weapon pools",
+          "bannerType": "STANDARD",
+          "gachaType": 200,
+          "scheduleId": 200,
+          "sortId": 10020,
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE",
+          "costItemId": 224,
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "rateUpItems4": [],
+          "rateUpItems5": [],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ]
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Kazuha",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7101,
+          "sortId": 9997,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1043,
+            1031,
+            1032
+          ],
+          "rateUpItems5": [
+            1047
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A200",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A200_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Xilonen",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7102,
+          "sortId": 9996,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1027,
+            1064,
+            1032
+          ],
+          "rateUpItems5": [
+            4103
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A269",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A269_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Yelan",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7103,
+          "sortId": 9995,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1025,
+            1031,
+            1043
+          ],
+          "rateUpItems5": [
+            1060
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A257",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A257_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Arlecchino",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7104,
+          "sortId": 9994,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1032,
+            1025,
+            1090
+          ],
+          "rateUpItems5": [
+            1096
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A263",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A263_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Kazuha, Xilonen",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7200,
+          "sortId": 9990,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            11503,
+            11516
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A270",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A270_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Yelan, Arlecchino",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7201,
+          "sortId": 9989,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            15508,
+            13512
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A264",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A264_TITLE"
+        }
+      ]
+    },
+    {
+      "name": "Diluc plunge and classic Mondstadt",
+      "characters": [
+        {
+          "name": "Diluc",
+          "card": 1016,
+          "signature": 12501
+        },
+        {
+          "name": "Xianyun",
+          "card": 1093,
+          "signature": 14515
+        },
+        {
+          "name": "Keqing",
+          "card": 1042,
+          "signature": 11505
+        },
+        {
+          "name": "Jean",
+          "card": 1003,
+          "signature": 11501
+        }
+      ],
+      "banners": [
+        {
+          "comment": "Standard: Wanderlust Invocation, normal non-featured character and weapon pools",
+          "bannerType": "STANDARD",
+          "gachaType": 200,
+          "scheduleId": 200,
+          "sortId": 10020,
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE",
+          "costItemId": 224,
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "rateUpItems4": [],
+          "rateUpItems5": [],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ]
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Diluc",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7101,
+          "sortId": 9997,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1032,
+            1025,
+            1043
+          ],
+          "rateUpItems5": [
+            1016
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Xianyun",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7102,
+          "sortId": 9996,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1076,
+            1032,
+            1043
+          ],
+          "rateUpItems5": [
+            1093
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A230",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A230_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Keqing",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7103,
+          "sortId": 9995,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1031,
+            1077,
+            1043
+          ],
+          "rateUpItems5": [
+            1042
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Jean",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7104,
+          "sortId": 9994,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1031,
+            1039,
+            1045
+          ],
+          "rateUpItems5": [
+            1003
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Diluc, Xianyun",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7200,
+          "sortId": 9990,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            12501,
+            14515
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A231",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A231_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Keqing, Jean",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7201,
+          "sortId": 9989,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            11505,
+            11501
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A020",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A020_TITLE"
+        }
+      ]
+    },
+    {
+      "name": "Bloom and Dendro cores",
+      "characters": [
+        {
+          "name": "Nahida",
+          "card": 1073,
+          "signature": 14511
+        },
+        {
+          "name": "Alhaitham",
+          "card": 1078,
+          "signature": 11512
+        },
+        {
+          "name": "Nilou",
+          "card": 1070,
+          "signature": 11511
+        },
+        {
+          "name": "Kokomi",
+          "card": 1054,
+          "signature": 14506
+        }
+      ],
+      "banners": [
+        {
+          "comment": "Standard: Wanderlust Invocation, normal non-featured character and weapon pools",
+          "bannerType": "STANDARD",
+          "gachaType": 200,
+          "scheduleId": 200,
+          "sortId": 10020,
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE",
+          "costItemId": 224,
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "rateUpItems4": [],
+          "rateUpItems5": [],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ]
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Nahida",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7101,
+          "sortId": 9997,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1065,
+            1025,
+            1072
+          ],
+          "rateUpItems5": [
+            1073
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A254",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A254_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Alhaitham",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7102,
+          "sortId": 9996,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1065,
+            1031,
+            1077
+          ],
+          "rateUpItems5": [
+            1078
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A188",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A188_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Nilou",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7103,
+          "sortId": 9995,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1072,
+            1014,
+            1067
+          ],
+          "rateUpItems5": [
+            1070
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A194",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A194_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Kokomi",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7104,
+          "sortId": 9994,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1025,
+            1072,
+            1067
+          ],
+          "rateUpItems5": [
+            1054
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A142",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A142_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Nahida, Alhaitham",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7200,
+          "sortId": 9990,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            14511,
+            11512
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A189",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A189_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Nilou, Kokomi",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7201,
+          "sortId": 9989,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            11511,
+            14506
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A144",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A144_TITLE"
+        }
+      ]
+    },
+    {
+      "name": "Electro carries and healing",
+      "characters": [
+        {
+          "name": "Raiden",
+          "card": 1052,
+          "signature": 13509
+        },
+        {
+          "name": "Furina",
+          "card": 1089,
+          "signature": 11513
+        },
+        {
+          "name": "Clorinde",
+          "card": 1098,
+          "signature": 11515
+        },
+        {
+          "name": "Baizhu",
+          "card": 1082,
+          "signature": 14505
+        }
+      ],
+      "banners": [
+        {
+          "comment": "Standard: Wanderlust Invocation, normal non-featured character and weapon pools",
+          "bannerType": "STANDARD",
+          "gachaType": 200,
+          "scheduleId": 200,
+          "sortId": 10020,
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE",
+          "costItemId": 224,
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "rateUpItems4": [],
+          "rateUpItems5": [],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ]
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Raiden",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7101,
+          "sortId": 9997,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1056,
+            1090,
+            1032
+          ],
+          "rateUpItems5": [
+            1052
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A299",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A299_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Furina",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7102,
+          "sortId": 9996,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1034,
+            1088,
+            1039
+          ],
+          "rateUpItems5": [
+            1089
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A260",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A260_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Clorinde",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7103,
+          "sortId": 9995,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1031,
+            1090,
+            1032
+          ],
+          "rateUpItems5": [
+            1098
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A221",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A221_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Baizhu",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7104,
+          "sortId": 9994,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1065,
+            1077,
+            1031
+          ],
+          "rateUpItems5": [
+            1082
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A185",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A185_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Raiden, Furina",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7200,
+          "sortId": 9990,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            13509,
+            11513
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A261",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A261_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Clorinde, Baizhu",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7201,
+          "sortId": 9989,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            11515,
+            14505
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A186",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A186_TITLE"
+        }
+      ]
+    },
+    {
+      "name": "Cryo and Freeze",
+      "characters": [
+        {
+          "name": "Ayaka",
+          "card": 1002,
+          "signature": 11509
+        },
+        {
+          "name": "Shenhe",
+          "card": 1063,
+          "signature": 13507
+        },
+        {
+          "name": "Wriothesley",
+          "card": 1086,
+          "signature": 14513
+        },
+        {
+          "name": "Sigewinne",
+          "card": 1095,
+          "signature": 15513
+        }
+      ],
+      "banners": [
+        {
+          "comment": "Standard: Wanderlust Invocation, normal non-featured character and weapon pools",
+          "bannerType": "STANDARD",
+          "gachaType": 200,
+          "scheduleId": 200,
+          "sortId": 10020,
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE",
+          "costItemId": 224,
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "rateUpItems4": [],
+          "rateUpItems5": [],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ]
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Ayaka",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7101,
+          "sortId": 9997,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1039,
+            1045,
+            1025
+          ],
+          "rateUpItems5": [
+            1002
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A164",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A164_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Shenhe",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7102,
+          "sortId": 9996,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1045,
+            1039,
+            1043
+          ],
+          "rateUpItems5": [
+            1063
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A242",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A242_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Wriothesley",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7103,
+          "sortId": 9995,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1032,
+            1039,
+            1025
+          ],
+          "rateUpItems5": [
+            1086
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A227",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A227_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Sigewinne",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7104,
+          "sortId": 9994,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1031,
+            1025,
+            1088
+          ],
+          "rateUpItems5": [
+            1095
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A224",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A224_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Ayaka, Shenhe",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7200,
+          "sortId": 9990,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            11509,
+            13507
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A243",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A243_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Wriothesley, Sigewinne",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7201,
+          "sortId": 9989,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            14513,
+            15513
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A225",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A225_TITLE"
+        }
+      ]
+    },
+    {
+      "name": "Hydro exploration and Burning",
+      "characters": [
+        {
+          "name": "Neuvillette",
+          "card": 1087,
+          "signature": 14514
+        },
+        {
+          "name": "Emilie",
+          "card": 1099,
+          "signature": 13513
+        },
+        {
+          "name": "Mualani",
+          "card": 4102,
+          "signature": 14516
+        },
+        {
+          "name": "Venti",
+          "card": 1022,
+          "signature": 15503
+        }
+      ],
+      "banners": [
+        {
+          "comment": "Standard: Wanderlust Invocation, normal non-featured character and weapon pools",
+          "bannerType": "STANDARD",
+          "gachaType": 200,
+          "scheduleId": 200,
+          "sortId": 10020,
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE",
+          "costItemId": 224,
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "rateUpItems4": [],
+          "rateUpItems5": [],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ]
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Neuvillette",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7101,
+          "sortId": 9997,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1031,
+            1043,
+            1092
+          ],
+          "rateUpItems5": [
+            1087
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A275",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A275_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Emilie",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7102,
+          "sortId": 9996,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1023,
+            1032,
+            1067
+          ],
+          "rateUpItems5": [
+            1099
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A245",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A245_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Mualani",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7103,
+          "sortId": 9995,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1023,
+            1032,
+            1097
+          ],
+          "rateUpItems5": [
+            4102
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A250",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A250_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Venti",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7104,
+          "sortId": 9994,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1031,
+            1043,
+            1039
+          ],
+          "rateUpItems5": [
+            1022
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A266",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A266_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Neuvillette, Emilie",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7200,
+          "sortId": 9990,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            14514,
+            13513
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A246",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A246_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Mualani, Venti",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7201,
+          "sortId": 9989,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            14516,
+            15503
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A234",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A234_TITLE"
+        }
+      ]
+    },
+    {
+      "name": "Geo foundations",
+      "characters": [
+        {
+          "name": "Navia",
+          "card": 1091,
+          "signature": 12512
+        },
+        {
+          "name": "Zhongli",
+          "card": 1030,
+          "signature": 13504
+        },
+        {
+          "name": "Itto",
+          "card": 1057,
+          "signature": 12510
+        },
+        {
+          "name": "Chiori",
+          "card": 1094,
+          "signature": 11514
+        }
+      ],
+      "banners": [
+        {
+          "comment": "Standard: Wanderlust Invocation, normal non-featured character and weapon pools",
+          "bannerType": "STANDARD",
+          "gachaType": 200,
+          "scheduleId": 200,
+          "sortId": 10020,
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE",
+          "costItemId": 224,
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "rateUpItems4": [],
+          "rateUpItems5": [],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ]
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Navia",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7101,
+          "sortId": 9997,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1032,
+            1023,
+            1031
+          ],
+          "rateUpItems5": [
+            1091
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A236",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A236_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Zhongli",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7102,
+          "sortId": 9996,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1027,
+            1064,
+            1032
+          ],
+          "rateUpItems5": [
+            1030
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A262",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A262_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Itto",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7103,
+          "sortId": 9995,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1055,
+            1064,
+            1034
+          ],
+          "rateUpItems5": [
+            1057
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A176",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A176_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Chiori",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7104,
+          "sortId": 9994,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1055,
+            1027,
+            1064
+          ],
+          "rateUpItems5": [
+            1094
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A206",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A206_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Navia, Zhongli",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7200,
+          "sortId": 9990,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            12512,
+            13504
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A264",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A264_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Itto, Chiori",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7201,
+          "sortId": 9989,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            12510,
+            11514
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A177",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A177_TITLE"
+        }
+      ]
+    },
+    {
+      "name": "Xiao plunge and Liyue carries",
+      "characters": [
+        {
+          "name": "Xiao",
+          "card": 1026,
+          "signature": 13505
+        },
+        {
+          "name": "Xianyun",
+          "card": 1093,
+          "signature": 14515
+        },
+        {
+          "name": "Hu Tao",
+          "card": 1046,
+          "signature": 13501
+        },
+        {
+          "name": "Yae Miko",
+          "card": 1058,
+          "signature": 14509
+        }
+      ],
+      "banners": [
+        {
+          "comment": "Standard: Wanderlust Invocation, normal non-featured character and weapon pools",
+          "bannerType": "STANDARD",
+          "gachaType": 200,
+          "scheduleId": 200,
+          "sortId": 10020,
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE",
+          "costItemId": 224,
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "rateUpItems4": [],
+          "rateUpItems5": [],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ]
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Xiao",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7101,
+          "sortId": 9997,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1076,
+            1032,
+            1039
+          ],
+          "rateUpItems5": [
+            1026
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A172",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A172_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Xianyun",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7102,
+          "sortId": 9996,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1076,
+            1032,
+            1043
+          ],
+          "rateUpItems5": [
+            1093
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A230",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A230_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Hu Tao",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7103,
+          "sortId": 9995,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1025,
+            1045,
+            1039
+          ],
+          "rateUpItems5": [
+            1046
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A209",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A209_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Yae Miko",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7104,
+          "sortId": 9994,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1031,
+            1077,
+            1065
+          ],
+          "rateUpItems5": [
+            1058
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A173",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A173_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Xiao, Xianyun",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7200,
+          "sortId": 9990,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            13505,
+            14515
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A231",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A231_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Hu Tao, Yae Miko",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7201,
+          "sortId": 9989,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            13501,
+            14509
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A174",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A174_TITLE"
+        }
+      ]
+    },
+    {
+      "name": "Inazuma carries, shields and Freeze",
+      "characters": [
+        {
+          "name": "Yoimiya",
+          "card": 1049,
+          "signature": 15509
+        },
+        {
+          "name": "Citlali",
+          "card": 4107,
+          "signature": 14517
+        },
+        {
+          "name": "Ayato",
+          "card": 1066,
+          "signature": 11510
+        },
+        {
+          "name": "Escoffier",
+          "card": 4112,
+          "signature": 13514
+        }
+      ],
+      "banners": [
+        {
+          "comment": "Standard: Wanderlust Invocation, normal non-featured character and weapon pools",
+          "bannerType": "STANDARD",
+          "gachaType": 200,
+          "scheduleId": 200,
+          "sortId": 10020,
+          "prefabPath": "GachaShowPanel_A022",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A022_TITLE",
+          "costItemId": 224,
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "rateUpItems4": [],
+          "rateUpItems5": [],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ]
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Yoimiya",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7101,
+          "sortId": 9997,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1032,
+            1064,
+            1025
+          ],
+          "rateUpItems5": [
+            1049
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A167",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A167_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Citlali",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7102,
+          "sortId": 9996,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1032,
+            1025,
+            1043
+          ],
+          "rateUpItems5": [
+            4107
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A218",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A218_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Ayato",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7103,
+          "sortId": 9995,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1025,
+            1031,
+            1064
+          ],
+          "rateUpItems5": [
+            1066
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A161",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A161_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Escoffier",
+          "bannerType": "CHARACTER2",
+          "gachaType": 400,
+          "scheduleId": 7104,
+          "sortId": 9994,
+          "costItemId": 223,
+          "rateUpItems4": [
+            1039,
+            1045,
+            1025
+          ],
+          "rateUpItems5": [
+            4112
+          ],
+          "fallbackItems4Pool1": [
+            1006,
+            1014,
+            1015,
+            1020,
+            1021,
+            1023,
+            1024,
+            1025,
+            1027,
+            1031,
+            1032,
+            1034,
+            1036,
+            1039,
+            1043,
+            1044,
+            1045,
+            1048,
+            1050,
+            1053,
+            1055,
+            1056,
+            1059,
+            1061,
+            1064,
+            1065,
+            1067,
+            1068,
+            1072,
+            1074,
+            1076,
+            1077,
+            1080,
+            1081,
+            1083,
+            1085,
+            1088,
+            1090,
+            1092,
+            1097,
+            4100,
+            4105,
+            4108,
+            4110,
+            4113,
+            4115,
+            4121,
+            4124,
+            4127,
+            4132,
+            4148
+          ],
+          "fallbackItems5Pool1": [
+            1003,
+            1016,
+            1042,
+            1035,
+            1041,
+            1069,
+            1079,
+            4109
+          ],
+          "fallbackItems5Pool2": [],
+          "prefabPath": "GachaShowPanel_A281",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A281_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Yoimiya, Citlali",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7200,
+          "sortId": 9990,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            15509,
+            14517
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A219",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A219_TITLE"
+        },
+        {
+          "costItemAmount": 1,
+          "costItemAmount10": 10,
+          "eventChance4": 50,
+          "eventChance5": 50,
+          "weights4": [
+            [
+              1,
+              1000
+            ],
+            [
+              6,
+              1000
+            ],
+            [
+              10,
+              10000
+            ]
+          ],
+          "weights5": [
+            [
+              1,
+              200
+            ],
+            [
+              49,
+              200
+            ],
+            [
+              70,
+              10000
+            ]
+          ],
+          "poolBalanceWeights4": [
+            [
+              1,
+              255
+            ],
+            [
+              17,
+              255
+            ],
+            [
+              21,
+              10455
+            ]
+          ],
+          "poolBalanceWeights5": [
+            [
+              1,
+              30
+            ],
+            [
+              147,
+              150
+            ],
+            [
+              181,
+              10230
+            ]
+          ],
+          "comment": "Signatures: Ayato, Escoffier",
+          "bannerType": "WEAPON",
+          "gachaType": 302,
+          "scheduleId": 7201,
+          "sortId": 9989,
+          "costItemId": 223,
+          "rateUpItems4": [
+            11401,
+            12401,
+            13407,
+            14401,
+            15401
+          ],
+          "rateUpItems5": [
+            11510,
+            13514
+          ],
+          "fallbackItems5Pool1": [],
+          "fallbackItems5Pool2": [
+            11501,
+            11502,
+            12501,
+            12502,
+            13502,
+            13505,
+            14501,
+            14502,
+            15501,
+            15502
+          ],
+          "prefabPath": "GachaShowPanel_A282",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A282_TITLE"
+        }
+      ]
+    }
+  ]
+}

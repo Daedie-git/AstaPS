@@ -1,6 +1,9 @@
 package emu.grasscutter.server.packet.recv;
 
+import static emu.grasscutter.config.Configuration.GAME_OPTIONS;
+
 import emu.grasscutter.Grasscutter;
+import emu.grasscutter.game.entity.CharacterDamageTuning;
 import emu.grasscutter.game.entity.EntityAvatar;
 import emu.grasscutter.game.entity.EntityClientGadget;
 import emu.grasscutter.game.entity.EntityMonster;
@@ -158,6 +161,18 @@ public class HandlerCombatInvocationsNotify extends PacketHandler {
                                 }
                             }
                         }
+                    }
+
+                    var tunedHit = CharacterDamageTuning.apply(
+                            player.getScene(), hitInfo, GAME_OPTIONS.keqingElectroDamageMultiplier,
+                            GAME_OPTIONS.dilucDamageMultiplier);
+                    if (tunedHit != hitInfo) {
+                        hitInfo = tunedHit;
+                        attackResult = hitInfo.getAttackResult();
+                        entry = entry.toBuilder()
+                                .setCombatData(hitInfo.toByteString())
+                                .setForwardType(ForwardType.ForwardType_FORWARD_TO_ALL)
+                                .build();
                     }
 
                     player.getAttackResults().add(attackResult);

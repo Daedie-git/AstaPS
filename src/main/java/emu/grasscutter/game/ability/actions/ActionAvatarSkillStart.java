@@ -4,6 +4,7 @@ import com.google.protobuf.ByteString;
 import emu.grasscutter.Grasscutter;
 import emu.grasscutter.data.binout.AbilityModifier.AbilityModifierAction;
 import emu.grasscutter.game.ability.Ability;
+import emu.grasscutter.game.ability.AmberSupport;
 import emu.grasscutter.game.avatar.Avatar;
 import emu.grasscutter.game.ability.SkirkCunningHelper;
 import emu.grasscutter.game.props.EntityIdType;
@@ -92,6 +93,7 @@ public class ActionAvatarSkillStart extends AbilityActionHandler {
                 // Secondary confirm: some bursts hit AvatarSkillStart before/without the
                 // invuln-modifier path in AbilityManager.onPossibleElementalBurst.
                 avatar.getPlayer().getEnergyManager().confirmBurstCast(avatar.getAvatar(), action.skillID);
+                AmberSupport.onConfirmedBurst(avatar.getPlayer(), avatar, ability, action.skillID);
             } catch (Throwable ignored) {
                 // Energy confirm must not cancel skill start.
             }

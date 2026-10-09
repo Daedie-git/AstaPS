@@ -1,6 +1,7 @@
 package emu.grasscutter.server.packet.recv;
 
 import emu.grasscutter.game.player.Player;
+import emu.grasscutter.game.ability.AmberSupport;
 import emu.grasscutter.game.ability.NyxHelper;
 import emu.grasscutter.game.ability.SkirkCunningBridge;
 import emu.grasscutter.net.packet.*;
@@ -16,7 +17,8 @@ public class HandlerAbilityInvocationsNotify extends PacketHandler {
         AbilityInvocationsNotify notif = AbilityInvocationsNotify.parseFrom(payload);
 
         Player player = session.getPlayer();
-        for (AbilityInvokeEntry entry : notif.getInvokesList()) {
+        for (AbilityInvokeEntry original : notif.getInvokesList()) {
+            AbilityInvokeEntry entry = AmberSupport.tuneInvoke(player, original);
             player.getAbilityManager().onAbilityInvoke(entry);
             player.getAbilityInvokeHandler().addEntry(entry.getForwardType(), entry);
         }

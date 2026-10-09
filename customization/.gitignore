@@ -1,0 +1,4 @@
+rotation-state.json
+backups/
+*-manifest.json
+*.lock

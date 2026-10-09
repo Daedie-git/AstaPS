@@ -496,6 +496,14 @@ public class ConfigContainer {
         public Questing questing = new Questing();
         public ResinOptions resinOptions = new ResinOptions();
         public Rates rates = new Rates();
+        /** Final Electro-hit multiplier for Keqing against monsters; 1 leaves damage unchanged. */
+        public float keqingElectroDamageMultiplier = 1.0f;
+        /** Final-hit multiplier for Diluc against monsters, including physical and plunge damage. */
+        public float dilucDamageMultiplier = 1.0f;
+        /** Amber burst: max-HP healing per party member every 2s for 12s; 0 disables it. */
+        public float amberBurstHealHpRatio = 0.0f;
+        /** Multiplies only Amber's native C6 ATK bonus; 1 preserves the original value. */
+        public float amberC6AttackMultiplier = 1.0f;
         public TowerOptions tower = new TowerOptions();
 
         public HandbookOptions handbook = new HandbookOptions();

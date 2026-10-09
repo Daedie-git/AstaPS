@@ -1,6 +1,7 @@
 package emu.grasscutter.server.packet.recv;
 
 import emu.grasscutter.net.packet.*;
+import emu.grasscutter.game.ability.AmberSupport;
 import emu.grasscutter.net.proto.ClientAbilityChangeNotifyOuterClass.ClientAbilityChangeNotify;
 import emu.grasscutter.server.game.GameSession;
 
@@ -11,7 +12,8 @@ public final class HandlerClientAbilityChangeNotify extends PacketHandler {
         var notif = ClientAbilityChangeNotify.parseFrom(payload);
 
         var player = session.getPlayer();
-        for (var entry : notif.getInvokesList()) {
+        for (var original : notif.getInvokesList()) {
+            var entry = AmberSupport.tuneInvoke(player, original);
             player.getAbilityManager().onAbilityInvoke(entry);
             player.getAbilityInvokeHandler().addEntry(entry.getForwardType(), entry);
         }
