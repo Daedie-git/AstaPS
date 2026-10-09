@@ -359,5 +359,6 @@ public final class CommandMap {
                     }
                 });
         registerCommand("catalog", new emu.grasscutter.command.commands.CatalogCommand());
+        registerCommand("finishquest", new emu.grasscutter.command.commands.FinishQuestCommand());
     }
 }
