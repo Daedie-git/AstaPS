@@ -1533,17 +1533,19 @@ public class Player implements PlayerHook, FieldFetch {
         }
 
         var runner = Grasscutter.getThreadPool();
-        var achievementsLoad = runner.submit(() -> this.achievements = Achievements.getByPlayer(this));
+        var exits = new java.util.ArrayList<CompletableFuture<Void>>();
+        var achievementsLoad = startLoad(runner, exits, () -> this.achievements = Achievements.getByPlayer(this));
 
-        var avatarsLoad = runner.submit(this.getAvatars()::loadFromDatabase);
-        var inventoryLoad = runner.submit(this.getInventory()::loadFromDatabase);
+        var avatarsLoad = startLoad(runner, exits, this.getAvatars()::loadFromDatabase);
+        var inventoryLoad = startLoad(runner, exits, this.getInventory()::loadFromDatabase);
 
-        var friendsLoad = runner.submit(this.getFriendsList()::loadFromDatabase);
-        var mailLoad = runner.submit(this.getMailHandler()::loadFromDatabase);
-        var questsLoad = runner.submit(this.getQuestManager()::loadFromDatabase);
+        var friendsLoad = startLoad(runner, exits, this.getFriendsList()::loadFromDatabase);
+        var mailLoad = startLoad(runner, exits, this.getMailHandler()::loadFromDatabase);
+        var questsLoad = startLoad(runner, exits, this.getQuestManager()::loadFromDatabase);
 
-        var battlePassLoad = runner.submit(this::loadBattlePassManager);
-        var dailyTaskLoad = runner.submit(this::loadDailyTaskManager);
+        var battlePassLoad = startLoad(runner, exits, this::loadBattlePassManager);
+        var dailyTaskLoad = startLoad(runner, exits, this::loadDailyTaskManager);
+        this.loadersExited = CompletableFuture.allOf(exits.toArray(CompletableFuture[]::new));
 
         // With asyncLogin off this runs on the one thread that handles every player's packets.
         // Waiting on the loaded flags forever meant a loader that threw - its exception swallowed
@@ -1576,6 +1578,38 @@ public class Player implements PlayerHook, FieldFetch {
     }
 
     private static final long LOAD_TIMEOUT_SECONDS = 30;
+
+    /** Completes when every loader has actually stopped; cancelling one does not stop it. */
+    @Transient private transient volatile CompletableFuture<Void> loadersExited = CompletableFuture.completedFuture(null);
+
+    public CompletableFuture<Void> whenLoadersExited() {
+        return this.loadersExited;
+    }
+
+    private static java.util.concurrent.Future<?> startLoad(
+            java.util.concurrent.ExecutorService runner, java.util.List<CompletableFuture<Void>> exits, Runnable loader) {
+        var exited = new CompletableFuture<Void>();
+        exits.add(exited);
+        var started = new java.util.concurrent.atomic.AtomicBoolean();
+        var task = new java.util.concurrent.FutureTask<Void>(() -> {
+            started.set(true);
+            try {
+                loader.run();
+            } finally {
+                exited.complete(null);
+            }
+        }, null) {
+            @Override
+            public boolean cancel(boolean interrupt) {
+                boolean cancelled = super.cancel(interrupt);
+                // Cancelled before it ran: it never will, so it has exited.
+                if (cancelled && !started.get()) exited.complete(null);
+                return cancelled;
+            }
+        };
+        runner.execute(task);
+        return task;
+    }
 
     /** Waits for one loader until the deadline; returns why it failed, or null. */
     private IllegalStateException awaitLoad(String what, java.util.concurrent.Future<?> load, long deadline) {

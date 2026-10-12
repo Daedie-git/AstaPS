@@ -48,6 +48,14 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
     private static final java.util.Map<String, Login> CURRENT =
             new java.util.concurrent.ConcurrentHashMap<>();
 
+    /** Orders login attempts as they arrive. */
+    private static final java.util.concurrent.atomic.AtomicLong ATTEMPTS =
+            new java.util.concurrent.atomic.AtomicLong();
+
+    /** Each account's newest attempt that authenticated; an older one that authenticates later loses. */
+    private static final java.util.Map<String, Long> ACCEPTED =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
     private static final java.util.concurrent.atomic.AtomicInteger LOGIN_THREADS =
             new java.util.concurrent.atomic.AtomicInteger();
 
@@ -78,14 +86,30 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
             String accountId,
             String clientRandKey,
             int keyId,
+            long attempt,
+            java.util.concurrent.atomic.AtomicReference<Player> player,
             java.util.concurrent.atomic.AtomicInteger databaseSteps,
             java.util.concurrent.atomic.AtomicBoolean ended,
-            java.util.concurrent.CompletableFuture<Void> settled) {
+            java.util.concurrent.CompletableFuture<Void> stepsSettled) {
         Login(GameSession session, boolean async, String accountId, String clientRandKey, int keyId) {
-            this(session, async, accountId, clientRandKey, keyId,
+            this(session, async, accountId, clientRandKey, keyId, ATTEMPTS.incrementAndGet(),
+                    new java.util.concurrent.atomic.AtomicReference<>(),
                     new java.util.concurrent.atomic.AtomicInteger(),
                     new java.util.concurrent.atomic.AtomicBoolean(),
                     new java.util.concurrent.CompletableFuture<>());
+        }
+
+        /**
+         * Completes once nothing this login started can still write: its database steps, the
+         * player's loaders (a timed-out one may still be running) and that player's queued writes.
+         */
+        java.util.concurrent.CompletableFuture<Void> settled() {
+            return this.stepsSettled.thenCompose(ignored -> {
+                var loaded = this.player.get();
+                if (loaded == null) return java.util.concurrent.CompletableFuture.<Void>completedFuture(null);
+                return loaded.whenLoadersExited()
+                        .thenCompose(exited -> DatabaseHelper.whenPlayerWritesDone(loaded.getUid()));
+            });
         }
 
         /** Runs a step that only does database work. */
@@ -95,7 +119,7 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
                 try {
                     this.guarded(step);
                 } finally {
-                    if (this.databaseSteps.decrementAndGet() == 0 && this.ended.get()) this.settled.complete(null);
+                    if (this.databaseSteps.decrementAndGet() == 0 && this.ended.get()) this.stepsSettled.complete(null);
                 }
             };
             if (this.async) LOGIN_EXECUTOR.execute(counted);
@@ -123,12 +147,16 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
             }
         }
 
-        /** Ends this login, letting the session start another. */
+        /**
+         * Ends this login, letting the session start another. The account's next login waits
+         * until this one has settled, however it ended (finished, refused, dropped or replaced).
+         */
         void done() {
             LOGGING_IN.remove(this.session);
             CURRENT.remove(this.accountId, this);
-            this.ended.set(true);
-            if (this.databaseSteps.get() == 0) this.settled.complete(null);
+            if (!this.ended.compareAndSet(false, true)) return;
+            if (this.databaseSteps.get() == 0) this.stepsSettled.complete(null);
+            PendingLogoutSaves.record(this.accountId, this.settled());
         }
 
         /** Whether a later login for the same account has not taken over from this one. */
@@ -210,20 +238,14 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
                 return;
             }
         } else {
-            var previous = CURRENT.put(login.accountId(), login);
-            if (previous != null && previous != login) {
-                // Its loaders may still be reading and saving (the Traveler avatar is saved
-                // during the load), so this login waits for them and their writes like a logout.
-                var previousPlayer = previous.session().getPlayer();
-                int previousUid = previousPlayer == null ? 0 : previousPlayer.getUid();
-                previous.close();
-                PendingLogoutSaves.record(
-                        login.accountId(),
-                        previous.settled().thenCompose(
-                                ignored -> previousUid > 0
-                                        ? DatabaseHelper.whenPlayerWritesDone(previousUid)
-                                        : java.util.concurrent.CompletableFuture.completedFuture(null)));
+            // Authentication can finish out of order; the attempt that arrived last wins.
+            if (ACCEPTED.merge(login.accountId(), login.attempt(), Math::max) != login.attempt()) {
+                login.close();
+                return;
             }
+            var previous = CURRENT.put(login.accountId(), login);
+            // Closing it publishes its loaders and writes as pending, which this login waits for below.
+            if (previous != null && previous != login) previous.close();
         }
         session.setAccount(account);
 
@@ -312,6 +334,7 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
         }
         var session = login.session();
         var player = DatabaseHelper.getPlayerByAccount(session.getAccount(), playerClass);
+        if (player != null) login.player().set(player);
 
         if (player == null) {
             var nextPlayerUid =
@@ -323,6 +346,7 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
                 throw new IllegalStateException("Could not create a " + playerClass.getName(), e);
             }
 
+            login.player().set(player);
             DatabaseHelper.generatePlayerUid(player, nextPlayerUid);
         }
 
