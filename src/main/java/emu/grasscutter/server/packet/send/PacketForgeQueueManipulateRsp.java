@@ -20,8 +20,9 @@ public class PacketForgeQueueManipulateRsp extends BasePacket {
 
         ForgeQueueManipulateRsp.Builder builder =
                 ForgeQueueManipulateRsp.newBuilder()
-                        .setRetcode(retcode.getNumber())
-                        .setManipulateType(type);
+                        .setRetcode(retcode.getNumber());
+        // A client-sent unknown type has no number to echo.
+        if (type != ForgeQueueManipulateType.UNRECOGNIZED) builder.setManipulateType(type);
 
         // ToDo: Add extra items when once we have handling for it.
 

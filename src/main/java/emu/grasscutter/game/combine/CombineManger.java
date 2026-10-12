@@ -171,12 +171,12 @@ public class CombineManger extends BaseGameSystem {
         }
         List<GameItem> outputs = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            var output = new GameItem(Utils.drawRandomListElement(possibleDrops), 1);
-            if (output.getItemData() == null || output.getItemType() != emu.grasscutter.game.inventory.ItemType.ITEM_RELIQUARY) {
+            var outputData = GameData.getItemDataMap().get(Utils.drawRandomListElement(possibleDrops));
+            if (outputData == null || outputData.getItemType() != emu.grasscutter.game.inventory.ItemType.ITEM_RELIQUARY) {
                 player.sendPacket(new PacketReliquaryDecomposeRsp(Retcode.RET_RELIQUARY_DECOMPOSE_PARAM_ERROR));
                 return;
             }
-            outputs.add(output);
+            outputs.add(new GameItem(outputData, 1));
         }
         // Outputs are validated and capacity-checked above; inputs are consumed only after that.
         List<GameItem> consumed = new ArrayList<>();
@@ -190,18 +190,15 @@ public class CombineManger extends BaseGameSystem {
             consumed.add(item);
         }
 
-        // addItem stores these objects themselves, so their GUIDs are the ones the client must see;
-        // tryAddItems would store copies. Net capacity was checked above.
-        List<Long> resultItems = new ArrayList<>();
-        for (var output : outputs) {
-            if (player.getInventory().addItem(output, ActionReason.Combine)) {
-                resultItems.add(output.getGuid());
-            } else {
-                Grasscutter.getLogger().error("Reliquary decompose output {} rejected for uid {}",
-                        output.getItemId(), player.getUid());
-            }
+        // One batch, so obtain callbacks run only after every output is stored.
+        var stored = player.getInventory().tryAddItemsStored(outputs, ActionReason.Combine);
+        if (stored == null) {
+            restoreInputs(player, consumed);
+            player.sendPacket(new PacketReliquaryDecomposeRsp(Retcode.RET_PACK_EXCEED_MAX_WEIGHT));
+            return;
         }
-
+        List<Long> resultItems = new ArrayList<>();
+        for (var item : stored) resultItems.add(item.getGuid());
         player.sendPacket(new PacketReliquaryDecomposeRsp(resultItems));
     }
 

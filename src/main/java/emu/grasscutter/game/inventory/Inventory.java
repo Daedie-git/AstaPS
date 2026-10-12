@@ -243,24 +243,34 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
     }
 
     public synchronized boolean tryAddItems(Collection<GameItem> items, ActionReason reason) {
-        if (!canAddItems(items)) return false;
+        return tryAddItemsStored(items, reason) != null;
+    }
+
+    /**
+     * As {@link #tryAddItems}, returning the items actually stored: equipment is stored as fresh
+     * copies, so callers that report GUIDs to the client must read them from this list. Null when
+     * nothing was added.
+     */
+    public synchronized List<GameItem> tryAddItemsStored(Collection<GameItem> items, ActionReason reason) {
+        if (!canAddItems(items)) return null;
         Map<Integer, Integer> currencies = new LinkedHashMap<>();
         for (var item : items) {
             if (currencyProperty(item.getItemId()) != null)
                 currencies.merge(item.getItemId(), item.getCount(), Math::addExact);
         }
         var changes = prepareCurrencyChanges(currencies, false);
-        if (changes == null) return false;
+        if (changes == null) return null;
         if (!canAddItems(items)) throw new IllegalStateException("Inventory changed during grant preflight");
+        List<GameItem> stored;
         try (var conversion = currencies.containsKey(201) ? PrimogemAutoConvert.defer(getPlayer()) : null) {
             applyCurrencyChanges(changes);
-            deliverOrdinaryItems(items, reason);
+            stored = deliverOrdinaryItems(items, reason);
             if (conversion != null) conversion.complete();
         }
-        return true;
+        return stored;
     }
 
-    private void deliverOrdinaryItems(Collection<GameItem> items, ActionReason reason) {
+    private List<GameItem> deliverOrdinaryItems(Collection<GameItem> items, ActionReason reason) {
         List<GameItem> delivered = new ArrayList<>();
         for (var item : items) {
             if (item.getItemType() == ItemType.ITEM_VIRTUAL) {
@@ -284,6 +294,7 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
             try { new PlayerObtainItemEvent(getPlayer(), item).call(); }
             catch (RuntimeException failure) { Grasscutter.getLogger().error("Item callback failed after delivery", failure); }
         }
+        return delivered;
     }
 
     private List<GameItem> buildParamGrants(Collection<ItemParamData> params) {

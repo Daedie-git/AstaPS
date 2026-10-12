@@ -25,10 +25,13 @@ public class PacketGetMailItemRsp extends BasePacket {
             for (int mailId : mailList) {
                 Mail message = player.getMail(mailId);
                 if (message != null && !message.isAttachmentGot) {
+                    if (message.itemList == null) message.itemList = new ArrayList<>();
                     List<GameItem> grants = new ArrayList<>();
                     List<EquipParamOuterClass.EquipParam> responseItems = new ArrayList<>();
-                    boolean valid = true;
-                    for (Mail.MailItem mailItem : message.itemList == null ? List.<Mail.MailItem>of() : message.itemList) {
+                    for (Mail.MailItem mailItem : message.itemList) {
+                        var itemData = GameData.getItemDataMap().get(mailItem.itemId);
+                        // An attachment that cannot exist is skipped; the valid ones are still delivered.
+                        if (itemData == null || mailItem.itemCount <= 0) continue;
                         EquipParamOuterClass.EquipParam.Builder item =
                                 EquipParamOuterClass.EquipParam.newBuilder();
                         int promoteLevel = GameItem.getMinPromoteLevel(mailItem.itemLevel);
@@ -38,8 +41,6 @@ public class PacketGetMailItemRsp extends BasePacket {
                         item.setItemLevel(mailItem.itemLevel);
                         item.setPromoteLevel(promoteLevel);
                         responseItems.add(item.build());
-                        var itemData = GameData.getItemDataMap().get(mailItem.itemId);
-                        if (itemData == null || mailItem.itemCount <= 0) { valid = false; break; }
                         GameItem gameItem = new GameItem(itemData);
                         gameItem.setCount(mailItem.itemCount);
                         gameItem.setLevel(mailItem.itemLevel);
@@ -48,9 +49,8 @@ public class PacketGetMailItemRsp extends BasePacket {
                     }
                     var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(player, "mail:" + mailId);
                     if (claim == null) continue;
-                    // Nothing deliverable (no attachments or invalid item data): mark as got so it is not retried forever.
-                    boolean deliverable = valid && !grants.isEmpty();
-                    if (deliverable) {
+                    // Nothing deliverable: mark as got so it is not retried forever.
+                    if (!grants.isEmpty()) {
                         if (!emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(player.getInventory(), grants, ActionReason.MailAttachment)) { claim.release(); continue; }
                         claimedItems.addAll(responseItems);
                     }
