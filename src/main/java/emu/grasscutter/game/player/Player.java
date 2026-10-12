@@ -1533,34 +1533,47 @@ public class Player implements PlayerHook, FieldFetch {
         }
 
         var runner = Grasscutter.getThreadPool();
-        runner.submit(() -> this.achievements = Achievements.getByPlayer(this));
+        var achievementsLoad = runner.submit(() -> this.achievements = Achievements.getByPlayer(this));
 
         var avatarsLoad = runner.submit(this.getAvatars()::loadFromDatabase);
         var inventoryLoad = runner.submit(this.getInventory()::loadFromDatabase);
 
-        runner.submit(this.getFriendsList()::loadFromDatabase);
-        runner.submit(this.getMailHandler()::loadFromDatabase);
-        runner.submit(this.getQuestManager()::loadFromDatabase);
+        var friendsLoad = runner.submit(this.getFriendsList()::loadFromDatabase);
+        var mailLoad = runner.submit(this.getMailHandler()::loadFromDatabase);
+        var questsLoad = runner.submit(this.getQuestManager()::loadFromDatabase);
 
-        runner.submit(this::loadBattlePassManager);
-        runner.submit(this::loadDailyTaskManager);
+        var battlePassLoad = runner.submit(this::loadBattlePassManager);
+        var dailyTaskLoad = runner.submit(this::loadDailyTaskManager);
 
         // With asyncLogin off this runs on the one thread that handles every player's packets.
         // Waiting on the loaded flags forever meant a loader that threw - its exception swallowed
         // by the pool - or a pool full of stuck tasks froze the whole server. Fail this one login
         // instead.
-        awaitLoad("avatars", avatarsLoad);
-        awaitLoad("inventory", inventoryLoad);
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(LOAD_TIMEOUT_SECONDS);
+        awaitLoad("avatars", avatarsLoad, deadline, true);
+        awaitLoad("inventory", inventoryLoad, deadline, true);
+        // The rest may fail without failing the login, as before, but must have finished: some
+        // create and save documents, and a login that replaces this one reads them next.
+        awaitLoad("achievements", achievementsLoad, deadline, false);
+        awaitLoad("friends", friendsLoad, deadline, false);
+        awaitLoad("mail", mailLoad, deadline, false);
+        awaitLoad("quests", questsLoad, deadline, false);
+        awaitLoad("battle pass", battlePassLoad, deadline, false);
+        awaitLoad("daily tasks", dailyTaskLoad, deadline, false);
 
         this.getPlayerProgress().setPlayer(this);
     }
 
     private static final long LOAD_TIMEOUT_SECONDS = 30;
 
-    private void awaitLoad(String what, java.util.concurrent.Future<?> load) {
+    private void awaitLoad(String what, java.util.concurrent.Future<?> load, long deadline, boolean required) {
         try {
-            load.get(LOAD_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS);
+            load.get(Math.max(0, deadline - System.nanoTime()), java.util.concurrent.TimeUnit.NANOSECONDS);
         } catch (java.util.concurrent.ExecutionException e) {
+            if (!required) {
+                Grasscutter.getLogger().error("Loading {} for uid {} failed.", what, this.getUid(), e.getCause());
+                return;
+            }
             throw new IllegalStateException(
                     "Loading " + what + " for uid " + this.getUid() + " failed.", e.getCause());
         } catch (java.util.concurrent.TimeoutException e) {

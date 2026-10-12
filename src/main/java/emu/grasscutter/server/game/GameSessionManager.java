@@ -111,6 +111,11 @@ public class GameSessionManager {
                 }
             };
 
+    /** Every connected session. */
+    public static java.util.Collection<GameSession> getSessions() {
+        return java.util.Collections.unmodifiableCollection(sessions.values());
+    }
+
     public static KcpListener getListener() {
         return listener;
     }

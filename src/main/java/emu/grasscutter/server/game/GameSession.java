@@ -90,6 +90,11 @@ public class GameSession implements GameSessionManager.KcpChannel {
         return this.getAccount().getId();
     }
 
+    /** Whether the player finished logging in, so its state is the account's. */
+    protected boolean isRegistered(Player player) {
+        return getServer().getPlayers().get(player.getUid()) == player;
+    }
+
     /** Drops a player whose login did not finish, so closing this session never saves it. */
     public synchronized void detachPlayer() {
         this.player = null;
@@ -375,8 +380,12 @@ public class GameSession implements GameSessionManager.KcpChannel {
                     .info(translate("messages.game.disconnect", String.valueOf(this.getAddress())));
 
             try {
-                if (this.isLoggedIn()) {
-                    getPlayer().onLogout();
+                var player = getPlayer();
+                if (player != null && isRegistered(player)) {
+                    player.onLogout();
+                } else if (player != null) {
+                    // Never registered: a login that did not finish. Its state is not the account's.
+                    detachPlayer();
                 }
             } finally {
                 try {

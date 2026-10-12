@@ -24,6 +24,19 @@ class GameSessionCloseTest {
         assertEquals(1, session.sent);
     }
 
+    @Test
+    void closeNeverSavesAPlayerThatDidNotFinishLoggingIn() {
+        var player = new FailingLogoutPlayer();
+        var session = new RecordingSession(player);
+        session.registered = false;
+        session.onConnected(new FakeTunnel());
+
+        session.handleClose();
+
+        assertEquals(0, player.logouts);
+        assertTrue(session.detached);
+    }
+
     private static final class FailingLogoutPlayer extends Player {
         int logouts;
 
@@ -37,6 +50,8 @@ class GameSessionCloseTest {
     private static final class RecordingSession extends GameSession {
         private final Player player;
         int sent;
+        boolean registered = true;
+        boolean detached;
 
         RecordingSession(Player player) {
             super(null);
@@ -51,6 +66,16 @@ class GameSessionCloseTest {
         @Override
         public void send(BasePacket packet) {
             sent++;
+        }
+
+        @Override
+        protected boolean isRegistered(Player player) {
+            return registered;
+        }
+
+        @Override
+        public synchronized void detachPlayer() {
+            detached = true;
         }
     }
 

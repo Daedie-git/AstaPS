@@ -245,6 +245,24 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
             }
         }
 
+        // A session that finished its login but has not registered its player yet (it is still
+        // picking a character, or was refused) holds the account too; displace it like a kick.
+        for (var other : GameSessionManager.getSessions()) {
+            var otherPlayer = other.getPlayer();
+            if (other == session || otherPlayer == null || other.getAccount() == null
+                    || !login.accountId().equals(other.getAccount().getId())
+                    || Grasscutter.getGameServer().getPlayers().get(otherPlayer.getUid()) == otherPlayer) {
+                continue;
+            }
+            int otherUid = otherPlayer.getUid();
+            other.detachPlayer();
+            other.close();
+            other.handleClose();
+            if (otherUid > 0) {
+                PendingLogoutSaves.record(login.accountId(), DatabaseHelper.whenPlayerWritesDone(otherUid));
+            }
+        }
+
         if (!kicked) {
 
             if (ACCOUNT.maxPlayer > -1
@@ -282,8 +300,8 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
         login.offLogic(() -> findPlayer(login, playerClass));
     }
 
-    /** How long a login waits for the account's previous logout saves before refusing. */
-    private static final int LOGOUT_SAVE_WAIT_SECONDS = 15;
+    /** How long a login waits for the account's previous logout saves before refusing; above the 30 s load bound. */
+    private static final int LOGOUT_SAVE_WAIT_SECONDS = 45;
 
     /** Database: finds or creates the player and applies an IP ban. */
     private static void findPlayer(Login login, Class<? extends Player> playerClass) {
