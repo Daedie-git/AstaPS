@@ -1586,6 +1586,18 @@ public class Player implements PlayerHook, FieldFetch {
         return this.loadersExited;
     }
 
+    /** An onLogin running off the logic thread (native intro); it can save until it ends. */
+    @Transient private transient volatile CompletableFuture<Void> backgroundLogin = CompletableFuture.completedFuture(null);
+
+    /** Call on the logic thread before handing onLogin to another thread. */
+    public void markBackgroundLoginStarting() {
+        this.backgroundLogin = new CompletableFuture<>();
+    }
+
+    public CompletableFuture<Void> whenBackgroundLoginFinished() {
+        return this.backgroundLogin;
+    }
+
     private static java.util.concurrent.Future<?> startLoad(
             java.util.concurrent.ExecutorService runner, java.util.List<CompletableFuture<Void>> exits, Runnable loader) {
         var exited = new CompletableFuture<Void>();

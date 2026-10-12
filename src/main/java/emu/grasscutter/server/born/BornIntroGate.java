@@ -172,7 +172,14 @@ public final class BornIntroGate {
             }
 
             // Cold first login can be slow. Keep packet handling alive while the world is built.
-            Grasscutter.getThreadPool().submit(() -> completeNativeWorldLogin(session, player));
+            player.markBackgroundLoginStarting();
+            Grasscutter.getThreadPool().submit(() -> {
+                try {
+                    completeNativeWorldLogin(session, player);
+                } finally {
+                    player.whenBackgroundLoginFinished().complete(null);
+                }
+            });
         } catch (Throwable t) {
             synchronized (state) {
                 state.cutoverStarted = false;

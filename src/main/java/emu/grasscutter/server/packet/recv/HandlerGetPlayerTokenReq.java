@@ -108,7 +108,8 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
                 var loaded = this.player.get();
                 if (loaded == null) return java.util.concurrent.CompletableFuture.<Void>completedFuture(null);
                 return loaded.whenLoadersExited()
-                        .thenCompose(exited -> DatabaseHelper.whenPlayerWritesDone(loaded.getUid()));
+                        .thenCompose(exited -> loaded.whenBackgroundLoginFinished())
+                        .thenCompose(finished -> DatabaseHelper.whenPlayerWritesDone(loaded.getUid()));
             });
         }
 
@@ -282,7 +283,11 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
             other.handleClose(); // Unregistered: leaves the world without saving, then detaches.
             other.detachPlayer();
             if (otherUid > 0) {
-                PendingLogoutSaves.record(login.accountId(), DatabaseHelper.whenPlayerWritesDone(otherUid));
+                // A native-intro onLogin may still be running on another thread and saving.
+                PendingLogoutSaves.record(
+                        login.accountId(),
+                        otherPlayer.whenBackgroundLoginFinished()
+                                .thenCompose(ignored -> DatabaseHelper.whenPlayerWritesDone(otherUid)));
             }
         }
 
