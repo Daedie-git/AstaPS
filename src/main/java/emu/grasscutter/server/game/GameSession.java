@@ -483,16 +483,7 @@ public class GameSession implements GameSessionManager.KcpChannel {
             try {
                 if (componentsReady && getPlayer() != null) {
                     getPlayer().onLogout();
-                    getPlayer().getScriptDepartureCompletion()
-                            .orTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-                            .whenComplete((ignored, failure) -> {
-                                if (failure == null) cleanupDone.complete(null);
-                                else {
-                                    unsafeLoader = true;
-                                    cleanupDone.completeExceptionally(failure);
-                                    Grasscutter.getLogger().error("Final script save did not complete; account remains quarantined", failure);
-                                }
-                            });
+                    cleanupDone.complete(null);
                 } else cleanupDone.complete(null);
             } catch (Throwable failure) {
                 unsafeLoader = true;

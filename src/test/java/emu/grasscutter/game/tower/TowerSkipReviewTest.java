@@ -86,6 +86,21 @@ class TowerSkipReviewTest {
         assertEquals(3, player.data.skipFloorState);
         for (int i = 0; i < 3; i++) assertTrue(records.get(9).isFirstPassPaid(900 + i));
     }
+    @Test void skipRewardRetrySavesOnlyWhenSomethingChangesAndToleratesMissingLedger() {
+        previousClear(11);
+        player.inv.createInventoryTab(ItemType.ITEM_MATERIAL, new MaterialInventoryTab(0));
+        manager.getRecordMap(); // rollover: nothing can be paid yet
+        int afterRollover = player.saves;
+        manager.getRecordMap(); manager.getRecordMap();
+        assertEquals(afterRollover, player.saves, "Unchanged retries must not save");
+        assertEquals(2, player.data.skipFloorState);
+        player.data.skipFloorGrantedRewards = null;
+        player.inv.createInventoryTab(ItemType.ITEM_MATERIAL, new MaterialInventoryTab(1));
+        manager.getRecordMap();
+        assertTrue(player.saves > afterRollover, "A grant must save");
+        assertEquals(3, player.inv.getItemCountById(991861));
+        assertEquals(3, player.data.skipFloorGrantedRewards.get(991861));
+    }
     @Test void starTreasureCapacityFailurePreservesCursorAndRetryPaysOnce() {
         previousClear(9); player.data.lastScheduleId = 2;
         player.inv.createInventoryTab(ItemType.ITEM_MATERIAL, new MaterialInventoryTab(0));
@@ -113,7 +128,8 @@ class TowerSkipReviewTest {
         @Override public GameServer getServer() { return server; }
         @Override public PlayerCodex getCodex() { return codex; }
         @Override public long getNextGameGuid() { return ++guid; }
-        @Override public void save() {}
+        int saves;
+        @Override public void save() { saves++; }
         @Override public void sendPacket(BasePacket packet) {}
     }
 }

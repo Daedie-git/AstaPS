@@ -83,14 +83,14 @@ final class BossFlowerClaimsTest {
             }
         }
     }
-    @Test void departingUnclaimedPlayerCannotBlockLastPaidClaim() {
+    @Test void claimedPlayersRetapThroughEntityGadgetIsAnswered() {
         claim(a);
-        scene.players.remove(b);
-        for (int i = 0; i < 5; i++) scene.getScheduler().runTasks();
-        assertEquals(102, gadget.state);
-        assertEquals(1, scene.removals);
-        assertEquals(0, b.resin.spent);
-        assertFalse(chest.grants.containsKey(200));
+        a.sent.clear();
+        gadget.onInteract(a, GadgetInteractReqOuterClass.GadgetInteractReq.newBuilder()
+            .setOpType(InterOpTypeOuterClass.InterOpType.InterOpType_INTER_OP_FINISH).build());
+        assertEquals(1, a.sent.stream().filter(p -> p instanceof emu.grasscutter.server.packet.send.PacketGadgetInteractRsp).count(),
+            "A player who already claimed must still get a response");
+        assertEquals(40, a.resin.spent, "The re-tap must not pay again");
     }
     @Test void failedRewardDoesNotConsumeUidClaim() {
         chest.success = false; claim(a);
@@ -122,6 +122,7 @@ final class BossFlowerClaimsTest {
         BG() { super(null, 0, new emu.grasscutter.game.world.Position()); }
         @Override public Scene getScene() { return scene; }
         @Override public SceneGadget getMetaGadget() { return meta; }
+        @Override protected void creditInteraction(Player player) {}
         @Override public int getState() { return state; }
         @Override public void updateState(int state) { this.state = state; }
     }

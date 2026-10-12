@@ -462,7 +462,9 @@ public class TowerManager extends BasePlayerManager {
     private void grantSkipRewards(Map<Integer, TowerLevelRecord> records, List<Integer> floors) {
         var data = getTowerData();
         var schedule = player.getServer().getTowerSystem().getCurrentTowerScheduleData();
+        if (data.skipFloorGrantedRewards == null) data.skipFloorGrantedRewards = new HashMap<>();
         boolean pending = false;
+        boolean granted = false;
         for (int floorId : floors) {
             var floor = GameData.getTowerFloorDataMap().get(floorId);
             if (floor == null || floor.getFloorIndex() < 9 || floor.getFloorIndex() >= data.skipToFloorIndex) continue;
@@ -485,13 +487,16 @@ public class TowerManager extends BasePlayerManager {
                     continue;
                 }
                 record.markFirstPassPaid(levelId);
+                granted = true;
                 claim.release();
                 for (var param : reward.getRewardItemList())
                     data.skipFloorGrantedRewards.merge(param.getId(), param.getCount(), Math::addExact);
             }
         }
-        data.skipFloorState = pending ? 2 : 3;
-        player.save();
+        int state = pending ? 2 : 3;
+        boolean changed = data.skipFloorState != state;
+        data.skipFloorState = state;
+        if (granted || changed) player.save();
     }
 
     /**

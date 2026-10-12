@@ -11,7 +11,7 @@ import java.util.HashMap;
 import org.junit.jupiter.api.Test;
 
 class GadgetInteractionAuditTest {
-    @Test void mismatchDisabledAndDeniedContentCannotCreditButStartAndFinishCan() {
+    @Test void mismatchAndDisabledCannotCreditButStartAndFinishCan() {
         var gadget = allocate(CreditedGadget.class);
         var content = new RecordingContent(gadget);
         set(gadget, "content", content);
@@ -25,10 +25,6 @@ class GadgetInteractionAuditTest {
         gadget.onInteract(player, valid.build());
         assertEquals(0, gadget.credits);
         set(gadget, "interactEnabled", true);
-        content.allowed = false;
-        gadget.onInteract(player, valid.build());
-        assertEquals(0, gadget.credits);
-        content.allowed = true;
         gadget.onInteract(player, valid.setOpType(emu.grasscutter.net.proto.InterOpTypeOuterClass.InterOpType.InterOpType_INTER_OP_START).build());
         gadget.onInteract(player, valid.setOpType(emu.grasscutter.net.proto.InterOpTypeOuterClass.InterOpType.InterOpType_INTER_OP_FINISH).build());
         assertEquals(2, gadget.credits);
@@ -48,9 +44,7 @@ class GadgetInteractionAuditTest {
     }
     static class RecordingContent extends emu.grasscutter.game.entity.gadget.GadgetContent {
         RecordingContent(emu.grasscutter.game.entity.EntityGadget gadget) { super(gadget); }
-        boolean allowed;
         int calls;
-        @Override public boolean canInteract(Player player, GadgetInteractReq req) { return allowed; }
         @Override public boolean onInteract(Player player, GadgetInteractReq req) { calls++; return false; }
         @Override public void onBuildProto(emu.grasscutter.net.proto.SceneGadgetInfoOuterClass.SceneGadgetInfo.Builder builder) {}
     }

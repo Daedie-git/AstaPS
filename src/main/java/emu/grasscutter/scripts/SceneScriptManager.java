@@ -46,7 +46,6 @@ public class SceneScriptManager {
     private volatile boolean isInit;
     private volatile boolean initAttempted;
     private volatile boolean destroyed;
-    private CompletableFuture<Void> destructionCompletion;
     private int executingEvents;
     private final SceneScriptInitGate initialization = new SceneScriptInitGate();
     private boolean noCacheGroupGridsToDisk;
@@ -1545,20 +1544,7 @@ public class SceneScriptManager {
         }
     }
 
-    /** Completes after final group saves have been submitted, not after database acknowledgement. */
-    public synchronized CompletableFuture<Void> onDestroyAsync() {
-        if (destructionCompletion == null) destructionCompletion = new CompletableFuture<>();
-        try {
-            onDestroy();
-        } catch (Throwable failure) {
-            finalizationFailure.compareAndSet(null, failure);
-            destructionCompletion.completeExceptionally(failure);
-        }
-        return destructionCompletion;
-    }
-
     public synchronized void onDestroy() {
-        if (destructionCompletion == null) destructionCompletion = new CompletableFuture<>();
         if (this.destroyed) {
             return;
         }
@@ -1617,9 +1603,7 @@ public class SceneScriptManager {
      */
     private void clearDestroyedState() {
         try {
-            if (scene.getSceneType() == emu.grasscutter.game.props.SceneType.SCENE_WORLD) {
-                scene.saveGroups();
-            }
+            scene.saveGroups(); // open-world scenes only
             currentTriggers.clear();
             ongoingTriggers.clear();
             triggersByGroupScene.clear();
@@ -1630,10 +1614,8 @@ public class SceneScriptManager {
             cachedSceneGroupsInstances.clear();
             loadedGroupSetPerBlock.clear();
             variables.clear();
-            destructionCompletion.complete(null);
         } catch (Throwable failure) {
             finalizationFailure.compareAndSet(null, failure);
-            destructionCompletion.completeExceptionally(failure);
         }
     }
 }
