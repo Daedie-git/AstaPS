@@ -28,7 +28,7 @@ public class PacketGetMailItemRsp extends BasePacket {
                     List<GameItem> grants = new ArrayList<>();
                     List<EquipParamOuterClass.EquipParam> responseItems = new ArrayList<>();
                     boolean valid = true;
-                    for (Mail.MailItem mailItem : message.itemList) {
+                    for (Mail.MailItem mailItem : message.itemList == null ? List.<Mail.MailItem>of() : message.itemList) {
                         EquipParamOuterClass.EquipParam.Builder item =
                                 EquipParamOuterClass.EquipParam.newBuilder();
                         int promoteLevel = GameItem.getMinPromoteLevel(mailItem.itemLevel);
@@ -48,8 +48,12 @@ public class PacketGetMailItemRsp extends BasePacket {
                     }
                     var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(player, "mail:" + mailId);
                     if (claim == null) continue;
-                    if (!valid || !emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(player.getInventory(), grants, ActionReason.MailAttachment)) { claim.release(); continue; }
-                    claimedItems.addAll(responseItems);
+                    // Nothing deliverable (no attachments or invalid item data): mark as got so it is not retried forever.
+                    boolean deliverable = valid && !grants.isEmpty();
+                    if (deliverable) {
+                        if (!emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(player.getInventory(), grants, ActionReason.MailAttachment)) { claim.release(); continue; }
+                        claimedItems.addAll(responseItems);
+                    }
 
                     message.isAttachmentGot = true;
                     claim.release();

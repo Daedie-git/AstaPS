@@ -61,6 +61,39 @@ class HomeRankClaimTest {
         }
     }
 
+    @Test
+    void repeatedAndFailedClaimsAreAnswered() throws Exception {
+        var p = allocate(FakePlayer.class);
+        p.home = GameHome.create(991);
+        p.setRealmList(new HashSet<>(Set.of(1)));
+        p.setHomeRewardedLevels(new HashSet<>(Set.of(1)));
+        p.inv = allocate(FakeInventory.class);
+        var level = new Gson().fromJson("{\"level\":1,\"rewardId\":991801}", HomeWorldLevelData.class);
+        var old = GameData.getHomeWorldLevelDataMap().put(1, level);
+        var reward = new RewardData();
+        reward.rewardId = 991801;
+        reward.rewardItemList = List.of(new ItemParamData(201, 10));
+        var oldReward = GameData.getRewardDataMap().put(991801, reward);
+        var session = new FakeSession(p);
+        try {
+            var request = GetHomeLevelUpRewardReq.newBuilder().setLevel(1).build().toByteArray();
+            new HandlerGetHomeLevelUpRewardReq().handle(session, null, request);
+            assertEquals(1, session.sent.size());
+            assertEquals(0, p.inv.grants);
+
+            // rewardId 0 / unknown level is answered too.
+            session.sent.clear();
+            new HandlerGetHomeLevelUpRewardReq().handle(session, null,
+                    GetHomeLevelUpRewardReq.newBuilder().setLevel(77).build().toByteArray());
+            assertEquals(1, session.sent.size());
+        } finally {
+            if (old == null) GameData.getHomeWorldLevelDataMap().remove(1);
+            else GameData.getHomeWorldLevelDataMap().put(1, old);
+            if (oldReward == null) GameData.getRewardDataMap().remove(991801);
+            else GameData.getRewardDataMap().put(991801, oldReward);
+        }
+    }
+
     static <T> T allocate(Class<T> type) throws Exception {
         Field f = Unsafe.class.getDeclaredField("theUnsafe");
         f.setAccessible(true);
@@ -106,6 +139,7 @@ class HomeRankClaimTest {
 
     static class FakeSession extends GameSession {
         Player p;
+        final List<BasePacket> sent = new ArrayList<>();
 
         FakeSession(Player p) {
             super(null);
@@ -118,6 +152,8 @@ class HomeRankClaimTest {
         }
 
         @Override
-        public void send(BasePacket p) {}
+        public void send(BasePacket packet) {
+            sent.add(packet);
+        }
     }
 }

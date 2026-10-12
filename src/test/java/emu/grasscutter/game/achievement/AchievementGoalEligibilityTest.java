@@ -70,6 +70,45 @@ class AchievementGoalEligibilityTest {
         }
     }
 
+    @Test
+    void refusedGoalGrantIsAnsweredAndNotRecorded() throws Exception {
+        var u = Unsafe.class.getDeclaredField("theUnsafe");
+        u.setAccessible(true);
+        var p = (FakePlayer) ((Unsafe) u.get(null)).allocateInstance(FakePlayer.class);
+        p.inv = (FakeInventory) ((Unsafe) u.get(null)).allocateInstance(FakeInventory.class);
+        p.inv.refuse = true;
+        p.sent = new ArrayList<>();
+        var gson = new Gson();
+        var a = new FakeAchievements(p);
+        a.getAchievementList().put(991302, new Achievement(
+                emu.grasscutter.net.proto.AchievementOuterClass.Achievement.Status.Status_FINISHED, 991302, 1, 1, 42));
+        var oldGoal = GameData.getAchievementGoalDataMap().put(991300,
+                gson.fromJson("{\"id\":991300,\"finishRewardId\":991301}", AchievementGoalData.class));
+        var oldAchievement = GameData.getAchievementDataMap().put(991302,
+                gson.fromJson("{\"id\":991302,\"goalId\":991300,\"progress\":1}", AchievementData.class));
+        var oldItem = GameData.getItemDataMap().put(201,
+                gson.fromJson("{\"id\":201,\"itemType\":\"ITEM_VIRTUAL\"}", ItemData.class));
+        var reward = new RewardData();
+        reward.rewardId = 991301;
+        reward.rewardItemList = List.of(new ItemParamData(201, 5));
+        var oldReward = GameData.getRewardDataMap().put(991301, reward);
+        try {
+            a.takeGoalReward(List.of(991300));
+            assertTrue(a.getTakenGoalRewardIdList().isEmpty());
+            assertEquals(1, p.sent.size());
+            assertEquals(emu.grasscutter.net.packet.PacketOpcodes.TakeAchievementGoalRewardRsp, p.sent.get(0).getOpcode());
+        } finally {
+            if (oldGoal == null) GameData.getAchievementGoalDataMap().remove(991300);
+            else GameData.getAchievementGoalDataMap().put(991300, oldGoal);
+            if (oldAchievement == null) GameData.getAchievementDataMap().remove(991302);
+            else GameData.getAchievementDataMap().put(991302, oldAchievement);
+            if (oldItem == null) GameData.getItemDataMap().remove(201);
+            else GameData.getItemDataMap().put(201, oldItem);
+            if (oldReward == null) GameData.getRewardDataMap().remove(991301);
+            else GameData.getRewardDataMap().put(991301, oldReward);
+        }
+    }
+
     static class FakeAchievements extends Achievements {
         FakeAchievements(Player p) {
             super(null, 0, p, new HashMap<>(), 0, new ArrayList<>());
@@ -81,6 +120,7 @@ class AchievementGoalEligibilityTest {
 
     static class FakePlayer extends Player {
         FakeInventory inv;
+        List<BasePacket> sent;
 
         @Override
         public Inventory getInventory() {
@@ -88,11 +128,14 @@ class AchievementGoalEligibilityTest {
         }
 
         @Override
-        public void sendPacket(BasePacket p) {}
+        public void sendPacket(BasePacket p) {
+            if (sent != null) sent.add(p);
+        }
     }
 
     static class FakeInventory extends Inventory {
         int grants;
+        boolean refuse;
 
         FakeInventory() {
             super(null);
@@ -106,6 +149,7 @@ class AchievementGoalEligibilityTest {
 
         @Override
         public boolean tryAddItems(Collection<GameItem> p, ActionReason r) {
+            if (refuse) return false;
             grants++;
             return true;
         }

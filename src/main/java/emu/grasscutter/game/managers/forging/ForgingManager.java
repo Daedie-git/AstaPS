@@ -175,6 +175,11 @@ public final class ForgingManager extends BasePlayerManager {
     /**********
      * Forge queue manipulation (obtaining results and cancelling forges).
      **********/
+    private void rejectManipulate(ForgeQueueManipulateType type, Retcode retcode) {
+        this.player.sendPacket(
+                new PacketForgeQueueManipulateRsp(retcode, type, List.of(), List.of(), List.of()));
+    }
+
     private synchronized void obtainItems(int queueId) {
         // Determine how many items are finished.
         int currentTime = Utils.getCurrentSeconds();
@@ -185,26 +190,41 @@ public final class ForgingManager extends BasePlayerManager {
 
         // Sanity check: Are any items finished?
         if (finished <= 0) {
+            this.rejectManipulate(ForgeQueueManipulateType.ForgeQueueManipulateType_RECEIVE_OUTPUT, Retcode.RET_FAIL);
             return;
         }
 
         // Give finished items to the player.
         ForgeData data = GameData.getForgeDataMap().get(forge.getForgeId());
+        if (data == null) {
+            this.rejectManipulate(ForgeQueueManipulateType.ForgeQueueManipulateType_RECEIVE_OUTPUT, Retcode.RET_FAIL);
+            return;
+        }
 
         int resultId = data.getResultItemId() > 0 ? data.getResultItemId() : data.getShowItemId();
         ItemData resultItemData = GameData.getItemDataMap().get(resultId);
-        if (resultItemData == null) return;
         long outputCount = (long) data.getResultItemCount() * finished;
-        if (outputCount <= 0 || outputCount > Integer.MAX_VALUE) return;
+        if (resultItemData == null || outputCount <= 0 || outputCount > Integer.MAX_VALUE) {
+            this.rejectManipulate(ForgeQueueManipulateType.ForgeQueueManipulateType_RECEIVE_OUTPUT, Retcode.RET_FAIL);
+            return;
+        }
         GameItem addItem = new GameItem(resultItemData, (int) outputCount);
         addItem.setCount((int) outputCount);
 
         // Call the PlayerForgeItemEvent.
         var event = new PlayerForgeItemEvent(this.player, addItem);
-        if (!event.call()) return;
+        if (!event.call()) {
+            this.rejectManipulate(ForgeQueueManipulateType.ForgeQueueManipulateType_RECEIVE_OUTPUT, Retcode.RET_FAIL);
+            return;
+        }
 
         addItem = event.getItemForged();
-        if (!this.player.getInventory().tryAddItems(List.of(addItem), ActionReason.ForgeOutput)) return;
+        if (!this.player.getInventory().tryAddItems(List.of(addItem), ActionReason.ForgeOutput)) {
+            this.rejectManipulate(
+                    ForgeQueueManipulateType.ForgeQueueManipulateType_RECEIVE_OUTPUT,
+                    Retcode.RET_PACK_EXCEED_MAX_WEIGHT);
+            return;
+        }
 
         // Battle pass trigger handler
         this.player
@@ -247,11 +267,16 @@ public final class ForgingManager extends BasePlayerManager {
         ActiveForgeData forge = this.player.getActiveForges().get(queueId - 1);
 
         if (forge.getFinishedCount(currentTime) > 0) {
+            this.rejectManipulate(ForgeQueueManipulateType.ForgeQueueManipulateType_STOP_FORGE, Retcode.RET_FAIL);
             return;
         }
 
         // Return material items to the player.
         ForgeData data = GameData.getForgeDataMap().get(forge.getForgeId());
+        if (data == null || GameData.getItemDataMap().get(202) == null) {
+            this.rejectManipulate(ForgeQueueManipulateType.ForgeQueueManipulateType_STOP_FORGE, Retcode.RET_FAIL);
+            return;
+        }
 
         var returnItems = new ArrayList<GameItem>();
         for (var material : data.getMaterialItems()) {
@@ -260,6 +285,10 @@ public final class ForgingManager extends BasePlayerManager {
             }
 
             ItemData resultItemData = GameData.getItemDataMap().get(material.getItemId());
+            if (resultItemData == null) {
+                this.rejectManipulate(ForgeQueueManipulateType.ForgeQueueManipulateType_STOP_FORGE, Retcode.RET_FAIL);
+                return;
+            }
             GameItem returnItem =
                     new GameItem(resultItemData, material.getItemCount() * forge.getCount());
 
@@ -273,7 +302,12 @@ public final class ForgingManager extends BasePlayerManager {
         ItemData moraItem = GameData.getItemDataMap().get(202);
         GameItem returnMora = new GameItem(moraItem, data.getScoinCost() * forge.getCount());
         if (returnMora.getCount() > 0) returnItems.add(returnMora);
-        if (!this.player.getInventory().tryAddItems(returnItems, ActionReason.ForgeReturn)) return;
+        if (!this.player.getInventory().tryAddItems(returnItems, ActionReason.ForgeReturn)) {
+            this.rejectManipulate(
+                    ForgeQueueManipulateType.ForgeQueueManipulateType_STOP_FORGE,
+                    Retcode.RET_PACK_EXCEED_MAX_WEIGHT);
+            return;
+        }
 
         // Return forge points to the player.
         int requiredPoints = data.getForgePoint() * forge.getCount();
@@ -299,13 +333,16 @@ public final class ForgingManager extends BasePlayerManager {
         // Get info from the request.
         int queueId = req.getForgeQueueId();
         var manipulateType = req.getManipulateType();
-        if (queueId <= 0 || queueId > player.getActiveForges().size()) return;
+        if (queueId <= 0 || queueId > player.getActiveForges().size()) {
+            this.rejectManipulate(manipulateType, Retcode.RET_FAIL);
+            return;
+        }
 
         // Handle according to the manipulation type.
         switch (manipulateType) {
             case ForgeQueueManipulateType_RECEIVE_OUTPUT -> this.obtainItems(queueId);
             case ForgeQueueManipulateType_STOP_FORGE -> this.cancelForge(queueId);
-            default -> {} // Should never happen.
+            default -> this.rejectManipulate(manipulateType, Retcode.RET_FAIL);
         }
     }
 

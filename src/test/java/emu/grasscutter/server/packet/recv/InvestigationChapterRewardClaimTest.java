@@ -35,6 +35,7 @@ final class InvestigationChapterRewardClaimTest {
     private List<Object> oldTargets;
     private boolean oldLoaded;
     private RewardData oldReward;
+    private emu.grasscutter.data.excels.ItemData oldItem;
 
     private static Field helperField(String name) throws Exception {
         var field = InvestigationHandbookHelper.class.getDeclaredField(name);
@@ -59,6 +60,8 @@ final class InvestigationChapterRewardClaimTest {
                 "{\"id\":60001,\"investigationId\":10001,\"progress\":1,\"rewardId\":991002}", targetClass);
         targets.put(CHAPTER, List.of(target));
         targetsById.put(TARGET, target);
+        oldItem = GameData.getItemDataMap().put(201, new Gson().fromJson(
+                "{\"id\":201,\"itemType\":\"ITEM_VIRTUAL\"}", emu.grasscutter.data.excels.ItemData.class));
         oldReward = GameData.getRewardDataMap().get(REWARD);
         var reward = new RewardData();
         reward.rewardId = REWARD;
@@ -85,6 +88,8 @@ final class InvestigationChapterRewardClaimTest {
         if (oldTargets == null) targets.remove(CHAPTER); else targets.put(CHAPTER, oldTargets);
         if (oldTarget == null) targetsById.remove(TARGET); else targetsById.put(TARGET, oldTarget);
         helperField("loaded").setBoolean(null, oldLoaded);
+        if (oldItem == null) GameData.getItemDataMap().remove(201);
+        else GameData.getItemDataMap().put(201, oldItem);
         if (oldReward == null) GameData.getRewardDataMap().remove(REWARD);
         else GameData.getRewardDataMap().put(REWARD, oldReward);
     }
@@ -108,6 +113,28 @@ final class InvestigationChapterRewardClaimTest {
         assertNotEquals(0, claim().getRetcode());
         assertTrue(player.inventory.grants.isEmpty());
         assertEquals(0, player.progress.getInvestigationChapterState(CHAPTER));
+    }
+
+    @Test
+    void refusedChapterGrantDoesNotConsumeTheClaim() throws Exception {
+        player.progress.setInvestigationTargetProgress(TARGET, 1);
+        player.inventory.refuse = true;
+        assertNotEquals(0, claim().getRetcode());
+        assertEquals(0, player.progress.getInvestigationChapterState(CHAPTER));
+        assertEquals(0, player.saves);
+        player.inventory.refuse = false;
+        session.sent.clear();
+        assertEquals(0, claim().getRetcode());
+        assertEquals(3, player.progress.getInvestigationChapterState(CHAPTER));
+    }
+
+    @Test
+    void refusedTargetGrantDoesNotRecordRewardTaken() {
+        player.progress.setInvestigationTargetProgress(TARGET, 1);
+        player.inventory.refuse = true;
+        assertNotEquals(0, InvestigationHandbookHelper.claimTargetReward(player, TARGET));
+        assertEquals(0, player.progress.getInvestigationTargetState(TARGET));
+        assertEquals(0, player.saves);
     }
 
     @Test
@@ -171,10 +198,12 @@ final class InvestigationChapterRewardClaimTest {
 
     private static final class RecordingInventory extends Inventory {
         List<List<ItemParamData>> grants;
+        boolean refuse;
         private RecordingInventory() { super(null); }
-        @Override public void addItemParamDatas(Collection<ItemParamData> items, ActionReason reason) {
-            assertEquals(ActionReason.InvestigationReward, reason);
+        @Override public boolean tryAddItemParamDatas(Collection<ItemParamData> items, ActionReason reason) {
+            if (refuse) return false;
             grants.add(List.copyOf(items));
+            return true;
         }
     }
 

@@ -88,7 +88,10 @@ public class CombineManger extends BaseGameSystem {
             player.sendPacket(new PacketCombineRsp(Retcode.RET_COMBINE_COUNT_TOO_LARGE_VALUE));
             return null;
         }
-        if (GameData.getItemDataMap().get(combineData.getResultItemId()) == null) return null;
+        if (GameData.getItemDataMap().get(combineData.getResultItemId()) == null) {
+            player.sendPacket(new PacketCombineRsp());
+            return null;
+        }
         var output = new GameItem(combineData.getResultItemId(), resultCount);
         output.setCount(resultCount);
         List<ItemParamData> material = buildMaterialCost(combineData);
@@ -169,17 +172,43 @@ public class CombineManger extends BaseGameSystem {
         List<GameItem> outputs = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             var output = new GameItem(Utils.drawRandomListElement(possibleDrops), 1);
-            if (output.getItemData() == null || output.getItemType() != emu.grasscutter.game.inventory.ItemType.ITEM_RELIQUARY) return;
+            if (output.getItemData() == null || output.getItemType() != emu.grasscutter.game.inventory.ItemType.ITEM_RELIQUARY) {
+                player.sendPacket(new PacketReliquaryDecomposeRsp(Retcode.RET_RELIQUARY_DECOMPOSE_PARAM_ERROR));
+                return;
+            }
             outputs.add(output);
         }
+        // Outputs are validated and capacity-checked above; inputs are consumed only after that.
+        List<GameItem> consumed = new ArrayList<>();
         for (long guid : input) {
-            if (!player.getInventory().removeItem(guid)) return;
+            var item = player.getInventory().getItemByGuid(guid);
+            if (item == null || !player.getInventory().removeItem(item)) {
+                restoreInputs(player, consumed);
+                player.sendPacket(new PacketReliquaryDecomposeRsp(Retcode.RET_RELIQUARY_DECOMPOSE_PARAM_ERROR));
+                return;
+            }
+            consumed.add(item);
         }
 
+        // addItem stores these objects themselves, so their GUIDs are the ones the client must see;
+        // tryAddItems would store copies. Net capacity was checked above.
         List<Long> resultItems = new ArrayList<>();
-        if (!player.getInventory().tryAddItems(outputs, ActionReason.Combine)) return;
-        for (var output : outputs) resultItems.add(output.getGuid());
+        for (var output : outputs) {
+            if (player.getInventory().addItem(output, ActionReason.Combine)) {
+                resultItems.add(output.getGuid());
+            } else {
+                Grasscutter.getLogger().error("Reliquary decompose output {} rejected for uid {}",
+                        output.getItemId(), player.getUid());
+            }
+        }
 
         player.sendPacket(new PacketReliquaryDecomposeRsp(resultItems));
+    }
+
+    private static void restoreInputs(Player player, List<GameItem> consumed) {
+        for (var item : consumed) {
+            item.setCount(1);
+            player.getInventory().addItem(item);
+        }
     }
 }
