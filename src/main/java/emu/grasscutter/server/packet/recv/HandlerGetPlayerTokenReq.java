@@ -144,6 +144,7 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
                 var player = this.session.getPlayer();
                 if (player != null && Grasscutter.getGameServer().getPlayers().get(player.getUid()) != player) {
                     this.session.detachPlayer();
+                    player.onLogout(false);
                 }
                 this.session.close();
             };
@@ -255,9 +256,9 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
                 continue;
             }
             int otherUid = otherPlayer.getUid();
-            other.detachPlayer();
             other.close();
-            other.handleClose();
+            other.handleClose(); // Unregistered: leaves the world without saving, then detaches.
+            other.detachPlayer();
             if (otherUid > 0) {
                 PendingLogoutSaves.record(login.accountId(), DatabaseHelper.whenPlayerWritesDone(otherUid));
             }

@@ -34,16 +34,24 @@ class GameSessionCloseTest {
         session.handleClose();
 
         assertEquals(0, player.logouts);
+        assertEquals(1, player.teardownsWithoutSave);
         assertTrue(session.detached);
     }
 
     private static final class FailingLogoutPlayer extends Player {
         int logouts;
+        int teardownsWithoutSave;
 
         @Override
         public void onLogout() {
             logouts++;
             throw new IllegalStateException("save rejected");
+        }
+
+        @Override
+        public void onLogout(boolean save) {
+            if (save) onLogout();
+            else teardownsWithoutSave++;
         }
     }
 

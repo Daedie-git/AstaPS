@@ -1550,40 +1550,50 @@ public class Player implements PlayerHook, FieldFetch {
         // by the pool - or a pool full of stuck tasks froze the whole server. Fail this one login
         // instead.
         long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(LOAD_TIMEOUT_SECONDS);
-        awaitLoad("avatars", avatarsLoad, deadline, true);
-        awaitLoad("inventory", inventoryLoad, deadline, true);
-        // The rest may fail without failing the login, as before, but must have finished: some
-        // create and save documents, and a login that replaces this one reads them next.
-        awaitLoad("achievements", achievementsLoad, deadline, false);
-        awaitLoad("friends", friendsLoad, deadline, false);
-        awaitLoad("mail", mailLoad, deadline, false);
-        awaitLoad("quests", questsLoad, deadline, false);
-        awaitLoad("battle pass", battlePassLoad, deadline, false);
-        awaitLoad("daily tasks", dailyTaskLoad, deadline, false);
+        var loads = new java.util.LinkedHashMap<String, java.util.concurrent.Future<?>>();
+        loads.put("avatars", avatarsLoad);
+        loads.put("inventory", inventoryLoad);
+        loads.put("achievements", achievementsLoad);
+        loads.put("friends", friendsLoad);
+        loads.put("mail", mailLoad);
+        loads.put("quests", questsLoad);
+        loads.put("battle pass", battlePassLoad);
+        loads.put("daily tasks", dailyTaskLoad);
+        // Every loader has finished or been cancelled before this returns or throws: some create
+        // and save documents, and a login that replaces this one reads them next. Only avatars and
+        // inventory fail the login, as before.
+        IllegalStateException failure = null;
+        for (var load : loads.entrySet()) {
+            var problem = awaitLoad(load.getKey(), load.getValue(), deadline);
+            boolean required = load.getValue() == avatarsLoad || load.getValue() == inventoryLoad;
+            if (problem == null) continue;
+            if (required && failure == null) failure = problem;
+            else Grasscutter.getLogger().error(problem.getMessage(), problem.getCause());
+        }
+        if (failure != null) throw failure;
 
         this.getPlayerProgress().setPlayer(this);
     }
 
     private static final long LOAD_TIMEOUT_SECONDS = 30;
 
-    private void awaitLoad(String what, java.util.concurrent.Future<?> load, long deadline, boolean required) {
+    /** Waits for one loader until the deadline; returns why it failed, or null. */
+    private IllegalStateException awaitLoad(String what, java.util.concurrent.Future<?> load, long deadline) {
         try {
             load.get(Math.max(0, deadline - System.nanoTime()), java.util.concurrent.TimeUnit.NANOSECONDS);
+            return null;
         } catch (java.util.concurrent.ExecutionException e) {
-            if (!required) {
-                Grasscutter.getLogger().error("Loading {} for uid {} failed.", what, this.getUid(), e.getCause());
-                return;
-            }
-            throw new IllegalStateException(
+            return new IllegalStateException(
                     "Loading " + what + " for uid " + this.getUid() + " failed.", e.getCause());
         } catch (java.util.concurrent.TimeoutException e) {
             load.cancel(true);
-            throw new IllegalStateException(
+            return new IllegalStateException(
                     "Loading " + what + " for uid " + this.getUid() + " took over "
                             + LOAD_TIMEOUT_SECONDS + "s; the load pool may be stuck.");
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted loading " + what + " for uid " + this.getUid());
+            load.cancel(true);
+            return new IllegalStateException("Interrupted loading " + what + " for uid " + this.getUid());
         }
     }
 
@@ -1716,6 +1726,12 @@ public class Player implements PlayerHook, FieldFetch {
             return;
         }
 
+        // Closed while logging in (on the intro thread): it never becomes the account's player.
+        var session = getSession();
+        if (session == null || session.getPlayer() != this) {
+            onLogout(false);
+            return;
+        }
         getServer().registerPlayer(this);
     }
 
@@ -1724,6 +1740,14 @@ public class Player implements PlayerHook, FieldFetch {
             new java.util.concurrent.atomic.AtomicBoolean();
 
     public void onLogout() {
+        onLogout(true);
+    }
+
+    /**
+     * Leaves the world and server; saves only when {@code save}. A player that never finished
+     * logging in is torn down without saving, as its state is not the account's.
+     */
+    public void onLogout(boolean save) {
         // A kicked duplicate login is logged out by the new login, then again when its session
         // closes; a second run would save this stale object over the new session's progress.
         if (!loggedOut.compareAndSet(false, true)) return;
@@ -1760,7 +1784,7 @@ public class Player implements PlayerHook, FieldFetch {
         } catch (Throwable e) {
             Grasscutter.getLogger().warn("Player (UID {}) save failure", getUid(), e);
         } finally {
-            Utils.runAll(
+            if (save) Utils.runAll(
                     "Player (UID " + getUid() + ") logout save",
                     this::save,
                     () -> this.getTeamManager().saveAvatars(),
