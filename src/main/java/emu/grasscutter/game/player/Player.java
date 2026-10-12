@@ -1779,11 +1779,23 @@ public class Player implements PlayerHook, FieldFetch {
             return;
         }
         getServer().registerPlayer(this);
+        // Torn down while registering: undo, so the account is never held by a closed player.
+        if (loggedOut.get()) getServer().getPlayers().remove(getUid(), this);
     }
 
 
     @Transient private final transient java.util.concurrent.atomic.AtomicBoolean loggedOut =
             new java.util.concurrent.atomic.AtomicBoolean();
+
+    /**
+     * Set once this object's final state is saved (or it never logged in). Background work that
+     * still holds it (quests, loaders, the native intro) can no longer write it over a newer login.
+     */
+    @Transient private transient volatile boolean retired;
+
+    public boolean isRetired() {
+        return this.retired;
+    }
 
     public void onLogout() {
         onLogout(true);
@@ -1797,6 +1809,7 @@ public class Player implements PlayerHook, FieldFetch {
         // A kicked duplicate login is logged out by the new login, then again when its session
         // closes; a second run would save this stale object over the new session's progress.
         if (!loggedOut.compareAndSet(false, true)) return;
+        if (!save) this.retired = true;
         try {
 
             this.getServer().getChatSystem().clearHistoryOnLogout(this);
@@ -1835,6 +1848,7 @@ public class Player implements PlayerHook, FieldFetch {
                     this::save,
                     () -> this.getTeamManager().saveAvatars(),
                     () -> this.getFriendsList().save(),
+                    () -> this.retired = true,
                     () -> emu.grasscutter.server.game.PendingLogoutSaves.record(
                             getAccountId(), DatabaseHelper.whenPlayerWritesDone(getUid())));
             removeFromServer();

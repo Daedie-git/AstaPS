@@ -184,7 +184,11 @@ public class GameItem {
         return ownerId;
     }
 
+    /** The player object holding this item, so writes from a logged-out one can be refused. */
+    @Transient private transient Player ownerPlayer;
+
     public void setOwner(Player player) {
+        this.ownerPlayer = player;
         this.ownerId = player.getUid();
         this.guid = player.getNextGameGuid();
     }

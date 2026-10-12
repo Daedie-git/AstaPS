@@ -280,6 +280,46 @@ public final class DatabaseHelper {
                 }
             };
 
+    /**
+     * The live player object a document belongs to. Only these names: a Friendship also holds
+     * its friend, whose logout must not stop the owner's writes.
+     */
+    private static final ClassValue<java.lang.reflect.Field> PLAYER_FIELDS =
+            new ClassValue<>() {
+                @Override
+                protected java.lang.reflect.Field computeValue(Class<?> type) {
+                    for (var name : List.of("owner", "player", "ownerPlayer")) {
+                        for (var current = type; current != null; current = current.getSuperclass()) {
+                            try {
+                                var field = current.getDeclaredField(name);
+                                if (field.getType() != Player.class) continue;
+                                field.setAccessible(true);
+                                return field;
+                            } catch (NoSuchFieldException ignored) {
+                                // Try the superclass, then the next name.
+                            }
+                        }
+                    }
+                    return null;
+                }
+            };
+
+    /** Whether this belongs to a player object that has logged out; its writes are stale. */
+    static boolean fromRetiredPlayer(Object object) {
+        if (object == null) return false;
+        Player player = object instanceof Player self ? self : null;
+        var field = player == null ? PLAYER_FIELDS.get(object.getClass()) : null;
+        try {
+            if (field != null) player = (Player) field.get(object);
+        } catch (IllegalAccessException e) {
+            return false;
+        }
+        if (player == null || !player.isRetired()) return false;
+        Grasscutter.getLogger().debug("Dropped a write of {} from logged-out uid {}.",
+                object.getClass().getSimpleName(), player.getUid());
+        return true;
+    }
+
     static PlayerOwner ownerOf(Object object) {
         if (object instanceof Player player) return new PlayerOwner(player.getUid());
         var field = OWNER_FIELDS.get(object.getClass());
@@ -477,7 +517,7 @@ public final class DatabaseHelper {
      * @param object The object to save.
      */
     public static void saveGameAsync(Object object) {
-        if (object == null) return;
+        if (object == null || fromRetiredPlayer(object)) return;
 
         // The three types are unrelated, so the order of these tests carries no meaning.
         if (object instanceof GameItem gameItem) {
@@ -854,7 +894,7 @@ public final class DatabaseHelper {
     }
 
     public static void deleteItem(GameItem item) {
-        itemWrites.delete(item);
+        if (!fromRetiredPlayer(item)) itemWrites.delete(item);
     }
 
     /**
@@ -892,6 +932,7 @@ public final class DatabaseHelper {
     }
 
     public static void deleteFriendship(Friendship friendship) {
+        if (fromRetiredPlayer(friendship)) return;
         databaseWriters.submitOwned(
                 eventExecutor, ownerOf(friendship), () -> DatabaseManager.getGameDatastore().delete(friendship));
     }
@@ -970,6 +1011,7 @@ public final class DatabaseHelper {
     }
 
     public static void deleteQuest(GameMainQuest quest) {
+        if (fromRetiredPlayer(quest)) return;
         databaseWriters.submitOwned(
                 eventExecutor, ownerOf(quest), () -> DatabaseManager.getGameDatastore().delete(quest));
     }
@@ -1003,6 +1045,7 @@ public final class DatabaseHelper {
     }
 
     public static void saveDailyTaskManager(emu.grasscutter.game.dailytask.DailyTaskManager manager) {
+        if (fromRetiredPlayer(manager)) return;
         runSynchronousDatabaseWrite(() -> DatabaseManager.getGameDatastore().save(manager));
     }
 
