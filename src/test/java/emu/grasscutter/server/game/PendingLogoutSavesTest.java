@@ -14,7 +14,7 @@ class PendingLogoutSavesTest {
         PendingLogoutSaves.record("pending-test", second);
 
         first.complete(null);
-        assertSame(second, PendingLogoutSaves.get("pending-test"), "an older logout must not clear a newer one");
+        assertFalse(PendingLogoutSaves.get("pending-test").isDone(), "an older logout must not clear a newer one");
 
         second.complete(null);
         assertNull(PendingLogoutSaves.get("pending-test"));

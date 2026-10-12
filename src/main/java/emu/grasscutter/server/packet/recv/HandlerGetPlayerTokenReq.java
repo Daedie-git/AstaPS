@@ -72,11 +72,34 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
                     });
 
     /** The login steps, run either across the login and logic threads or inline (asyncLogin off). */
-    private record Login(GameSession session, boolean async, String accountId, String clientRandKey, int keyId) {
+    private record Login(
+            GameSession session,
+            boolean async,
+            String accountId,
+            String clientRandKey,
+            int keyId,
+            java.util.concurrent.atomic.AtomicInteger databaseSteps,
+            java.util.concurrent.atomic.AtomicBoolean ended,
+            java.util.concurrent.CompletableFuture<Void> settled) {
+        Login(GameSession session, boolean async, String accountId, String clientRandKey, int keyId) {
+            this(session, async, accountId, clientRandKey, keyId,
+                    new java.util.concurrent.atomic.AtomicInteger(),
+                    new java.util.concurrent.atomic.AtomicBoolean(),
+                    new java.util.concurrent.CompletableFuture<>());
+        }
+
         /** Runs a step that only does database work. */
         void offLogic(Runnable step) {
-            if (this.async) LOGIN_EXECUTOR.execute(() -> this.guarded(step));
-            else this.guarded(step);
+            this.databaseSteps.incrementAndGet();
+            Runnable counted = () -> {
+                try {
+                    this.guarded(step);
+                } finally {
+                    if (this.databaseSteps.decrementAndGet() == 0 && this.ended.get()) this.settled.complete(null);
+                }
+            };
+            if (this.async) LOGIN_EXECUTOR.execute(counted);
+            else counted.run();
         }
 
         /** Runs a step that touches game state or the client. */
@@ -104,6 +127,8 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
         void done() {
             LOGGING_IN.remove(this.session);
             CURRENT.remove(this.accountId, this);
+            this.ended.set(true);
+            if (this.databaseSteps.get() == 0) this.settled.complete(null);
         }
 
         /** Whether a later login for the same account has not taken over from this one. */
@@ -185,7 +210,19 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
             }
         } else {
             var previous = CURRENT.put(login.accountId(), login);
-            if (previous != null && previous != login) previous.close();
+            if (previous != null && previous != login) {
+                // Its loaders may still be reading and saving (the Traveler avatar is saved
+                // during the load), so this login waits for them and their writes like a logout.
+                var previousPlayer = previous.session().getPlayer();
+                int previousUid = previousPlayer == null ? 0 : previousPlayer.getUid();
+                previous.close();
+                PendingLogoutSaves.record(
+                        login.accountId(),
+                        previous.settled().thenCompose(
+                                ignored -> previousUid > 0
+                                        ? DatabaseHelper.whenPlayerWritesDone(previousUid)
+                                        : java.util.concurrent.CompletableFuture.completedFuture(null)));
+            }
         }
         session.setAccount(account);
 
