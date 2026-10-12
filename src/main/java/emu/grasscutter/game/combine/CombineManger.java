@@ -190,13 +190,17 @@ public class CombineManger extends BaseGameSystem {
             consumed.add(item);
         }
 
+        // addItem stores these objects themselves, so their GUIDs are the ones the client must see;
+        // tryAddItems would store copies. Net capacity was checked above.
         List<Long> resultItems = new ArrayList<>();
-        if (!player.getInventory().tryAddItems(outputs, ActionReason.Combine)) {
-            restoreInputs(player, consumed);
-            player.sendPacket(new PacketReliquaryDecomposeRsp(Retcode.RET_PACK_EXCEED_MAX_WEIGHT));
-            return;
+        for (var output : outputs) {
+            if (player.getInventory().addItem(output, ActionReason.Combine)) {
+                resultItems.add(output.getGuid());
+            } else {
+                Grasscutter.getLogger().error("Reliquary decompose output {} rejected for uid {}",
+                        output.getItemId(), player.getUid());
+            }
         }
-        for (var output : outputs) resultItems.add(output.getGuid());
 
         player.sendPacket(new PacketReliquaryDecomposeRsp(resultItems));
     }
