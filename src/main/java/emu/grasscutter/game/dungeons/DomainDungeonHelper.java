@@ -441,7 +441,36 @@ public final class DomainDungeonHelper {
             Grasscutter.getLogger().warn("Blocked dungeon enter uid={} point={} dungeon={}: player at ({}, {}, {}), entry at ({}, {}, {})", new Object[]{player.getUid(), n, n2, Float.valueOf(position2 != null ? position2.getX() : 0.0f), Float.valueOf(position2 != null ? position2.getY() : 0.0f), Float.valueOf(position2 != null ? position2.getZ() : 0.0f), Float.valueOf(position != null ? position.getX() : 0.0f), Float.valueOf(position != null ? position.getY() : 0.0f), Float.valueOf(position != null ? position.getZ() : 0.0f)});
             return false;
         }
-        return !player.isScenePointForceLocked(scene.getId(), n);
+        if (player.isScenePointForceLocked(scene.getId(), n)) return false;
+        var entries = GameData.getDungeonEntryDataMap().values().stream()
+                .filter(entry -> entry.getSceneId() == scene.getId() && entry.getDungeonEntryId() == n)
+                .toList();
+        return entries.isEmpty() || entries.stream().anyMatch(entry -> meetsEntryConditions(player, entry));
+    }
+
+    private static boolean meetsEntryConditions(Player player, DungeonEntryData entry) {
+        var conditions = entry.getSatisfiedCond();
+        if (conditions == null || conditions.isEmpty()) return true;
+        var comb = entry.getCondComb();
+        boolean or = comb == emu.grasscutter.game.dungeons.enums.DungeonEntryCondCombType.DUNGEON_ENTRY_COND_COMB_LOGIC_OR;
+        if (!or && comb != emu.grasscutter.game.dungeons.enums.DungeonEntryCondCombType.DUNGEON_ENTRY_COND_COMB_LOGIC_AND
+                && conditions.size() != 1) return false;
+        for (var condition : conditions) {
+            boolean met = false;
+            if (condition != null && condition.getType() != null) {
+                met = switch (condition.getType()) {
+                    case DUNGEON_ENTRY_CONDITION_NONE -> true;
+                    case DUNGEON_ENTRY_CONDITION_LEVEL -> condition.getParam1() >= 0 && player.getLevel() >= condition.getParam1();
+                    case DUNGEON_ENTRY_CONDITION_QUEST -> {
+                        var quest = player.getQuestManager() == null ? null : player.getQuestManager().getQuestById(condition.getParam1());
+                        yield quest != null && quest.getState() == emu.grasscutter.game.quest.enums.QuestState.QUEST_STATE_FINISHED;
+                    }
+                };
+            }
+            if (or && met) return true;
+            if (!or && !met) return false;
+        }
+        return !or;
     }
 
     public static void handleQuickOpen(Player player, int n) {

@@ -686,7 +686,13 @@ public class InventorySystem extends BaseGameSystem {
             if (actions != null) {
                 for (var action : actions) {
                     if (action.getItemUseOp() == ItemUseOp.ITEM_USE_ADD_EXP) {
-                        expGain += ((ItemUseAddExp) action).getExp() * count;
+                        if (count <= 0) return;
+                        try {
+                            expGain = Math.multiplyExact(((ItemUseAddExp) action).getExp(), count);
+                        } catch (ArithmeticException overflow) {
+                            return;
+                        }
+                        break;
                     }
                 }
             }
@@ -736,8 +742,15 @@ public class InventorySystem extends BaseGameSystem {
                 if (actions != null) {
                     for (var action : actions) {
                         if (action.getItemUseOp() == ItemUseOp.ITEM_USE_ADD_EXP) {
-                            expGain += ((ItemUseAddExp) action).getExp() * itemParam.getCount();
+                            if (itemParam.getCount() <= 0) return;
+                            try {
+                                expGain = Math.addExact(expGain,
+                                        Math.multiplyExact(((ItemUseAddExp) action).getExp(), itemParam.getCount()));
+                            } catch (ArithmeticException overflow) {
+                                return;
+                            }
                             costItems.add(new ItemParamData(itemParam.getItemId(), itemParam.getCount()));
+                            break;
                         }
                     }
                 }

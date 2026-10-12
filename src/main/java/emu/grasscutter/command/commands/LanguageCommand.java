@@ -6,7 +6,6 @@ import emu.grasscutter.Grasscutter;
 import emu.grasscutter.command.Command;
 import emu.grasscutter.command.CommandHandler;
 import emu.grasscutter.command.CommandOutput;
-import emu.grasscutter.database.DatabaseHelper;
 import emu.grasscutter.game.player.Player;
 import emu.grasscutter.utils.Utils;
 import java.util.Locale;
@@ -52,8 +51,9 @@ public final class LanguageCommand implements CommandHandler {
 
             if (sender != null) {
                 var account = sender.getAccount();
-                account.setLocale(locale);
-                DatabaseHelper.saveAccountFieldsAsync(account, "locale");
+                emu.grasscutter.database.DatabaseHelper.updateAccount(account, fresh -> {
+                    fresh.setLocale(locale); return null;
+                });
             } else {
                 Grasscutter.setLanguage(language);
                 var config = Grasscutter.getConfig();

@@ -58,14 +58,87 @@ public class GadgetChest extends GadgetContent {
      */
     private static final double BOSS_CLAIM_RANGE = 100;
     private final Set<Integer> claimedBossUids = ConcurrentHashMap.newKeySet();
+    private final java.util.concurrent.atomic.AtomicLong retirementDeadline = new java.util.concurrent.atomic.AtomicLong();
+    private final java.util.concurrent.atomic.AtomicBoolean retirementScheduled = new java.util.concurrent.atomic.AtomicBoolean();
+    private static final long FLOWER_LIFETIME = java.util.concurrent.TimeUnit.MINUTES.toNanos(10);
+    private static final java.util.concurrent.atomic.AtomicReferenceFieldUpdater<GadgetChest, List> ELIGIBILITY =
+            java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater(GadgetChest.class, List.class, "bossUids");
 
     public GadgetChest(EntityGadget gadget) {
         super(gadget);
     }
 
+    protected long monotonicNanos() { return System.nanoTime(); }
+
+    private boolean isBossRewardChest() {
+        var meta = resolveChestMeta();
+        if (meta != null && meta.boss_chest != null) return true;
+        var data = getGadget().getGadgetData();
+        return data != null && !Grasscutter.getConfig().server.game.enableScriptInBigWorld
+                && getGadget().getScene().getWorld().getServer().getWorldDataSystem()
+                        .getChestInteractHandlerMap().get(data.getJsonName()) instanceof BossChestInteractHandler;
+    }
+
+    private void captureBossEligibility() {
+        if (bossUids != null) return;
+        var flower = getGadget().getPosition();
+        var present = getGadget().getScene().getPlayers().stream()
+                .filter(p -> flower == null || (p.getPosition() != null
+                        && p.getPosition().computeDistance(flower) <= BOSS_CLAIM_RANGE))
+                .map(Player::getUid).distinct().toList();
+        if (!present.isEmpty()) ELIGIBILITY.compareAndSet(this, null, present);
+    }
+
+    @Override
+    public void onCreate() {
+        if (isBossRewardChest()) {
+            captureBossEligibility();
+            retirementDeadline.compareAndSet(0, monotonicNanos() + FLOWER_LIFETIME);
+            scheduleRosterRetirement();
+        }
+    }
+
+    private void scheduleRosterRetirement() {
+        if (!retirementScheduled.compareAndSet(false, true)) return;
+        getGadget().getScene().getScheduler().scheduleDelayedTask(() -> {
+            synchronized (this) {
+                retirementScheduled.set(false);
+                var gadget = getGadget();
+                if (gadget.getContent() != this || gadget.getState() == CHEST_OPENED_STATE
+                        || gadget.getScene().getEntityById(gadget.getId()) != gadget) return;
+                captureBossEligibility();
+                var paidPlayer = gadget.getScene().getPlayers().stream()
+                        .filter(p -> claimedBossUids.contains(p.getUid())).findFirst();
+                if (paidPlayer.isPresent() && finishIfAllClaimed(paidPlayer.get(), resolveChestMeta(), false)) return;
+                boolean abandoned = bossUids != null && gadget.getScene().getPlayers().stream()
+                        .noneMatch(p -> bossUids.contains(p.getUid()));
+                if (abandoned || monotonicNanos() >= retirementDeadline.get()) {
+                    gadget.getScene().getBlossomManager().expireRewardChest(gadget);
+                    gadget.updateState(CHEST_OPENED_STATE);
+                    gadget.getScene().removeEntity(gadget, VisionTypeOuterClass.VisionType.VisionType_VISION_REMOVE);
+                    WorldBossSpawnHelper.onBossChestClaimed(gadget);
+                } else scheduleRosterRetirement();
+            }
+        }, 1);
+    }
+
+    @Override
+    public synchronized boolean canInteract(Player player, GadgetInteractReqOuterClass.GadgetInteractReq req) {
+        if (!GatherInteractHelper.safeClientInteractEnabled(getGadget())) return false;
+        if (isBossRewardChest()) {
+            onCreate();
+            return canClaimBossFlower(player);
+        }
+        return canOpenOrdinary(player);
+    }
+
     @Override
     public synchronized boolean onInteract(
             Player player, GadgetInteractReqOuterClass.GadgetInteractReq req) {
+        if (!canInteract(player, req)) {
+            if (claimedBossUids.contains(player.getUid())) finishIfAbandoned(player, resolveChestMeta());
+            return false;
+        }
         if (Grasscutter.getConfig().server.game.enableScriptInBigWorld) {
             SceneGadget meta = resolveChestMeta();
             DropSystem dropSystem = player.getServer().getDropSystem();
@@ -215,7 +288,7 @@ public class GadgetChest extends GadgetContent {
         if (!success) {
             return false;
         }
-        if (getGadget().getMetaGadget() != null && getGadget().getMetaGadget().boss_chest != null) {
+        if (handler instanceof BossChestInteractHandler) {
             finishBossClaim(player, getGadget().getMetaGadget());
         } else {
             finishOpen(player, null);
@@ -232,7 +305,10 @@ public class GadgetChest extends GadgetContent {
 
     private boolean canClaimBossFlower(Player player) {
         List<Integer> uids = bossUids;
-        return getGadget().getState() != CHEST_OPENED_STATE
+        return (retirementDeadline.get() == 0 || monotonicNanos() < retirementDeadline.get())
+                && getGadget().getScene().getEntityById(getGadget().getId()) == getGadget()
+                && getGadget().getScene().getPlayers().contains(player)
+                && getGadget().getState() != CHEST_OPENED_STATE
                 && uids != null
                 && uids.contains(player.getUid())
                 && !claimedBossUids.contains(player.getUid());
@@ -272,7 +348,7 @@ public class GadgetChest extends GadgetContent {
         player.sendPacket(
                 new PacketSceneEntityAppearNotify(
                         getGadget(), VisionTypeOuterClass.VisionType.VisionType_VISION_REFRESH, 0));
-        creditChestOpen(player);
+        creditClaim(player);
     }
 
     /** Opens the flower for good once every eligible player still in the scene has claimed. */
@@ -342,11 +418,11 @@ public class GadgetChest extends GadgetContent {
         } catch (Throwable ignored) {
         }
         if (credit) {
-            creditChestOpen(player);
+            creditClaim(player);
         }
     }
 
-    private void creditChestOpen(Player player) {
+    protected void creditClaim(Player player) {
         try {
             int gadgetId = getGadget().getGadgetId();
             player.getPlayerProgress().addHandbookChestOpen(1);
@@ -399,6 +475,7 @@ public class GadgetChest extends GadgetContent {
 
     @Override
     public void onBuildProto(SceneGadgetInfoOuterClass.SceneGadgetInfo.Builder builder) {
+        onCreate();
         SceneGadget sceneGadget = resolveChestMeta();
         if (sceneGadget == null) {
             return;

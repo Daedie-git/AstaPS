@@ -41,7 +41,7 @@ public final class DungeonManager {
         return rewardedPlayers.contains(uid);
     }
     private final Set<Integer> activeDungeonWayPoints = new HashSet<>();
-    private boolean ended = false;
+    private volatile boolean ended = false;
     private int newestWayPoint = 0;
     @Getter private int startSceneTime = 0;
     @Setter @Getter private boolean towerDungeon = false;

@@ -1,0 +1,1528 @@
+{
+  "days": 18,
+  "excludedCards": [
+    1005,
+    1007,
+    1062
+  ],
+  "fiveStarCharacters": 68,
+  "fourStarCharacters": 51,
+  "eventFiveStarBounds": [
+    1,
+    3
+  ],
+  "nonArchonEventFiveStarBounds": [
+    1,
+    2
+  ],
+  "archonBounds": [
+    3,
+    3
+  ],
+  "archonEveryDay": true,
+  "archonCards": [
+    1022,
+    1030,
+    1052,
+    1073,
+    1089,
+    4106
+  ],
+  "eventFourStarBounds": [
+    1,
+    12
+  ],
+  "eventAppearanceUnit": "one character tab, including repeated four-star lineups",
+  "characters": [
+    {
+      "name": "Kamisato Ayaka",
+      "card": 1002,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        7
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Jean",
+      "card": 1003,
+      "rarity": 5,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Lisa",
+      "card": 1006,
+      "rarity": 4,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Barbara",
+      "card": 1014,
+      "rarity": 4,
+      "eventAppearances": 7,
+      "eventDays": [
+        3,
+        6,
+        9,
+        13,
+        15
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Kaeya",
+      "card": 1015,
+      "rarity": 4,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Diluc",
+      "card": 1016,
+      "rarity": 5,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Razor",
+      "card": 1020,
+      "rarity": 4,
+      "eventAppearances": 8,
+      "eventDays": [
+        5,
+        6,
+        8,
+        11,
+        13,
+        14
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Amber",
+      "card": 1021,
+      "rarity": 4,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Venti",
+      "card": 1022,
+      "rarity": 5,
+      "eventAppearances": 3,
+      "eventDays": [
+        1,
+        7,
+        13
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Xiangling",
+      "card": 1023,
+      "rarity": 4,
+      "eventAppearances": 11,
+      "eventDays": [
+        2,
+        4,
+        5,
+        6,
+        8,
+        14,
+        15
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Beidou",
+      "card": 1024,
+      "rarity": 4,
+      "eventAppearances": 12,
+      "eventDays": [
+        1,
+        2,
+        6,
+        7,
+        8,
+        9,
+        11,
+        13,
+        15,
+        17
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Xingqiu",
+      "card": 1025,
+      "rarity": 4,
+      "eventAppearances": 8,
+      "eventDays": [
+        3,
+        4,
+        6,
+        7,
+        9,
+        10,
+        16
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Xiao",
+      "card": 1026,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        6
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Ningguang",
+      "card": 1027,
+      "rarity": 4,
+      "eventAppearances": 3,
+      "eventDays": [
+        3,
+        12,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Klee",
+      "card": 1029,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        13
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Zhongli",
+      "card": 1030,
+      "rarity": 5,
+      "eventAppearances": 3,
+      "eventDays": [
+        6,
+        12,
+        18
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Fischl",
+      "card": 1031,
+      "rarity": 4,
+      "eventAppearances": 6,
+      "eventDays": [
+        6,
+        12,
+        14,
+        15,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Bennett",
+      "card": 1032,
+      "rarity": 4,
+      "eventAppearances": 11,
+      "eventDays": [
+        1,
+        2,
+        3,
+        5,
+        8,
+        14,
+        15
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Tartaglia",
+      "card": 1033,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        13
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Noelle",
+      "card": 1034,
+      "rarity": 4,
+      "eventAppearances": 4,
+      "eventDays": [
+        1,
+        8,
+        12,
+        13
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Qiqi",
+      "card": 1035,
+      "rarity": 5,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Chongyun",
+      "card": 1036,
+      "rarity": 4,
+      "eventAppearances": 7,
+      "eventDays": [
+        4,
+        5,
+        10,
+        16,
+        17,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Ganyu",
+      "card": 1037,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        7
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Albedo",
+      "card": 1038,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        6
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Diona",
+      "card": 1039,
+      "rarity": 4,
+      "eventAppearances": 7,
+      "eventDays": [
+        2,
+        7,
+        8,
+        15,
+        16
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Mona",
+      "card": 1041,
+      "rarity": 5,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Keqing",
+      "card": 1042,
+      "rarity": 5,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Sucrose",
+      "card": 1043,
+      "rarity": 4,
+      "eventAppearances": 11,
+      "eventDays": [
+        3,
+        7,
+        13,
+        14,
+        15,
+        16,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Xinyan",
+      "card": 1044,
+      "rarity": 4,
+      "eventAppearances": 7,
+      "eventDays": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        17
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Rosaria",
+      "card": 1045,
+      "rarity": 4,
+      "eventAppearances": 3,
+      "eventDays": [
+        9,
+        10,
+        17
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Hu Tao",
+      "card": 1046,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        6
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Kaedehara Kazuha",
+      "card": 1047,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        1,
+        5
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Yanfei",
+      "card": 1048,
+      "rarity": 4,
+      "eventAppearances": 8,
+      "eventDays": [
+        1,
+        2,
+        5,
+        6,
+        7,
+        8,
+        13
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Yoimiya",
+      "card": 1049,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        10,
+        18
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Thoma",
+      "card": 1050,
+      "rarity": 4,
+      "eventAppearances": 5,
+      "eventDays": [
+        2,
+        5,
+        8,
+        11,
+        13
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Eula",
+      "card": 1051,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        5,
+        11
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Raiden Shogun",
+      "card": 1052,
+      "rarity": 5,
+      "eventAppearances": 3,
+      "eventDays": [
+        5,
+        11,
+        17
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Sayu",
+      "card": 1053,
+      "rarity": 4,
+      "eventAppearances": 4,
+      "eventDays": [
+        4,
+        10,
+        13,
+        17
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Sangonomiya Kokomi",
+      "card": 1054,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        3,
+        7
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Gorou",
+      "card": 1055,
+      "rarity": 4,
+      "eventAppearances": 6,
+      "eventDays": [
+        4,
+        12,
+        16,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Kujou Sara",
+      "card": 1056,
+      "rarity": 4,
+      "eventAppearances": 4,
+      "eventDays": [
+        2,
+        8,
+        10,
+        17
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Arataki Itto",
+      "card": 1057,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        12
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Yae Miko",
+      "card": 1058,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        5,
+        17
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Shikanoin Heizou",
+      "card": 1059,
+      "rarity": 4,
+      "eventAppearances": 3,
+      "eventDays": [
+        6,
+        12,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Yelan",
+      "card": 1060,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        5,
+        6
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Kirara",
+      "card": 1061,
+      "rarity": 4,
+      "eventAppearances": 7,
+      "eventDays": [
+        3,
+        5,
+        10,
+        12,
+        17,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Shenhe",
+      "card": 1063,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        7
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Yun Jin",
+      "card": 1064,
+      "rarity": 4,
+      "eventAppearances": 9,
+      "eventDays": [
+        3,
+        5,
+        6,
+        10,
+        12,
+        17,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Kuki Shinobu",
+      "card": 1065,
+      "rarity": 4,
+      "eventAppearances": 5,
+      "eventDays": [
+        3,
+        6,
+        9,
+        15
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Kamisato Ayato",
+      "card": 1066,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        10,
+        17
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Collei",
+      "card": 1067,
+      "rarity": 4,
+      "eventAppearances": 5,
+      "eventDays": [
+        3,
+        4,
+        9,
+        10,
+        16
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Dori",
+      "card": 1068,
+      "rarity": 4,
+      "eventAppearances": 5,
+      "eventDays": [
+        3,
+        7,
+        12
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Tighnari",
+      "card": 1069,
+      "rarity": 5,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Nilou",
+      "card": 1070,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        3
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Cyno",
+      "card": 1071,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        3
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Candace",
+      "card": 1072,
+      "rarity": 4,
+      "eventAppearances": 2,
+      "eventDays": [
+        10
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Nahida",
+      "card": 1073,
+      "rarity": 5,
+      "eventAppearances": 3,
+      "eventDays": [
+        3,
+        9,
+        15
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Layla",
+      "card": 1074,
+      "rarity": 4,
+      "eventAppearances": 3,
+      "eventDays": [
+        9,
+        11,
+        17
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Wanderer",
+      "card": 1075,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        11
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Faruzan",
+      "card": 1076,
+      "rarity": 4,
+      "eventAppearances": 10,
+      "eventDays": [
+        1,
+        2,
+        7,
+        9,
+        11,
+        13,
+        16,
+        17
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Yaoyao",
+      "card": 1077,
+      "rarity": 4,
+      "eventAppearances": 10,
+      "eventDays": [
+        3,
+        4,
+        6,
+        9,
+        10,
+        12,
+        16,
+        17,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Alhaitham",
+      "card": 1078,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        3,
+        17
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Dehya",
+      "card": 1079,
+      "rarity": 5,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Mika",
+      "card": 1080,
+      "rarity": 4,
+      "eventAppearances": 10,
+      "eventDays": [
+        2,
+        4,
+        5,
+        7,
+        8,
+        11,
+        13,
+        14
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Kaveh",
+      "card": 1081,
+      "rarity": 4,
+      "eventAppearances": 7,
+      "eventDays": [
+        3,
+        9,
+        12,
+        15,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Baizhu",
+      "card": 1082,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        9,
+        17
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Lynette",
+      "card": 1083,
+      "rarity": 4,
+      "eventAppearances": 5,
+      "eventDays": [
+        2,
+        8,
+        13,
+        16,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Lyney",
+      "card": 1084,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        13
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Freminet",
+      "card": 1085,
+      "rarity": 4,
+      "eventAppearances": 4,
+      "eventDays": [
+        2,
+        8,
+        13,
+        15
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Wriothesley",
+      "card": 1086,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        4
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Neuvillette",
+      "card": 1087,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        4,
+        18
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Charlotte",
+      "card": 1088,
+      "rarity": 4,
+      "eventAppearances": 3,
+      "eventDays": [
+        4,
+        10
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Furina",
+      "card": 1089,
+      "rarity": 5,
+      "eventAppearances": 3,
+      "eventDays": [
+        4,
+        10,
+        16
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Chevreuse",
+      "card": 1090,
+      "rarity": 4,
+      "eventAppearances": 4,
+      "eventDays": [
+        4,
+        9,
+        11
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Navia",
+      "card": 1091,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        12,
+        18
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Gaming",
+      "card": 1092,
+      "rarity": 4,
+      "eventAppearances": 3,
+      "eventDays": [
+        4,
+        11
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Xianyun",
+      "card": 1093,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        4,
+        11
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Chiori",
+      "card": 1094,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        12
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Sigewinne",
+      "card": 1095,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        4
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Arlecchino",
+      "card": 1096,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        13,
+        18
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Sethos",
+      "card": 1097,
+      "rarity": 4,
+      "eventAppearances": 6,
+      "eventDays": [
+        5,
+        6,
+        11,
+        15,
+        17
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Clorinde",
+      "card": 1098,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        9
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Emilie",
+      "card": 1099,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        8
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Kachina",
+      "card": 4100,
+      "rarity": 4,
+      "eventAppearances": 4,
+      "eventDays": [
+        1,
+        2,
+        5
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Kinich",
+      "card": 4101,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        2,
+        8
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Mualani",
+      "card": 4102,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        1,
+        2
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Xilonen",
+      "card": 4103,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        1,
+        2
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Chasca",
+      "card": 4104,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        1,
+        8
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Ororon",
+      "card": 4105,
+      "rarity": 4,
+      "eventAppearances": 5,
+      "eventDays": [
+        5,
+        11,
+        13,
+        15,
+        17
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Mavuika",
+      "card": 4106,
+      "rarity": 5,
+      "eventAppearances": 3,
+      "eventDays": [
+        2,
+        8,
+        14
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Citlali",
+      "card": 4107,
+      "rarity": 5,
+      "eventAppearances": 2,
+      "eventDays": [
+        2,
+        8
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Lan Yan",
+      "card": 4108,
+      "rarity": 4,
+      "eventAppearances": 1,
+      "eventDays": [
+        9
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Yumemizuki Mizuki",
+      "card": 4109,
+      "rarity": 5,
+      "eventAppearances": 0,
+      "eventDays": [],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Iansan",
+      "card": 4110,
+      "rarity": 4,
+      "eventAppearances": 3,
+      "eventDays": [
+        4,
+        11
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Varesa",
+      "card": 4111,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        11
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Escoffier",
+      "card": 4112,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        10
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Ifa",
+      "card": 4113,
+      "rarity": 4,
+      "eventAppearances": 1,
+      "eventDays": [
+        15
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Skirk",
+      "card": 4114,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        10
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Dahlia",
+      "card": 4115,
+      "rarity": 4,
+      "eventAppearances": 2,
+      "eventDays": [
+        10
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Ineffa",
+      "card": 4116,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        15
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Lauma",
+      "card": 4119,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        9
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Flins",
+      "card": 4120,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        15
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Aino",
+      "card": 4121,
+      "rarity": 4,
+      "eventAppearances": 6,
+      "eventDays": [
+        1,
+        4,
+        8,
+        12,
+        16,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Nefer",
+      "card": 4122,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        9
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Durin",
+      "card": 4123,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        14
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Jahoda",
+      "card": 4124,
+      "rarity": 4,
+      "eventAppearances": 4,
+      "eventDays": [
+        5,
+        11,
+        15,
+        17
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Columbina",
+      "card": 4125,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        15
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Zibai",
+      "card": 4126,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        16
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Illuga",
+      "card": 4127,
+      "rarity": 4,
+      "eventAppearances": 6,
+      "eventDays": [
+        1,
+        4,
+        8,
+        12,
+        16,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Varka",
+      "card": 4128,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        14
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Lohen",
+      "card": 4129,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        14
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Linnea",
+      "card": 4130,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        12
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Nicole",
+      "card": 4131,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        14
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Prune",
+      "card": 4132,
+      "rarity": 4,
+      "eventAppearances": 2,
+      "eventDays": [
+        14
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Sandrone",
+      "card": 4133,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        15
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Vodyanitsa",
+      "card": 4140,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        16
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Vesna",
+      "card": 4143,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        16
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    },
+    {
+      "name": "Alyosha",
+      "card": 4148,
+      "rarity": 4,
+      "eventAppearances": 3,
+      "eventDays": [
+        13,
+        16,
+        18
+      ],
+      "standardAvailable": true,
+      "chronicledDays": []
+    },
+    {
+      "name": "Odette",
+      "card": 4150,
+      "rarity": 5,
+      "eventAppearances": 1,
+      "eventDays": [
+        16
+      ],
+      "standardAvailable": false,
+      "chronicledDays": []
+    }
+  ]
+}

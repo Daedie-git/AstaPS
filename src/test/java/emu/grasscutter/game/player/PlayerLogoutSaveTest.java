@@ -10,7 +10,7 @@ class PlayerLogoutSaveTest {
     void logoutStillSavesWhenCleanupAndPlayerSaveFail() {
         var player = new FailingPlayer();
 
-        player.onLogout();
+        assertThrows(IllegalStateException.class, player::onLogout);
 
         assertEquals(1, player.saves);
         assertEquals(1, player.friends.saves);

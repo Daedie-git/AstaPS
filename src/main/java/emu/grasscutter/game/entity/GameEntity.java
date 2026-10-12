@@ -44,6 +44,13 @@ import static emu.grasscutter.GameConstants.ENTITY_ID_BIT_SHIFT;
 
 public abstract class GameEntity {
     @Getter private final Scene scene;
+
+    /** Changes when runtime state is retired, including off-field/unregistered entities. */
+    @Getter private volatile Object abilityWorkEpoch;
+
+    public void invalidateQueuedAbilityWork() {
+        this.abilityWorkEpoch = new Object();
+    }
     private boolean restrictedFromHealing = false;
     private boolean convertToHpDebt = false;
     @Getter @Setter public int id;

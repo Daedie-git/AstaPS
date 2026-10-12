@@ -1,6 +1,7 @@
 package emu.grasscutter.game.entity;
 
 import emu.grasscutter.game.ability.ArlecchinoBoLUtil;
+import emu.grasscutter.game.ability.AmberSupport;
 import emu.grasscutter.game.ability.ArlecchinoBurstBoL;
 import emu.grasscutter.game.ability.ClorindeBoLUtil;
 import emu.grasscutter.game.ability.EscoffierHealUtil;
@@ -22,7 +23,9 @@ public final class EntityRuntimeStateCleanup {
         if (entity == null) {
             return;
         }
+        entity.invalidateQueuedAbilityWork();
         int entityId = entity.getId();
+        AmberSupport.clearEntityState(entity);
         ArlecchinoBoLUtil.clearEntityState(entityId);
         ArlecchinoBurstBoL.clearEntityState(entityId);
         ClorindeBoLUtil.clearEntityState(entityId);

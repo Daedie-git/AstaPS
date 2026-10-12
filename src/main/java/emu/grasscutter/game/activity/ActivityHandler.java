@@ -104,6 +104,7 @@ public abstract class ActivityHandler {
                 PlayerActivityData.of()
                         .activityId(activityConfigItem.getActivityId())
                         .uid(player.getUid())
+                        .player(player)
                         .watcherInfoMap(initWatchersDataForPlayer())
                         .build();
 

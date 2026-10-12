@@ -24,6 +24,7 @@ public final class SceneGroupInstance {
     // combat kills retain their pre-existing oneoff/persistent spawn policy.
     private Set<Integer> scriptDestroyedGadgets = new HashSet<>();
     private boolean isCached;
+    private transient java.util.function.Consumer<SceneGroupInstance> persistence;
 
     @Getter private Map<Integer, Integer> cachedGadgetStates;
     @Getter private Map<String, Integer> cachedVariables;
@@ -31,6 +32,13 @@ public final class SceneGroupInstance {
     @Getter @Setter private int lastTimeRefreshed;
 
     public SceneGroupInstance(SceneGroup group, Player owner) {
+        this(group, owner, DatabaseHelper::saveGroupInstance);
+    }
+
+    SceneGroupInstance(SceneGroup group, Player owner,
+            java.util.function.Consumer<SceneGroupInstance> persistence) {
+        emu.grasscutter.game.player.SessionWriteFence.bind(this, owner);
+        this.persistence = Objects.requireNonNull(persistence);
         this.luaGroup = group;
         this.groupId = group.id;
         this.targetSuiteId = 0;
@@ -102,6 +110,7 @@ public final class SceneGroupInstance {
     }
 
     public void save() {
-        DatabaseHelper.saveGroupInstance(this);
+        if (persistence == null) DatabaseHelper.saveGroupInstance(this);
+        else persistence.accept(this);
     }
 }

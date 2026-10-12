@@ -185,6 +185,163 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
         return addItem(itemParam.getId(), itemParam.getCount(), reason);
     }
 
+    public synchronized boolean canAddItems(Collection<GameItem> items) {
+        return canAddItemsAfterPayment(items, Map.of());
+    }
+
+    private boolean canAddItemsAfterPayment(Collection<GameItem> items, Map<Integer, Integer> costs) {
+        if (items == null) return false;
+        Map<ItemType, Integer> slots = new HashMap<>();
+        Map<Integer, Long> stacks = new HashMap<>();
+        for (var cost : costs.entrySet()) {
+            if (currencyProperty(cost.getKey()) != null || cost.getValue() == 0) continue;
+            var input = getInventoryTab(ItemType.ITEM_MATERIAL).getItemById(cost.getKey());
+            if (input != null && input.getCount() == cost.getValue())
+                slots.merge(ItemType.ITEM_MATERIAL, -1, Integer::sum);
+        }
+        for (var item : items) {
+            if (item == null || item.getCount() <= 0 || item.getItemData() == null) return false;
+            var data = item.getItemData();
+            var type = data.getItemType();
+            if (type == null || data.isUseOnGain()) return false;
+            if (data.getMaterialType() == MaterialType.MATERIAL_AVATAR
+                    || data.getMaterialType() == MaterialType.MATERIAL_FLYCLOAK
+                    || data.getMaterialType() == MaterialType.MATERIAL_COSTUME
+                    || data.getMaterialType() == MaterialType.MATERIAL_NAMECARD) return false;
+            if (type == ItemType.ITEM_VIRTUAL) {
+                if (currencyProperty(item.getItemId()) == null) return false;
+                long total = stacks.getOrDefault(item.getItemId(),
+                        (long) getVirtualItemCount(item.getItemId()) - costs.getOrDefault(item.getItemId(), 0)) + item.getCount();
+                if (total < 0 || total > Integer.MAX_VALUE) return false;
+                stacks.put(item.getItemId(), total);
+                continue;
+            }
+            var tab = getInventoryTab(type);
+            if (tab == null) return false;
+            if (type == ItemType.ITEM_WEAPON || type == ItemType.ITEM_RELIQUARY) {
+                long total = (long) slots.getOrDefault(type, 0) + item.getCount();
+                if (total > tab.getMaxCapacity()) return false;
+                slots.put(type, (int) total);
+            } else if (type == ItemType.ITEM_TPS_WEAPON) {
+                if (tab.getItemById(item.getItemId()) == null && !stacks.containsKey(item.getItemId()))
+                    slots.merge(type, 1, Integer::sum);
+                stacks.put(item.getItemId(), 1L);
+            } else {
+                var existing = tab.getItemById(item.getItemId());
+                long remaining = existing == null ? 0L : (long) existing.getCount() - costs.getOrDefault(item.getItemId(), 0);
+                if (!stacks.containsKey(item.getItemId()) && remaining == 0) slots.merge(type, 1, Integer::sum);
+                long total = stacks.getOrDefault(item.getItemId(), remaining) + item.getCount();
+                if (total > data.getStackLimit() || total > Integer.MAX_VALUE) return false;
+                stacks.put(item.getItemId(), total);
+            }
+        }
+        for (var entry : slots.entrySet()) {
+            var tab = getInventoryTab(entry.getKey());
+            if ((long) tab.getSize() + entry.getValue() > tab.getMaxCapacity()) return false;
+        }
+        return true;
+    }
+
+    public synchronized boolean tryAddItems(Collection<GameItem> items, ActionReason reason) {
+        if (!canAddItems(items)) return false;
+        Map<Integer, Integer> currencies = new LinkedHashMap<>();
+        for (var item : items) {
+            if (currencyProperty(item.getItemId()) != null)
+                currencies.merge(item.getItemId(), item.getCount(), Math::addExact);
+        }
+        var changes = prepareCurrencyChanges(currencies, false);
+        if (changes == null) return false;
+        if (!canAddItems(items)) throw new IllegalStateException("Inventory changed during grant preflight");
+        try (var conversion = currencies.containsKey(201) ? PrimogemAutoConvert.defer(getPlayer()) : null) {
+            applyCurrencyChanges(changes);
+            deliverOrdinaryItems(items, reason);
+            if (conversion != null) conversion.complete();
+        }
+        return true;
+    }
+
+    private void deliverOrdinaryItems(Collection<GameItem> items, ActionReason reason) {
+        List<GameItem> delivered = new ArrayList<>();
+        for (var item : items) {
+            if (item.getItemType() == ItemType.ITEM_VIRTUAL) {
+                delivered.add(item);
+            } else {
+                var copies = item.getItemType() == ItemType.ITEM_WEAPON || item.getItemType() == ItemType.ITEM_RELIQUARY
+                        ? InventoryGrantBuilder.create(item.getItemData(), item.getCount(), item.getLevel()) : List.of(item);
+                for (var copy : copies) {
+                    var inserted = putItem(copy);
+                    if (!inserted.accepted()) throw new IllegalStateException("Validated inventory grant rejected");
+                    delivered.add(inserted.changedItem() == null ? copy : inserted.changedItem());
+                }
+            }
+        }
+        for (var result : delivered) {
+            triggerAddItemEvents(result);
+            getPlayer().sendPacket(new PacketStoreItemChangeNotify(result));
+        }
+        if (reason != null) getPlayer().sendPacket(new PacketItemAddHintNotify(items, reason));
+        for (var item : items) {
+            try { new PlayerObtainItemEvent(getPlayer(), item).call(); }
+            catch (RuntimeException failure) { Grasscutter.getLogger().error("Item callback failed after delivery", failure); }
+        }
+    }
+
+    private List<GameItem> buildParamGrants(Collection<ItemParamData> params) {
+        var items = new ArrayList<GameItem>();
+        for (var param : params) {
+            items.addAll(InventoryGrantBuilder.create(GameData.getItemDataMap().get(param.getId()), param.getCount(), 1));
+        }
+        return items;
+    }
+
+    public synchronized boolean canAddItemParamDatas(Collection<ItemParamData> params) {
+        try { return canAddItems(buildParamGrants(params)); }
+        catch (IllegalArgumentException invalid) { return false; }
+    }
+
+    public synchronized boolean tryAddItemParamDatas(Collection<ItemParamData> params, ActionReason reason) {
+        try { return tryAddItems(buildParamGrants(params), reason); }
+        catch (IllegalArgumentException invalid) { return false; }
+    }
+
+    public synchronized boolean canPayAndAddItems(Iterable<ItemParamData> costs, int quantity,
+            Collection<GameItem> outputs) {
+        var totals = collectPayment(costs, quantity);
+        return totals != null && canExchange(totals, outputs);
+    }
+
+    private boolean canExchange(Map<Integer, Integer> costs, Collection<GameItem> outputs) {
+        for (var cost : costs.entrySet()) {
+            if (cost.getValue() > 0 && (cost.getKey() == 106 || cost.getKey() == 107)) return false;
+            if (!canPayItem(cost.getKey(), cost.getValue())) return false;
+        }
+        return canAddItemsAfterPayment(outputs, costs);
+    }
+
+    public synchronized boolean tryPayAndAddItems(Iterable<ItemParamData> costs, int quantity,
+            Collection<GameItem> outputs, ActionReason reason) {
+        var totals = collectPayment(costs, quantity);
+        if (totals == null || !canExchange(totals, outputs)) return false;
+        Map<Integer, Integer> netCurrencies = new LinkedHashMap<>();
+        for (var cost : totals.entrySet()) {
+            if (currencyProperty(cost.getKey()) != null) netCurrencies.put(cost.getKey(), -cost.getValue());
+        }
+        for (var output : outputs) {
+            if (currencyProperty(output.getItemId()) != null)
+                netCurrencies.merge(output.getItemId(), output.getCount(), Math::addExact);
+        }
+        var changes = prepareCurrencyChanges(netCurrencies, false);
+        if (changes == null) return false;
+        if (!canExchange(totals, outputs)) throw new IllegalStateException("Inventory changed during exchange preflight");
+        try (var conversion = netCurrencies.containsKey(201) ? PrimogemAutoConvert.defer(getPlayer()) : null) {
+            applyCurrencyChanges(changes);
+            debitStoredItems(totals);
+            deliverOrdinaryItems(outputs, reason);
+            if (conversion != null) conversion.complete();
+        }
+        return true;
+    }
+
     /** Default to complete delivery. Callers must explicitly request partial delivery. */
     public InventoryAddResult addItems(Collection<GameItem> items) {
         return addItems(items, null, InventoryAddPolicy.ALL_OR_NOTHING);
@@ -227,7 +384,7 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
      * Common insertion and notification path. Reports actual amounts and refusal reasons.
      * ALL_OR_NOTHING runs a full preflight before calling this method.
      */
-    private synchronized InventoryAddResult addItemsInternal(
+    private InventoryAddResult addItemsInternal(
             Collection<GameItem> items,
             ActionReason reason,
             boolean notifyAvatarCard,
@@ -379,6 +536,10 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
     }
 
     private void triggerAddItemEvents(GameItem result) {
+        if (TpsWeaponSystem.isTpsWeapon(result)
+                || result.getItemData().getMaterialType() == MaterialType.MATERIAL_TPS_ACCESSORY) {
+            TpsWeaponSystem.refreshAccessoryUnlocks(getPlayer());
+        }
         try {
             getPlayer()
                     .getBattlePassManager()
@@ -508,7 +669,9 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
                         return InsertResult.refused(InventoryAddResult.Status.STACK_LIMIT);
                     }
                 }
-                addVirtualItem(item.getItemId(), item.getCount());
+                if (!addVirtualItem(item.getItemId(), item.getCount())) {
+                    return InsertResult.refused(InventoryAddResult.Status.INVALID_ITEM);
+                }
                 return InsertResult.stored(item);
             case ITEM_NONE:
             case ITEM_DISPLAY:
@@ -575,7 +738,7 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
         }
     }
 
-    private void addVirtualItem(int itemId, int count) {
+    private boolean addVirtualItem(int itemId, int count) {
         switch (itemId) {
             case 101 -> // Character exp
             this.player.getTeamManager().getActiveTeam().stream()
@@ -604,38 +767,69 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
             this.player.addLegendaryKey(count);
             case 121 -> // Home exp
             this.player.getHome().addExp(this.player, count);
-            case 201 -> // Primogem
-            this.player.setPrimogems(this.player.getPrimogems() + count);
-            case 202 -> // Mora
-            this.player.setMora(this.player.getMora() + count);
-            case 203 -> // Genesis Crystals
-            this.player.setCrystals(this.player.getCrystals() + count);
-            case 204 -> // Home Coin
-            this.player.setHomeCoin(this.player.getHomeCoin() + count);
+            case 201 -> { return this.player.setPrimogems(this.player.getPrimogems() + count); }
+            case 202 -> { return this.player.setMora(this.player.getMora() + count); }
+            case 203 -> { return this.player.setCrystals(this.player.getCrystals() + count); }
+            case 204 -> { return this.player.setHomeCoin(this.player.getHomeCoin() + count); }
         }
+        return true;
     }
 
-    private GameItem payVirtualItem(int itemId, int count) {
+    private boolean payVirtualItem(int itemId, int count) {
         switch (itemId) {
-            case 201 -> // Primogem
-            player.setPrimogems(player.getPrimogems() - count);
-            case 202 -> // Mora
-            player.setMora(player.getMora() - count);
-            case 203 -> // Genesis Crystals
-            player.setCrystals(player.getCrystals() - count);
+            case 201 -> { return player.setPrimogems(player.getPrimogems() - count); }
+            case 202 -> { return player.setMora(player.getMora() - count); }
+            case 203 -> { return player.setCrystals(player.getCrystals() - count); }
             case 106 -> // Resin
             player.getResinManager().useResin(count);
             case 107 -> // LegendaryKey
             player.useLegendaryKey(count);
-            case 204 -> // Home Coin
-            player.setHomeCoin(player.getHomeCoin() - count);
+            case 204 -> { return player.setHomeCoin(player.getHomeCoin() - count); }
             default -> {
                 var gameItem = getInventoryTab(ItemType.ITEM_MATERIAL).getItemById(itemId);
-                removeItem(gameItem, count);
-                return gameItem;
+                return removeItem(gameItem, count);
             }
         }
-        return null;
+        return true;
+    }
+
+    private static PlayerProperty currencyProperty(int itemId) {
+        return switch (itemId) {
+            case 201 -> PlayerProperty.PROP_PLAYER_HCOIN;
+            case 202 -> PlayerProperty.PROP_PLAYER_SCOIN;
+            case 203 -> PlayerProperty.PROP_PLAYER_MCOIN;
+            case 204 -> PlayerProperty.PROP_PLAYER_HOME_COIN;
+            default -> null;
+        };
+    }
+
+    private List<Player.PreparedPropertyChange> prepareCurrencyChanges(Map<Integer, Integer> amounts, boolean debit) {
+        List<Player.PreparedPropertyChange> changes = new ArrayList<>();
+        for (var entry : amounts.entrySet()) {
+            var prop = currencyProperty(entry.getKey());
+            if (prop == null || entry.getValue() == 0) continue;
+            int value = debit ? Math.subtractExact(getVirtualItemCount(entry.getKey()), entry.getValue())
+                    : Math.addExact(getVirtualItemCount(entry.getKey()), entry.getValue());
+            var change = player.preparePropertyChange(prop, value);
+            // An altered amount/target does not satisfy this exact inventory operation.
+            if (change == null || !change.matches(prop, value)) return null;
+            changes.add(change);
+        }
+        for (var change : changes) change.validate();
+        return changes;
+    }
+
+    private void applyCurrencyChanges(List<Player.PreparedPropertyChange> changes) {
+        for (var change : changes) change.validate();
+        for (var change : changes) change.apply(true);
+    }
+
+    private boolean canPayItem(int itemId, int count) {
+        if (count < 0 || getVirtualItemCount(itemId) < count) return false;
+        if (count == 0 || itemId == 201 || itemId == 202 || itemId == 203
+                || itemId == 204 || itemId == 106 || itemId == 107) return true;
+        var item = getInventoryTab(ItemType.ITEM_MATERIAL).getItemById(itemId);
+        return item != null && getItemByGuid(item.getGuid()) == item;
     }
 
     private int getVirtualItemCount(int itemId) {
@@ -664,9 +858,14 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
     public synchronized boolean payItem(int id, int count) {
         if (id <= 0 || count < 0) return false;
         if (count == 0) return true;
-        if (this.getVirtualItemCount(id) < count) return false;
-        this.payVirtualItem(id, count);
-        return true;
+        if (!canPayItem(id, count)) return false;
+        if (currencyProperty(id) != null) {
+            var changes = prepareCurrencyChanges(Map.of(id, count), true);
+            if (changes == null || !canPayItem(id, count)) return false;
+            applyCurrencyChanges(changes);
+            return true;
+        }
+        return payVirtualItem(id, count);
     }
 
     public boolean payItem(ItemParamData costItem) {
@@ -702,7 +901,7 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
 
     private boolean canPayQuote(Map<Integer, Integer> totals) {
         for (var cost : totals.entrySet()) {
-            if (getVirtualItemCount(cost.getKey()) < cost.getValue()) {
+            if (!canPayItem(cost.getKey(), cost.getValue())) {
                 return false;
             }
         }
@@ -719,10 +918,36 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
         if (totals == null || !canPayQuote(totals)) {
             return false;
         }
-        for (var cost : totals.entrySet()) {
-            payVirtualItem(cost.getKey(), cost.getValue());
-        }
+        var changes = prepareCurrencyChanges(totals, true);
+        if (changes == null || !canPayQuote(totals)) return false;
+        applyCurrencyChanges(changes);
+        debitStoredItems(totals);
         return true;
+    }
+
+    private Map<Integer, Integer> collectPayment(Iterable<ItemParamData> costItems, int quantity) {
+        if (quantity <= 0 || costItems == null) return null;
+        Map<Integer, Integer> totals = new LinkedHashMap<>();
+        try {
+            for (ItemParamData cost : costItems) {
+                if (cost == null || cost.getCount() < 0) return null;
+                if (cost.getId() == 0 && cost.getCount() == 0) continue;
+                if (cost.getId() <= 0) return null;
+                int amount = Math.multiplyExact(cost.getCount(), quantity);
+                totals.merge(cost.getId(), amount, Math::addExact);
+            }
+        } catch (ArithmeticException overflow) {
+            return null;
+        }
+        return totals;
+    }
+
+    private void debitStoredItems(Map<Integer, Integer> totals) {
+        for (var cost : totals.entrySet()) {
+            if (currencyProperty(cost.getKey()) == null && cost.getValue() > 0
+                    && !payVirtualItem(cost.getKey(), cost.getValue()))
+                throw new IllegalStateException("Validated inventory debit rejected");
+        }
     }
 
     public void removeItems(List<GameItem> items) {
@@ -792,7 +1017,8 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
 
     public synchronized boolean removeItem(GameItem item, int count) {
         // Sanity check
-        if (count <= 0 || item == null) {
+        if (count <= 0 || item == null || count > item.getCount()
+                || getItemByGuid(item.getGuid()) != item) {
             return false;
         }
 
@@ -836,6 +1062,7 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
         if (tab != null) {
             tab.onRemoveItem(item);
         }
+        TpsWeaponSystem.onWeaponRemoved(getPlayer(), item);
     }
 
     public boolean equipItem(long avatarGuid, long equipGuid) {
@@ -910,6 +1137,7 @@ public class Inventory extends BasePlayerManager implements Iterable<GameItem> {
 
         // Load avatars after inventory.
         this.getPlayer().getAvatars().postLoad();
+        TpsWeaponSystem.onInventoryLoaded(getPlayer());
         this.setLoaded(true);
     }
 

@@ -40,7 +40,7 @@ public class ConfigContainer {
      * Version 16 - 'server.http.webConsole' was added for the password-protected web console.
      * Version 17 - 'gameOptions.unlockAllOpenStatesOnLogin' controls optional login feature unlock.
      */
-    private static int version() {
+    public static int currentVersion() {
         return 17;
     }
 
@@ -65,41 +65,22 @@ public class ConfigContainer {
      * Attempts to update the server's existing configuration.
      */
     public static void updateConfig() {
-        try { // Check if the server is using a legacy config.
-            var configObject = JsonUtils.loadToClass(Grasscutter.configFile.toPath(), JsonObject.class);
-            if (!configObject.has("version")) {
-                Grasscutter.getLogger().info("Updating legacy config...");
-                Grasscutter.saveConfig(null);
+        // loadConfig performs migration before publishing the startup configuration.
+        // Retained for startup callers; never replace objects held by static consumers.
+        try {
+            var json = JsonUtils.loadToClass(Grasscutter.configFile.toPath(), JsonObject.class);
+            if (!json.has("version") || config.version < currentVersion()) {
+                migrate(config);
+                Grasscutter.saveConfig(config);
             }
-        } catch (Exception ignored) { }
-
-        var existing = config.version;
-        var latest = version();
-
-        if (existing == latest)
-            return;
-
-        // Create a new configuration instance.
-        var updated = new ConfigContainer();
-        // Update all configuration fields.
-        var fields = ConfigContainer.class.getDeclaredFields();
-        Arrays.stream(fields).forEach(field -> {
-            try {
-                field.set(updated, field.get(config));
-            } catch (Exception exception) {
-                Grasscutter.getLogger().error("Failed to update a configuration field.", exception);
-            }
-        });
-
-        updated.server.threadPools = mergeThreadPoolDefaults(updated.server.threadPools);
-        updated.version = version();
-
-        try { // Save configuration and reload.
-            Grasscutter.saveConfig(updated);
-            Grasscutter.loadConfig();
-        } catch (Exception exception) {
-            Grasscutter.getLogger().warn("Failed to save the updated configuration.", exception);
+        } catch (java.io.IOException exception) {
+            throw new java.io.UncheckedIOException("Unable to migrate configuration", exception);
         }
+    }
+
+    static void migrate(ConfigContainer existing) {
+        existing.server.threadPools = mergeThreadPoolDefaults(existing.server.threadPools);
+        existing.version = currentVersion();
     }
 
     public Structure folderStructure = new Structure();
@@ -109,7 +90,7 @@ public class ConfigContainer {
     public Server server = new Server();
 
     // DO NOT. TOUCH. THE VERSION NUMBER.
-    public int version = version();
+    public int version = currentVersion();
 
     /* Option containers. */
 
@@ -499,6 +480,14 @@ public class ConfigContainer {
         public Questing questing = new Questing();
         public ResinOptions resinOptions = new ResinOptions();
         public Rates rates = new Rates();
+        /** Final Electro-hit multiplier for Keqing against monsters; 1 leaves damage unchanged. */
+        public float keqingElectroDamageMultiplier = 1.0f;
+        /** Final-hit multiplier for Diluc against monsters, including physical and plunge damage. */
+        public float dilucDamageMultiplier = 1.0f;
+        /** Amber burst: max-HP healing per party member every 2s for 12s; 0 disables it. */
+        public float amberBurstHealHpRatio = 0.0f;
+        /** Multiplies only Amber's native C6 ATK bonus; 1 preserves the original value. */
+        public float amberC6AttackMultiplier = 1.0f;
         public TowerOptions tower = new TowerOptions();
 
         public HandbookOptions handbook = new HandbookOptions();

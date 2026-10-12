@@ -316,7 +316,8 @@ public class EntityAvatar extends GameEntity {
     /** Flat elemental energy from an ability; special-energy gauges are left alone. */
     public void addAbilityEnergy(float amount) {
         var energySkill = this.getAvatar().getSkillDepot().getEnergySkillData();
-        if (!this.getPlayer().getEnergyManager().isEnergyUsage()
+        if (!emu.grasscutter.config.Configuration.GAME_OPTIONS.energyUsage
+                || !this.getPlayer().getEnergyManager().isEnergyUsage()
                 || (energySkill != null && energySkill.getSpecialEnergyMin() > 0)) return;
         this.addEnergy(
                 amount,
@@ -343,7 +344,8 @@ public class EntityAvatar extends GameEntity {
             amount *= this.getFightProperty(FightProperty.FIGHT_PROP_CHARGE_EFFICIENCY);
         }
 
-        float newEnergy = Math.min(curEnergy + amount, maxEnergy);
+        if (!Float.isFinite(curEnergy) || !Float.isFinite(maxEnergy) || maxEnergy <= 0f) return;
+        float newEnergy = Math.max(0f, Math.min(curEnergy + amount, maxEnergy));
 
         if (newEnergy != curEnergy) {
             float delta = newEnergy - curEnergy;

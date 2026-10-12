@@ -34,6 +34,7 @@ public class AbilityMixinData implements Serializable {
         KENHGCLICPB,
         DoActionOnGlobalValueChangeMixin,
         CurLocalAvatarMixin,
+        CurLocalAvatarMixinV2,
         @SerializedName(value = "NyxCostMixin", alternate = "ChangeNyxValueMixin")
         NyxCostMixin,
         ModifyDamageMixin,
@@ -48,6 +49,7 @@ public class AbilityMixinData implements Serializable {
         AttachToMultiNormalizedTimeMixin,
         DLJBCMKDMEK,
         PhlogistonCostMixin,
+        ChangePhlogistonMixin,
         FIHACJPNNED,
         JMEOJHGPNMB,
         AttachModifierToSelfGlobalValueMixin,
@@ -197,6 +199,12 @@ public class AbilityMixinData implements Serializable {
     public DynamicFloat value = DynamicFloat.ZERO;
     public DynamicFloat detectWindow = DynamicFloat.ONE;
     public String globalValueKey;
+    public String globalValueTarget;
+    public String targetType;
+    /** Retained 7.1 phlogiston cadence field; units require native-client validation. */
+    public DynamicFloat LANIGKLMJHP = DynamicFloat.ZERO;
+    public List<DynamicFloat> valueSteps = new ArrayList<>();
+    public boolean removeAppliedModifier;
     public List<String> stateIDs = new ArrayList<>();
     public String stateID;
     public DynamicFloat defaultGlobalValueOnCreate = DynamicFloat.ZERO;

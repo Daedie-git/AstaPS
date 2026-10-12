@@ -244,7 +244,10 @@ public final class InvestigationHandbookHelper {
             if (progress < total) {
                 return 1;
             }
-            grantReward(player, target.rewardId, emu.grasscutter.game.props.ActionReason.InvestigationTargetReward);
+            if (!grantReward(player, target.rewardId,
+                    emu.grasscutter.game.props.ActionReason.InvestigationTargetReward)) {
+                return 1;
+            }
             player.getPlayerProgress().setInvestigationTargetState(target.id, STATE_REWARD_TAKEN);
             player.save();
 
@@ -293,7 +296,7 @@ public final class InvestigationHandbookHelper {
         try {
             ensureLoaded();
             ChapterDef chapter = CHAPTERS_BY_ID.get(chapterId);
-            if (chapter == null) {
+            if (!isChapterUnlocked(player, chapter, player.getLevel())) {
                 return 1;
             }
             if (player.getPlayerProgress().getInvestigationChapterState(chapterId)
@@ -311,11 +314,10 @@ public final class InvestigationHandbookHelper {
                     return 1;
                 }
             }
-            if (chapter.rewardId > 0) {
-                grantReward(
-                        player,
-                        chapter.rewardId,
-                        emu.grasscutter.game.props.ActionReason.InvestigationReward);
+            if (chapter.rewardId > 0 && !grantReward(
+                    player, chapter.rewardId,
+                    emu.grasscutter.game.props.ActionReason.InvestigationReward)) {
+                return 1;
             }
             player.getPlayerProgress().setInvestigationChapterState(chapterId, STATE_REWARD_TAKEN);
             player.save();
@@ -357,15 +359,15 @@ public final class InvestigationHandbookHelper {
         return target.id;
     }
 
-    private static void grantReward(
+    private static boolean grantReward(
             Player player, int rewardId, emu.grasscutter.game.props.ActionReason reason) {
         if (rewardId <= 0) {
-            return;
+            return true;
         }
         var rewardData = emu.grasscutter.data.GameData.getRewardDataMap().get(rewardId);
         if (rewardData == null || rewardData.getRewardItemList() == null) {
             Grasscutter.getLogger().warn("Investigation reward missing id={}", rewardId);
-            return;
+            return false;
         }
         java.util.List<emu.grasscutter.data.common.ItemParamData> scaled = new ArrayList<>();
         for (var item : rewardData.getRewardItemList()) {
@@ -376,9 +378,11 @@ public final class InvestigationHandbookHelper {
                     new emu.grasscutter.data.common.ItemParamData(
                             item.getId(), Math.max(0, item.getCount()) * REWARD_MULTIPLIER));
         }
-        if (!scaled.isEmpty()) {
-            player.getInventory().addItemParamDatas(scaled, reason);
+        if (scaled.isEmpty()) {
+            return false;
         }
+        player.getInventory().addItemParamDatas(scaled, reason);
+        return true;
     }
 
     /** Recompute snapshot targets and push changed handbook packets. */

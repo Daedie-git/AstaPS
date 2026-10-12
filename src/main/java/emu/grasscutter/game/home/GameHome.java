@@ -352,32 +352,26 @@ public class GameHome {
     }
 
     private void checkAccumulatedResources(Player player) {
-        int clientTime = (int) ZonedDateTime.now().toEpochSecond();
-        int owedRewards = 0;
+        accrueResources(player, (int) (System.currentTimeMillis() / 1000));
+    }
 
-        // Don't owe if previous update hasn't passed
-        if (nextUpdateTime > clientTime) {
-            return;
+    private boolean accrueResources(Player player, int now) {
+        if (nextUpdateTime <= 0 || lastUpdatedTime <= 0) {
+            lastUpdatedTime = now;
+            nextUpdateTime = (int) (((long) now / 3600 + 1) * 3600);
+            save();
+            return false;
         }
-
-        if (lastUpdatedTime == 0) {
-            lastUpdatedTime = clientTime;
-        }
-
-        // Calculate number of owed rewards
-        owedRewards = 1 + ((clientTime - nextUpdateTime) / 3600);
-
-        // Ensure next update is at top of the hour
-        nextUpdateTime =
-                (int) ZonedDateTime.now().plusHours(1).truncatedTo(ChronoUnit.HOURS).toEpochSecond();
-
-        // Get resources
-        var hourlyResources = getComfortResources(player);
-        var owedCoin = hourlyResources.get(0) * owedRewards;
-        var owedFetter = hourlyResources.get(1) * owedRewards;
-
-        // Update stored amounts
-        storeResources(player, owedCoin, owedFetter);
+        if (now < nextUpdateTime) return false;
+        long hours = 1 + ((long) now - nextUpdateTime) / 3600;
+        var rate = getComfortResources(player);
+        int coin = (int) Math.min(Integer.MAX_VALUE, hours * rate.get(0));
+        int fetter = (int) Math.min(Integer.MAX_VALUE, hours * rate.get(1));
+        storeResources(player, coin, fetter);
+        lastUpdatedTime = now;
+        nextUpdateTime = (int) (nextUpdateTime + hours * 3600);
+        save();
+        return true;
     }
 
     public void takeHomeCoin(Player player) {
@@ -435,27 +429,9 @@ public class GameHome {
     }
 
     public void updateHourlyResources(Player player) {
-        int clientTime = (int) ZonedDateTime.now().toEpochSecond();
-
-        // Check if resources can update
-        if (nextUpdateTime > clientTime) {
-            return;
+        if (accrueResources(player, (int) (System.currentTimeMillis() / 1000))) {
+            player.getSession().send(new PacketHomeResourceNotify(player));
         }
-
-        // If no update has occurred before
-        if (lastUpdatedTime == 0) {
-            lastUpdatedTime = clientTime;
-        }
-
-        // Update stored resources
-        storeResources(player, 0, 0);
-        lastUpdatedTime = clientTime;
-        nextUpdateTime =
-                (int) ZonedDateTime.now().plusHours(1).truncatedTo(ChronoUnit.HOURS).toEpochSecond();
-        save();
-
-        // Send packet
-        player.getSession().send(new PacketHomeResourceNotify(player));
     }
 
     public void storeResources(Player player, int owedCoin, int owedFetter) {
@@ -475,24 +451,14 @@ public class GameHome {
 
         // Update home coin
         if (storedCoin < maxCoin) {
-            // Check if owed or hourly
-            if (owedCoin == 0) {
-                newCoin = storedCoin + hourlyResources.get(0);
-            } else {
-                newCoin = storedCoin + owedCoin;
-            }
+            newCoin = (int) Math.min(maxCoin, (long) storedCoin + Math.max(0, owedCoin));
             // Ensure max is not exceeded
             storedCoin = Math.min(maxCoin, newCoin);
         }
 
         // Update fetter exp
         if (storedFetterExp < maxFetter) {
-            // Check if owed or hourly
-            if (owedFetter == 0) {
-                newFetter = storedFetterExp + hourlyResources.get(1);
-            } else {
-                newFetter = storedFetterExp + owedFetter;
-            }
+            newFetter = (int) Math.min(maxFetter, (long) storedFetterExp + Math.max(0, owedFetter));
             // Ensure max is not exceeded
             storedFetterExp = Math.min(maxFetter, newFetter);
         }

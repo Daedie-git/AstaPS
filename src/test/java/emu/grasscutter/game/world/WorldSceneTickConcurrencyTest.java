@@ -130,6 +130,19 @@ public final class WorldSceneTickConcurrencyTest {
     }
 
     @Test
+    void failingSceneDoesNotSkipSiblingOrNextWorldTick() throws Exception {
+        var world = world();
+        var failing = scene(1);
+        var healthy = scene(2);
+        failing.tick = () -> { throw new IllegalStateException("script failure"); };
+        world.registerScene(failing);
+        world.registerScene(healthy);
+        assertDoesNotThrow(world::onTick);
+        assertDoesNotThrow(world::onTick);
+        assertEquals(2, healthy.ticks.get());
+    }
+
+    @Test
     void emptyScenesAreNotTicked() throws Exception {
         var world = world();
         var empty = scene(1);

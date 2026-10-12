@@ -8,6 +8,59 @@ import org.junit.jupiter.api.Test;
 
 class BattlePassPurchaseTest {
     @Test
+    void actualPurchaseChargesOnlyRemainingLevelsAndRejectsRetry() throws Exception {
+        var player = fakePlayer(100000);
+        var bp = player.manager;
+        var level = BattlePassManager.class.getDeclaredField("level");
+        level.setAccessible(true);
+        level.setInt(bp, 49);
+        assertEquals(1, bp.buyLevels(40));
+        assertEquals(50, bp.getLevel());
+        assertEquals(100000 - GameConstants.BATTLE_PASS_LEVEL_PRICE, player.gems);
+        assertEquals(0, bp.buyLevels(1));
+    }
+
+    @Test
+    void actualPurchaseRejectsInsufficientAndCancelledDebit() throws Exception {
+        var player = fakePlayer(0);
+        assertEquals(0, player.manager.buyLevels(1));
+        player.gems = 100000;
+        player.rejectDebit = true;
+        assertEquals(0, player.manager.buyLevels(1));
+        assertEquals(0, player.manager.getLevel());
+        assertEquals(100000, player.gems);
+    }
+
+    private static FakePlayer fakePlayer(int gems) throws Exception {
+        var field = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+        field.setAccessible(true);
+        var player = (FakePlayer) ((sun.misc.Unsafe) field.get(null)).allocateInstance(FakePlayer.class);
+        player.gems = gems;
+        player.manager = new FakeManager(player);
+        return player;
+    }
+
+    private static class FakeManager extends BattlePassManager {
+        FakeManager(emu.grasscutter.game.player.Player player) { super(player); }
+        @Override public void save() {}
+    }
+
+    private static class FakePlayer extends emu.grasscutter.game.player.Player {
+        int gems;
+        boolean rejectDebit;
+        FakeManager manager;
+        @Override public int getPrimogems() { return gems; }
+        @Override public boolean setPrimogems(int gems) {
+            if (rejectDebit) return false;
+            this.gems = gems;
+            return true;
+        }
+        @Override public BattlePassManager getBattlePassManager() { return manager; }
+        @Override public void save() {}
+        @Override public void sendPacket(emu.grasscutter.net.packet.BasePacket packet) {}
+    }
+
+    @Test
     void purchaseQuotesUseCurrentLevelRatherThanRequestedLevel() {
         assertEquals(
                 new BattlePassManager.LevelPurchase(5, 5 * GameConstants.BATTLE_PASS_LEVEL_PRICE),

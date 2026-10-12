@@ -53,6 +53,8 @@ final class GadgetChestBossClaimTest {
         meta.boss_chest.resin = 40;
         flower.setMetaGadget(meta);
         chest = new TestChest(flower);
+        flower.setContent(chest);
+        scene.getEntities().put(flower.getId(), flower);
         // Off while building the entity (avoids script loading); on for onInteract's boss path.
         Grasscutter.getConfig().server.game.enableScriptInBigWorld = true;
         info(); // the flower appears to everyone in the scene

@@ -168,19 +168,23 @@ class CombatFixesTest {
         var f = fixture();
         var mixin = new AbilityMixinData();
         mixin.costStaminaDelta = new DynamicFloat(1);
-        f.stamina.setLastCostStaminaTime(System.currentTimeMillis() - 600);
-        new CostStaminaMixin().execute(ability(f), mixin, ByteString.EMPTY, f.entity);
+        var clock = new ClockStamina();
+        var ability = ability(f);
+        clock.execute(ability, mixin, ByteString.EMPTY, f.entity);
+        assertEquals(0, f.stamina.spent, "A new stream establishes its own clock");
+        clock.now += 600;
+        clock.execute(ability, mixin, ByteString.EMPTY, f.entity);
         assertEquals(-60, f.stamina.spent);
 
-        // The first tick after a long pause bills nothing.
-        f.stamina.setLastCostStaminaTime(System.currentTimeMillis() - 60_000);
-        new CostStaminaMixin().execute(ability(f), mixin, ByteString.EMPTY, f.entity);
-        assertEquals(-60, f.stamina.spent);
+        // Long gaps are capped at one second rather than billing the paused interval.
+        clock.now += 60_000;
+        clock.execute(ability, mixin, ByteString.EMPTY, f.entity);
+        assertEquals(-160, f.stamina.spent);
 
         mixin.costStaminaDelta = new DynamicFloat(-1);
-        f.stamina.setLastCostStaminaTime(System.currentTimeMillis() - 600);
-        new CostStaminaMixin().execute(ability(f), mixin, ByteString.EMPTY, f.entity);
-        assertEquals(0, f.stamina.spent);
+        clock.now += 600;
+        clock.execute(ability, mixin, ByteString.EMPTY, f.entity);
+        assertEquals(-100, f.stamina.spent);
     }
 
     @Test
@@ -189,19 +193,16 @@ class CombatFixesTest {
         GAME_OPTIONS.energyUsage = true;
         try {
             var f = fixture();
-            // Live when queued, gone by the time the executor runs it.
-            var team = new LeavingTeam();
-            team.addAll(f.team.getActiveTeam());
-            set(f.team, TeamManager.class, "avatars", team);
+            // Owner and target are registered during capture, gone at execution validation.
+            f.scene.retireAfterReads = 2;
             f.entity.setFightProperty(FightProperty.FIGHT_PROP_CUR_FIRE_ENERGY, 10);
             var action = new AbilityModifierAction();
             action.type = AbilityModifierAction.Type.ReviveElemEnergy;
             action.ratio = new DynamicFloat(3);
             f.player.getAbilityManager().executeAction(ability(f), action, ByteString.EMPTY, f.entity);
 
-            for (int i = 0; i < 200 && team.lookups < 2; i++) Thread.sleep(10);
-            Thread.sleep(100);
-            assertTrue(team.lookups >= 2);
+            for (int i = 0; i < 200 && f.scene.entityReads < 3; i++) Thread.sleep(10);
+            assertTrue(f.scene.entityReads >= 3);
             assertEquals(10, f.entity.getFightProperty(FightProperty.FIGHT_PROP_CUR_FIRE_ENERGY));
         } finally {
             GAME_OPTIONS.energyUsage = energyUsage;
@@ -314,6 +315,11 @@ class CombatFixesTest {
         field.set(instance, value);
     }
 
+    static class ClockStamina extends CostStaminaMixin {
+        long now = 1000;
+        @Override protected long monotonicMillis() { return now; }
+    }
+
     private static final class Fixture {
         TestPlayer player;
         TestEntity entity;
@@ -363,7 +369,12 @@ class CombatFixesTest {
         TestScene() { super(null, null); }
         @Override public World getWorld() { return world; }
         @Override public List<Player> getPlayers() { return players; }
-        @Override public GameEntity getEntityById(int id) { return entities.get(id); }
+        volatile int entityReads;
+        int retireAfterReads;
+        @Override public GameEntity getEntityById(int id) {
+            if (++entityReads > retireAfterReads && retireAfterReads > 0) entities.remove(id);
+            return entities.get(id);
+        }
         @Override public Map<Integer, GameEntity> getEntities() { return entities; }
         @Override public synchronized void replaceEntity(EntityAvatar oldEntity, EntityAvatar newEntity) {}
         @Override public void broadcastPacket(BasePacket packet) { packets.add(packet); }

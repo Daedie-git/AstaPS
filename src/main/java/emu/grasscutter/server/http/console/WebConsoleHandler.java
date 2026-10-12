@@ -154,7 +154,7 @@ public final class WebConsoleHandler implements Router {
         command = command.trim();
         if (command.startsWith("/")) command = command.substring(1);
 
-        Grasscutter.getLogger().info("Web console command from {}: {}", ctx.ip(), command);
+        Grasscutter.getLogger().info("Web console command from {}: {}", ctx.ip(), emu.grasscutter.command.CommandLog.describe(command));
         final var line = command;
         List<String> output;
         try {
@@ -162,8 +162,9 @@ public final class WebConsoleHandler implements Router {
                     CommandOutputCapture.capture(
                             () -> Grasscutter.getCommandMap().invoke(null, null, line));
         } catch (Exception e) {
-            Grasscutter.getLogger().warn("Web console command failed: {}", line, e);
-            json(ctx, 500, Map.of("error", String.valueOf(e)));
+            Grasscutter.getLogger().warn("Web console command failed: {} ({})",
+                    emu.grasscutter.command.CommandLog.describe(line), e.getClass().getSimpleName());
+            json(ctx, 500, Map.of("error", "Command execution failed."));
             return;
         }
         json(ctx, 200, Map.of("output", output));

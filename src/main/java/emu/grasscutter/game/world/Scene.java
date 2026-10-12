@@ -141,15 +141,15 @@ public class Scene {
         if (id == 0x13800001) return this.sceneEntity;
         else if (id == this.getWorld().getLevelEntityId()) return this.getWorld().getEntity();
 
-        var teamEntityPlayer =
-                players.stream().filter(p -> p.getTeamManager().getEntity().getId() == id).findAny();
-        if (teamEntityPlayer.isPresent()) return teamEntityPlayer.get().getTeamManager().getEntity();
+        var teamEntity = players.stream().map(p -> p.getTeamManager().getEntity())
+                .filter(java.util.Objects::nonNull).filter(team -> team.getId() == id).findAny();
+        if (teamEntity.isPresent()) return teamEntity.get();
 
         var entity = this.entities.get(id);
         if (entity == null) entity = this.weaponEntities.get(id);
         if (entity == null && (id >> ENTITY_ID_BIT_SHIFT) == EntityIdType.AVATAR.getId()) {
             for (var player : getPlayers()) {
-                for (var avatar : player.getTeamManager().getActiveTeam()) {
+                for (var avatar : new ArrayList<>(player.getTeamManager().getActiveTeam())) {
                     if (avatar.getId() == id) return avatar;
                 }
             }
@@ -157,7 +157,7 @@ public class Scene {
 
         if (entity == null && (id >> ENTITY_ID_BIT_SHIFT) == EntityIdType.WEAPON.getId()) {
             for (var player : this.getPlayers()) {
-                for (var avatar : player.getTeamManager().getActiveTeam()) {
+                for (var avatar : new ArrayList<>(player.getTeamManager().getActiveTeam())) {
                     if (avatar.getWeaponEntityId() == id) return avatar;
                 }
             }
@@ -245,6 +245,12 @@ public class Scene {
         this.playerEntryCallbacks.enter(player.getUid());
     }
 
+    /** Nonblocking departure; completion covers all script final saves recorded for this player. */
+    public synchronized java.util.concurrent.CompletableFuture<Void> removePlayerWithCompletion(Player player) {
+        removePlayer(player);
+        return player.getScriptDepartureCompletion();
+    }
+
     public synchronized void removePlayer(Player player) {
 
         if (this.getChallenge() != null && this.getChallenge().inProgress()) {
@@ -268,7 +274,7 @@ public class Scene {
                 .forEach(entityVehicle -> this.removeEntity(entityVehicle, VisionType.VisionType_VISION_REMOVE));
 
         if (this.getPlayerCount() <= 0 && !this.dontDestroyWhenEmpty) {
-            this.getScriptManager().onDestroy();
+            player.recordScriptDeparture(this.getScriptManager().onDestroyAsync());
             this.getWorld().deregisterScene(this);
         }
 
@@ -311,6 +317,7 @@ public class Scene {
     private synchronized void removePlayerAvatars(Player player) {
         var team = player.getTeamManager().getActiveTeam();
 
+        team.forEach(emu.grasscutter.game.tps.TpsWeaponSystem::retireWeaponEntities);
         team.forEach(e -> removeEntity(e, VisionType.VisionType_VISION_REMOVE));
         // The team is rebuilt with new entities on the next scene, so the off-field members' ids
         // are dead too.
@@ -837,13 +844,7 @@ public class Scene {
 
         var sceneTime = getSceneTimeSeconds();
 
-        var entities = Map.copyOf(this.getEntities());
-        entities.forEach(
-                (eid, e) -> {
-                    if (!e.isAlive()) {
-                        this.getEntities().remove(eid);
-                    } else e.onTick(sceneTime);
-                });
+        tickEntities(sceneTime);
 
         blossomManager.onTick();
 
@@ -865,6 +866,20 @@ public class Scene {
         this.checkPlayerRespawn();
         if (this.tickCount % 50 == 0) this.reportFrozenState();
         if (this.tickCount++ % 10 == 0) this.broadcastPacket(new PacketSceneTimeNotify(this));
+    }
+
+    void tickEntities(int sceneTime) {
+        Map.copyOf(this.getEntities()).forEach((eid, entity) -> {
+            // An entity removed by an earlier callback must not run from the old snapshot.
+            if (this.getEntities().get(eid) != entity) return;
+            try {
+                if (!entity.isAlive()) this.getEntities().remove(eid, entity);
+                else entity.onTick(sceneTime);
+            } catch (RuntimeException failure) {
+                Grasscutter.getLogger().error(
+                        "Scene {} entity {} tick failed", this.getId(), eid, failure);
+            }
+        });
     }
 
     /**
@@ -1146,7 +1161,10 @@ public class Scene {
         }
 
         if (toRemove.size() > 0) {
-            toRemove.forEach(this::removeEntityDirectly);
+            toRemove.forEach(entity -> {
+                emu.grasscutter.game.entity.EntityRuntimeStateCleanup.clear(entity);
+                this.removeEntityDirectly(entity);
+            });
             this.broadcastPacket(
                     new PacketSceneEntityDisappearNotify(toRemove, VisionType.VisionType_VISION_REMOVE));
             blossomManager.recycleGadgetEntity(toRemove);
@@ -1393,50 +1411,51 @@ public class Scene {
                                                 && (block == null || e.getBlockId() == block.id))
                         .toList();
 
-        if (toRemove.size() > 0) {
-            toRemove.forEach(this::removeEntityDirectly);
+        var retired = new ArrayList<GameEntity>();
+        for (var entity : toRemove) {
+            if (!this.getEntities().remove(entity.getId(), entity)) continue;
+            // Retire before callbacks can register a same-ID replacement with fresh runtime state.
+            EntityRuntimeStateCleanup.clear(entity);
+            entity.onRemoved();
+            retired.add(entity);
+        }
+        if (!retired.isEmpty()) {
             this.broadcastPacket(
-                    new PacketSceneEntityDisappearNotify(toRemove, VisionType.VisionType_VISION_REMOVE));
+                    new PacketSceneEntityDisappearNotify(retired, VisionType.VisionType_VISION_REMOVE));
         }
 
-        var group =
-                block == null || block.groups == null
-                        ? this.scriptManager.getGroupById(group_id)
-                        : block.groups.get(group_id);
-        if (group == null) {
-            // The group's script never loaded, so there is nothing to tear down. The entities are
-            // already gone above; tell the client the group is unloaded and stop.
-            this.broadcastPacket(new PacketGroupUnloadNotify(List.of(group_id)));
-            return;
+        // Recover loaded metadata without loading scripts during teardown.
+        var groups = new HashSet<SceneGroup>();
+        if (block != null && block.groups != null && block.groups.get(group_id) != null) {
+            groups.add(block.groups.get(group_id));
         }
-
-        if (group.triggers != null) {
-            group.triggers.values().forEach(getScriptManager()::deregisterTrigger);
+        this.loadedGroups.stream().filter(g -> g.id == group_id).forEach(groups::add);
+        var instance = scriptManager.getGroupInstanceById(group_id);
+        if (instance != null && instance.getLuaGroup() != null) groups.add(instance.getLuaGroup());
+        var loadedPerBlock = scriptManager.getLoadedGroupSetPerBlock();
+        loadedPerBlock.values().forEach(set ->
+                set.stream().filter(g -> g.id == group_id).forEach(groups::add));
+        for (var group : groups) {
+            if (group.triggers != null) {
+                group.triggers.values().forEach(getScriptManager()::deregisterTrigger);
+            }
+            if (group.regions != null) {
+                group.regions.values().forEach(getScriptManager()::deregisterRegion);
+            }
+            this.scriptManager.unregisterGroup(group);
         }
-        if (group.regions != null) {
-            group.regions.values().forEach(getScriptManager()::deregisterRegion);
-        }
-        if (challenge != null && group.id == challenge.getGroup().id) {
+        if (challenge != null && challenge.getGroup() != null
+                && group_id == challenge.getGroup().id) {
             challenge.fail();
         }
 
-        // A null block means the group's block is gone; only the per-block bookkeeping is skipped.
-        if (block != null) {
-            var blockGroups = scriptManager.getLoadedGroupSetPerBlock().get(block.id);
-            if (blockGroups != null) {
-                blockGroups.remove(group);
-            }
+        this.loadedGroups.removeIf(g -> g.id == group_id);
+        for (var entry : List.copyOf(loadedPerBlock.entrySet())) {
+            var set = entry.getValue();
+            set.removeIf(g -> g.id == group_id);
+            if (set.isEmpty()) loadedPerBlock.remove(entry.getKey(), set);
         }
-        this.loadedGroups.remove(group);
-
-        if (block != null && scriptManager.getLoadedGroupSetPerBlock().get(block.id) != null
-                && this.scriptManager.getLoadedGroupSetPerBlock().get(block.id).isEmpty()) {
-            this.scriptManager.getLoadedGroupSetPerBlock().remove(block.id);
-            Grasscutter.getLogger().trace("Scene {} block {} is unloaded.", this.getId(), block.id);
-        }
-
         this.broadcastPacket(new PacketGroupUnloadNotify(List.of(group_id)));
-        this.scriptManager.unregisterGroup(group);
     }
 
     public void onPlayerCreateGadget(EntityClientGadget gadget) {

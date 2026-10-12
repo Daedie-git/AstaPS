@@ -18,9 +18,8 @@ import java.util.List;
 /**
  * Resolve MATERIAL_SELECTABLE_CHEST BP rewards into real inventory items.
  *
- * <p>Client option_idx for specialty chests (e.g. 116018) is the 1-based slot id from
- * GroupedItemSelectionExcelConfig (can be up to 61), not necessarily bounded by a truncated
- * MaterialExcel useParam list. We extend consecutive GRANT_SELECT reward ids when present.
+ * <p>Only the loaded chest's declared choices authorize delivery. Extended grouped choices require
+ * an authoritative resource mapping; global ID adjacency is not such a mapping.
  */
 public final class BattlePassSelectChestHelper {
     private BattlePassSelectChestHelper() {}
@@ -93,8 +92,8 @@ public final class BattlePassSelectChestHelper {
                     }
                 }
             }
-            GameItem gi = new GameItem(itemData, count);
-            inv.addItem(gi, reason);
+            GameItem gi = emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(itemData, count);
+            if (!emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(inv, List.of(gi), reason)) return granted;
             granted.add(gi);
             Grasscutter.getLogger()
                     .info(
@@ -120,20 +119,12 @@ public final class BattlePassSelectChestHelper {
                 if (itemData == null) {
                     Grasscutter.getLogger()
                             .warn("TakeBP select: missing item {} from reward {}", ip.getItemId(), chosen);
-                    continue;
+                    return List.of();
                 }
-                GameItem gi = new GameItem(itemData, ip.getItemCount());
-                boolean ok = inv.addItem(gi, reason);
-                if (ok) {
-                    granted.add(gi);
-                } else {
-                    Grasscutter.getLogger()
-                            .warn(
-                                    "TakeBP select: addItem failed item={} x{}",
-                                    ip.getItemId(),
-                                    ip.getItemCount());
-                }
+                GameItem gi = emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(itemData, ip.getItemCount());
+                granted.add(gi);
             }
+            if (!emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(inv, granted, reason)) return List.of();
             Grasscutter.getLogger()
                     .info(
                             "TakeBP select GRANT_REWARD uid={} chest={} choiceReward={} optionIdx={} items={}",
@@ -167,11 +158,10 @@ public final class BattlePassSelectChestHelper {
         for (String p : parts) {
             try {
                 int v = Integer.parseInt(p.trim());
-                if (v > 0) {
-                    choices.add(v);
-                }
+                if (v <= 0) return -1;
+                choices.add(v);
             } catch (Exception ignored) {
-                // skip malformed
+                return -1;
             }
         }
         if (choices.isEmpty()) {
@@ -179,58 +169,7 @@ public final class BattlePassSelectChestHelper {
             return -1;
         }
 
-        // Auto-extend consecutive reward ids when MaterialExcel list is truncated vs client UI.
-        if (use.getUseOp() == ItemUseOp.ITEM_USE_GRANT_SELECT_REWARD) {
-            int last = choices.get(choices.size() - 1);
-            while (true) {
-                int next = last + 1;
-                if (GameData.getRewardDataMap().get(next) == null) {
-                    break;
-                }
-                choices.add(next);
-                last = next;
-                if (choices.size() > 128) {
-                    break;
-                }
-            }
-        }
-
-        if (optionIdx <= choices.size()) {
-            return choices.get(optionIdx - 1);
-        }
-
-        // Fallback: treat optionIdx as 1-based offset from the first reward/item id.
-        int extrapolated = choices.get(0) + (optionIdx - 1);
-        if (use.getUseOp() == ItemUseOp.ITEM_USE_GRANT_SELECT_REWARD) {
-            if (GameData.getRewardDataMap().get(extrapolated) != null) {
-                Grasscutter.getLogger()
-                        .info(
-                                "TakeBP select: optionIdx {} beyond list ({}) chest {}, using reward {}",
-                                optionIdx,
-                                choices.size(),
-                                chestId,
-                                extrapolated);
-                return extrapolated;
-            }
-        } else if (GameData.getItemDataMap().get(extrapolated) != null) {
-            Grasscutter.getLogger()
-                    .info(
-                            "TakeBP select: optionIdx {} beyond list ({}) chest {}, using item {}",
-                            optionIdx,
-                            choices.size(),
-                            chestId,
-                            extrapolated);
-            return extrapolated;
-        }
-
-        Grasscutter.getLogger()
-                .warn(
-                        "TakeBP select: optionIdx {} out of range {} for chest {} (extrapolated {} missing)",
-                        optionIdx,
-                        choices.size(),
-                        chestId,
-                        extrapolated);
-        return -1;
+        return optionIdx >= 1 && optionIdx <= choices.size() ? choices.get(optionIdx - 1) : -1;
     }
 
     private static ItemUseData firstUse(ItemData chest) {

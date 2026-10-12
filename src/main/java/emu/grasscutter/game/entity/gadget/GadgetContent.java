@@ -16,6 +16,14 @@ public abstract class GadgetContent {
         return gadget;
     }
 
+    /** Admission is distinct from onInteract's entity-deletion result. */
+    public boolean canInteract(Player player, GadgetInteractReq req) {
+        return true;
+    }
+
+    /** Called after the owning entity is admitted to its scene. */
+    public void onCreate() {}
+
     public abstract boolean onInteract(Player player, GadgetInteractReq req);
 
     public abstract void onBuildProto(SceneGadgetInfo.Builder gadgetInfo);

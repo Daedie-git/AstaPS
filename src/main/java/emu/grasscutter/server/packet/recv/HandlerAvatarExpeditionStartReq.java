@@ -26,16 +26,15 @@ public class HandlerAvatarExpeditionStartReq extends PacketHandler {
 
         // 7.0 sends a list of expeditions in one request instead of a single flattened one.
         int startTime = Utils.getCurrentSeconds();
-        for (var info : req.getBasicInfoListList()) {
-            player.addExpeditionInfo(
-                    info.getAvatarGuid(), info.getExpId(), info.getHourTime(), startTime);
-        }
-        player.save();
+        var assignments = req.getBasicInfoListList().stream()
+                .map(info -> new emu.grasscutter.game.expedition.ExpeditionHelper.Assignment(
+                        info.getAvatarGuid(), info.getExpId(), info.getHourTime())).toList();
+        boolean started = emu.grasscutter.game.expedition.ExpeditionHelper.startAll(player, assignments, startTime);
 
         // StartRsp must include _expedition_basic_info_list or the open UI won't refresh.
         var startRsp =
                 new PacketAvatarExpeditionStartRsp(
-                        player.getExpeditionInfo(), req.getBasicInfoListList());
+                        player.getExpeditionInfo(), started ? req.getBasicInfoListList() : java.util.List.of());
         if (clientSeq > 0) {
             startRsp.buildHeader(clientSeq);
         }

@@ -138,6 +138,12 @@ public final class DungeonSystem extends BaseGameSystem {
     /** used in tower dungeons handoff */
     public boolean handoffDungeon(
             Player player, int dungeonId, List<DungeonSettleListener> dungeonSettleListeners) {
+        return handoffDungeon(player, dungeonId, dungeonSettleListeners, null);
+    }
+
+    public boolean handoffDungeon(
+            Player player, int dungeonId, List<DungeonSettleListener> dungeonSettleListeners,
+            Runnable prepare) {
         DungeonData data = GameData.getDungeonDataMap().get(dungeonId);
 
         if (data == null) {
@@ -151,15 +157,11 @@ public final class DungeonSystem extends BaseGameSystem {
                         dungeonId);
 
         Scene current = player.getScene();
-        if (current != null
-                && current.getSceneType() == SceneType.SCENE_DUNGEON
-                && (TowerAbyssFix.isInTowerDungeon(player)
-                        || (current.getDungeonManager() != null
-                                && current.getDungeonManager().isTowerDungeon()))) {
+        if (current != null && current.getSceneType() == SceneType.SCENE_DUNGEON) {
             TowerAbyssFix.endChallengeUi(player);
         }
 
-        if (!player.getWorld().transferPlayerToScene(player, data.getSceneId(), data)) {
+        if (!player.getWorld().transferPlayerToScene(player, data.getSceneId(), data, prepare)) {
             return false;
         }
         var scene = player.getScene();

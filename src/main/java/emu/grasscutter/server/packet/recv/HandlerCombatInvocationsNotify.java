@@ -1,7 +1,9 @@
 package emu.grasscutter.server.packet.recv;
 
+import static emu.grasscutter.config.Configuration.GAME_OPTIONS;
+
 import emu.grasscutter.Grasscutter;
-import emu.grasscutter.game.dps.DPSAttackContext;
+import emu.grasscutter.game.entity.CharacterDamageTuning;
 import emu.grasscutter.game.entity.EntityAvatar;
 import emu.grasscutter.game.entity.EntityClientGadget;
 import emu.grasscutter.game.entity.EntityMonster;
@@ -27,8 +29,19 @@ import emu.grasscutter.server.packet.send.PacketEntityFightPropUpdateNotify;
 @Opcodes(PacketOpcodes.CombatInvocationsNotify)
 public class HandlerCombatInvocationsNotify extends PacketHandler {
 
+    protected long monotonicMillis() {
+        return System.nanoTime() / 1_000_000L;
+    }
+
     @Override
     public void handle(GameSession session, byte[] header, byte[] payload) throws Exception {
+        try (var damageBatch = emu.grasscutter.game.player.CombatDamageBatch.open(session)) {
+            handleInvocations(session, payload);
+            damageBatch.complete();
+        }
+    }
+
+    private void handleInvocations(GameSession session, byte[] payload) throws Exception {
         CombatInvocationsNotify notif = CombatInvocationsNotify.parseFrom(payload);
         for (CombatInvokeEntry entry : notif.getInvokeListList()) {
 
@@ -157,7 +170,19 @@ public class HandlerCombatInvocationsNotify extends PacketHandler {
                         }
                     }
 
-                    player.getAttackResults().add(attackResult);
+                    var tunedHit = CharacterDamageTuning.apply(
+                            player.getScene(), hitInfo, GAME_OPTIONS.keqingElectroDamageMultiplier,
+                            GAME_OPTIONS.dilucDamageMultiplier);
+                    if (tunedHit != hitInfo) {
+                        hitInfo = tunedHit;
+                        attackResult = hitInfo.getAttackResult();
+                        entry = entry.toBuilder()
+                                .setCombatData(hitInfo.toByteString())
+                                .setForwardType(ForwardType.ForwardType_FORWARD_TO_ALL)
+                                .build();
+                    }
+
+                    emu.grasscutter.game.player.CombatDamageBatch.enqueue(session, player.getScene(), attackResult);
                     player.getEnergyManager().handleAttackHit(hitInfo);
                     try {
                         GameEntity atkEnt = player.getScene().getEntityById(attackResult.getAttackerId());
@@ -202,15 +227,7 @@ public class HandlerCombatInvocationsNotify extends PacketHandler {
                                 .getStaminaManager()
                                 .handleCombatInvocationsNotify(session, moveInfo, entity);
 
-                        if (motionState == MotionState.MotionState_MOTION_LAND_SPEED) {
-                            session.setLandingSpeed(motionInfo.getSpeed().getY());
-                            session.setLandingTimeMillis(System.currentTimeMillis());
-                        }
-                        if (motionState == MotionState.MotionState_MOTION_FALL_ON_GROUND
-                                && session.getLandingTimeMillis() != 0) {
-                            handleFallOnGround(session, entity);
-                            session.setLandingTimeMillis(0);
-                        }
+                        handleLandingMovement(session, entity, motionInfo);
 
                         if (motionState == MotionState.MotionState_MOTION_NOTIFY
                                 || motionState == MotionState.MotionState_MOTION_FIGHT) {
@@ -236,46 +253,39 @@ public class HandlerCombatInvocationsNotify extends PacketHandler {
         }
         // Flush even when this notify arrives outside UnionCmd (needed for MP motion/skill sync).
         session.getPlayer().getCombatInvokeHandler().update(session.getPlayer());
-
-        // A standalone notify has no UnionCmdNotify after it to apply its hits. Inside a batch they
-        // wait for the end of it, after the ability invokes (shields, modifiers) sent alongside.
-        if (!HandlerUnionCmdNotify.isHandlingBatch()) applyQueuedAttacks(session.getPlayer());
     }
 
-    static void applyQueuedAttacks(emu.grasscutter.game.player.Player player) {
-        var attacks = player.getAttackResults();
-        for (var attack = attacks.poll(); attack != null; attack = attacks.poll()) {
-            // Lets the DPS dummy tell reaction damage from elemental damage inside damage().
-            DPSAttackContext.set(attack);
-            try {
-                player.getScene().handleAttack(attack);
-            } finally {
-                DPSAttackContext.clear();
+    private void handleLandingMovement(GameSession session, GameEntity entity, MotionInfo motion) {
+        var sample = session.getFallDamageSample();
+        long now = monotonicMillis();
+        if (sample != null && (sample.scene() != session.getPlayer().getScene()
+                || now - sample.atMillis() > 200 || now < sample.atMillis())) {
+            session.setFallDamageSample(null);
+            sample = null;
+        }
+        if (!(entity instanceof EntityAvatar avatar)
+                || avatar != session.getPlayer().getTeamManager().getCurrentAvatarEntity()
+                || avatar.getScene() != session.getPlayer().getScene() || !avatar.isAlive()) return;
+        if (motion.getState() == MotionState.MotionState_MOTION_LAND_SPEED) {
+            float speed = motion.getSpeed().getY();
+            session.setFallDamageSample(Float.isFinite(speed)
+                    ? new emu.grasscutter.game.player.FallDamageSample(avatar, avatar.getScene(), speed, now)
+                    : null);
+        } else if (motion.getState() == MotionState.MotionState_MOTION_FALL_ON_GROUND) {
+            session.setFallDamageSample(null);
+            if (sample != null && sample.entity() == avatar) {
+                handleFallOnGround(session, avatar, sample.speed());
             }
         }
     }
 
-    private void handleFallOnGround(GameSession session, GameEntity entity) {
+    private void handleFallOnGround(GameSession session, GameEntity entity, float cachedLandingSpeed) {
         if (session.getPlayer().isInGodMode()) {
             return;
         }
 
-        int maxDelay = 200;
-        long actualDelay = System.currentTimeMillis() - session.getLandingTimeMillis();
-        Grasscutter.getLogger()
-                .trace(
-                        "MOTION_FALL_ON_GROUND received after "
-                                + actualDelay
-                                + "/"
-                                + maxDelay
-                                + "ms."
-                                + (actualDelay > maxDelay ? " Discard" : ""));
-        if (actualDelay > maxDelay) {
-            return;
-        }
         float currentHP = entity.getFightProperty(FightProperty.FIGHT_PROP_CUR_HP);
         float maxHP = entity.getFightProperty(FightProperty.FIGHT_PROP_MAX_HP);
-        float cachedLandingSpeed = session.getLandingSpeed();
         float damageFactor = 0;
         if (cachedLandingSpeed < -23.5) {
             damageFactor = 0.33f;

@@ -26,7 +26,7 @@ public final class GameServerPacketHandler {
     public void registerPacketHandler(Class<? extends PacketHandler> handlerClass) {
         try {
             var opcode = handlerClass.getAnnotation(Opcodes.class);
-            if (opcode == null || opcode.disabled() || opcode.value() <= 0) {
+            if (opcode == null || opcode.disabled() || opcode.value() <= 0 || opcode.value() > 65535) {
                 return;
             }
 
@@ -54,7 +54,7 @@ public final class GameServerPacketHandler {
     private void registerOpcodeAliases() {
         var combineHandler = this.handlers.get(PacketOpcodes.CombineReq);
         if (combineHandler != null) {
-            this.handlers.put(PacketOpcodes.CombineReqUnionCmd, combineHandler);
+            registerAlias(PacketOpcodes.CombineReqUnionCmd, combineHandler);
         }
         // Ensure handbook domain refresh is handled even if Reflections misses a hot-patched class.
         if (!this.handlers.containsKey(PacketOpcodes.InteractDailyDungeonInfoNotify)) {
@@ -79,8 +79,8 @@ public final class GameServerPacketHandler {
                 emu.grasscutter.server.packet.recv.HandlerReliquaryDustConfirmReqB.class);
 
         // BuyResinReq was missing from the 7.0 dump; live click confirmed opcode 29821.
-        if (!this.handlers.containsKey(PacketOpcodes.BuyResinReq)) {
-            this.handlers.put(
+        if (PacketOpcodes.BuyResinReq > 0 && !this.handlers.containsKey(PacketOpcodes.BuyResinReq)) {
+            registerAlias(
                     PacketOpcodes.BuyResinReq,
                     new emu.grasscutter.server.packet.recv.HandlerBuyResinReq());
             Grasscutter.getLogger()
@@ -112,58 +112,22 @@ public final class GameServerPacketHandler {
                 .info("Registered PlayerOfferingReq handler at opcode {}", PacketOpcodes.PlayerOfferingReq);
     }
 
+    private void registerAlias(int opcode, PacketHandler handler) {
+        if (opcode > 0 && opcode <= 65535) this.handlers.putIfAbsent(opcode, handler);
+    }
+
     private void registerIfAbsent(int opcode, Class<? extends PacketHandler> handlerClass) {
-        if (!this.handlers.containsKey(opcode)) {
+        if (opcode > 0 && !this.handlers.containsKey(opcode)) {
             this.registerPacketHandler(handlerClass);
         }
     }
 
-    private boolean tryHandleCombineReqFallback(
-            GameSession session, int opcode, byte[] header, byte[] payload) {
-        if (payload == null || payload.length < 2) {
-            return false;
-        }
-        PacketHandler combineHandler = this.handlers.get(PacketOpcodes.CombineReq);
-        if (combineHandler == null) {
-            return false;
-        }
-        try {
-            var req =
-                    emu.grasscutter.net.proto.CombineReqOuterClass.CombineReq.parseFrom(payload);
-            // Any unknown packet whose first field is a number parses as a CombineReq. A real one
-            // always crafts at least one item; without this check a waypoint's UnlockTransPointReq
-            // was taken for combineId 6 and answered with a failed CombineRsp.
-            if (req.getCombineId() <= 0 || req.getCombineCount() <= 0) {
-                return false;
-            }
-            Grasscutter.getLogger()
-                    .info(
-                            "Routing opcode {} as CombineReq (combineId={})",
-                            opcode,
-                            req.getCombineId());
-            combineHandler.handle(session, header, payload);
-            return true;
-        } catch (Exception ignored) {
-            return false;
-        }
-    }
-
-    private boolean tryHandleBuyResinReqFallback(
-            GameSession session, int opcode, byte[] header, byte[] payload) {
-        // Kept as a no-op safety net; BuyResinReq is registered at PacketOpcodes.BuyResinReq.
-        return false;
-    }
-
     public void handle(GameSession session, int opcode, byte[] header, byte[] payload) {
+        if (opcode <= 0 || opcode > 65535) return;
         PacketHandler handler = this.handlers.get(opcode);
 
         if (handler != null) {
             try {
-                if (session.getPlayer() != null) {
-                    emu.grasscutter.game.systems.ReliquaryDustSystem.noteRecvOpcode(
-                            session.getPlayer(), opcode);
-                }
-
                 SessionState state = session.getState();
 
                 if (opcode == PacketOpcodes.PingReq) {
@@ -191,10 +155,17 @@ public final class GameServerPacketHandler {
 
                 ReceivePacketEvent event = new ReceivePacketEvent(session, opcode, payload);
                 event.call();
-                if (!event.isCanceled())
-                handler.handle(session, header, event.getPacketData());
+                if (!event.isCanceled()) {
+                    if (session.getPlayer() != null) {
+                        ReliquaryDustSystem.noteRecvOpcode(session.getPlayer(), opcode);
+                    }
+                    handler.handle(session, header, event.getPacketData());
+                }
             } catch (Exception ex) {
-
+                if (opcode == PacketOpcodes.CombatInvocationsNotify
+                        || opcode == PacketOpcodes.UnionCmdNotify) {
+                    emu.grasscutter.game.player.CombatDamageBatch.invalidate(session);
+                }
                 ex.printStackTrace();
             }
             return;
@@ -203,24 +174,6 @@ public final class GameServerPacketHandler {
         if (!PacketOpcodesUtils.LOOP_PACKETS.contains(opcode)
                 && opcode != PacketOpcodes.PingReq
                 && opcode != PacketOpcodes.PingRsp) {
-            if (tryHandleCombineReqFallback(session, opcode, header, payload)) {
-                return;
-            }
-            if (tryHandleBuyResinReqFallback(session, opcode, header, payload)) {
-                return;
-            }
-            if (session.getPlayer() != null
-                    && emu.grasscutter.game.entity.gadget.OfferingHelper.tryHandleUnknownOfferingReq(
-                            session.getPlayer(), opcode, payload, header)) {
-                return;
-            }
-            // Extra level (90->95->100): also feed unknown opcodes to the sniffer, so a
-            // cap-breakthrough request that is not yet named still upgrades the avatar.
-            if (session.getPlayer() != null
-                    && emu.grasscutter.game.avatar.AvatarExtraLevelHelper.tryHandleUnregisteredPacket(
-                            session.getPlayer(), opcode, payload)) {
-                return;
-            }
             // Unhandled requests go to debug: a 7.1 client sends dozens this server has no
             // handler for, and listing them at every login was noise.
             var logger = Grasscutter.getLogger();
@@ -238,10 +191,6 @@ public final class GameServerPacketHandler {
                     hex
                 };
                 logger.debug(line, args);
-            }
-            if (session.getPlayer() != null) {
-                emu.grasscutter.game.systems.ReliquaryDustSystem.noteRecvOpcode(
-                        session.getPlayer(), opcode);
             }
         }
     }

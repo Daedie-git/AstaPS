@@ -157,6 +157,12 @@ public final class BanCommand implements CommandHandler {
         }
     }
 
+    static Account canonicalBanAccount(Account selected, Player online) {
+        var live = online == null ? null : online.getAccount();
+        return live != null && java.util.Objects.equals(selected.getId(), live.getId())
+                ? live : selected;
+    }
+
     static boolean hasPermission(Player sender, String permission, String additional) {
         if (sender == null) return true;
         Account account = sender.getAccount();

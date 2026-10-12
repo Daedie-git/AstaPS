@@ -29,6 +29,7 @@ public class MailHandler extends BasePlayerManager {
         if (event.isCanceled()) return;
         message = event.getMessage();
 
+        emu.grasscutter.game.player.SessionWriteFence.bind(message, this.getPlayer());
         message.setOwnerUid(this.getPlayer().getUid());
         message.save();
 
@@ -166,6 +167,7 @@ public class MailHandler extends BasePlayerManager {
         List<Mail> mailList = DatabaseHelper.getAllMail(this.getPlayer());
 
         for (Mail mail : mailList) {
+            emu.grasscutter.game.player.SessionWriteFence.bind(mail, this.getPlayer());
             this.getMail().add(mail);
         }
     }

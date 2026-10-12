@@ -1,6 +1,6 @@
 package emu.grasscutter.data.binout;
 
-import com.google.gson.TypeAdapter;
+import com.google.gson.*;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 
 import lombok.ToString;
 
@@ -460,6 +461,8 @@ public class AbilityModifier implements Serializable {
             return this.ratio == DynamicFloat.ONE ? DynamicFloat.ZERO : this.ratio;
         }
         public String determineType;
+        /** ChangePhlogiston resources use Add/Sub/Set here, independently of determineType. */
+        public String costType;
         public int configID;
 
         public int[] configIdArray;
@@ -503,7 +506,19 @@ public class AbilityModifier implements Serializable {
         }
     }
 
+    @JsonAdapter(ModifierPropertyAdapter.class)
     public static class AbilityModifierProperty implements Serializable {
+        private final Map<String, DynamicFloat> additionalProperties = new HashMap<>();
+
+        /** Retain resource properties without opting them into server-authoritative stat changes. */
+        public Map<String, DynamicFloat> values() {
+            var result = new HashMap<>(additionalProperties);
+            result.put("Actor_HpThresholdRatio", Actor_HpThresholdRatio);
+            result.put("Actor_MaxHPRatio", Actor_MaxHPRatio);
+            result.put("Actor_CostStaminaRatio", Actor_CostStaminaRatio);
+            return Map.copyOf(result);
+        }
+
         // Usually a constant, but a config may also name an ability special to read it from.
         public DynamicFloat Actor_HpThresholdRatio = DynamicFloat.ZERO;
         /** Max HP multiplier added to FIGHT_PROP_HP_PERCENT (e.g. Yelan C4 / Furina overflow). */
@@ -513,6 +528,40 @@ public class AbilityModifier implements Serializable {
          * {@code -2} so exploration movement spends nightsoul instead of stamina.
          */
         public DynamicFloat Actor_CostStaminaRatio = DynamicFloat.ZERO;
+    }
+
+    public static final class ModifierPropertyAdapter
+            implements JsonDeserializer<AbilityModifierProperty> {
+        @Override
+        public AbilityModifierProperty deserialize(JsonElement json, java.lang.reflect.Type type,
+                JsonDeserializationContext context) {
+            var result = new AbilityModifierProperty();
+            if (!json.isJsonObject()) return result;
+            for (var entry : json.getAsJsonObject().entrySet()) {
+                var raw = entry.getValue();
+                if (raw.isJsonNull() || raw.isJsonObject()) continue;
+                if (raw.isJsonArray()) {
+                    boolean valid = true;
+                    for (var item : raw.getAsJsonArray()) valid &= item.isJsonPrimitive();
+                    if (!valid) continue;
+                }
+                DynamicFloat value;
+                try {
+                    value = context.deserialize(raw, DynamicFloat.class);
+                } catch (JsonParseException | IllegalArgumentException malformed) {
+                    emu.grasscutter.Grasscutter.getLogger().debug("Skipping malformed modifier property {}", entry.getKey());
+                    continue;
+                }
+                if (value == null) continue;
+                switch (entry.getKey()) {
+                    case "Actor_HpThresholdRatio" -> result.Actor_HpThresholdRatio = value;
+                    case "Actor_MaxHPRatio" -> result.Actor_MaxHPRatio = value;
+                    case "Actor_CostStaminaRatio" -> result.Actor_CostStaminaRatio = value;
+                    default -> result.additionalProperties.put(entry.getKey(), value);
+                }
+            }
+            return result;
+        }
     }
 
     public enum State {

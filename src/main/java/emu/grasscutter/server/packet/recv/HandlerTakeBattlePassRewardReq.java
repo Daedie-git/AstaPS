@@ -42,39 +42,7 @@ public class HandlerTakeBattlePassRewardReq extends PacketHandler {
         if (options.isEmpty()) options.addAll(parseOptionsFromWire(payload));
         if (options.isEmpty()) options.addAll(buildAllClaimableNonSelectable(manager));
 
-        List<BattlePassRewardTakeOptionOuterClass.BattlePassRewardTakeOption> normal = new ArrayList<>();
-        List<BattlePassRewardTakeOptionOuterClass.BattlePassRewardTakeOption> selectable = new ArrayList<>();
-        for (var option : options) {
-            if (option == null || !option.hasTag() || option.getTag().getRewardId() <= 0) continue;
-            if (BattlePassSelectChestHelper.isSelectableReward(option.getTag().getRewardId())) {
-                if (option.getOptionIdx() > 0) selectable.add(option);
-            } else normal.add(option);
-        }
-        if (!normal.isEmpty()) {
-            BattlePassCompatHelper.takeReward(manager, normal);
-            if (selectable.isEmpty()) return;
-        }
-        List<GameItem> granted = new ArrayList<>();
-        List<BattlePassRewardTakeOptionOuterClass.BattlePassRewardTakeOption> claimed = new ArrayList<>();
-        for (var option : selectable) {
-            int rewardId = option.getTag().getRewardId();
-            int level = option.getTag().getLevel();
-            boolean paid = option.getTag().getUnlockStatus()
-                    == BattlePassUnlockStatusOuterClass.BattlePassUnlockStatus.BattlePassUnlockStatus_BATTLE_PASS_UNLOCK_PAID;
-            manager.getTakenRewards().remove(rewardId);
-            List<GameItem> items = BattlePassSelectChestHelper.grant(player, rewardId, option.getOptionIdx(), paid);
-            if (items.isEmpty()) continue;
-            manager.getTakenRewards().put(rewardId, new BattlePassReward(level, rewardId, paid));
-            granted.addAll(items);
-            claimed.add(option);
-        }
-        if (!claimed.isEmpty()) {
-            manager.save();
-            player.sendPacket(new PacketBattlePassCurScheduleUpdateNotify(player));
-            player.sendPacket(new PacketTakeBattlePassRewardRsp(claimed, granted));
-        } else if (normal.isEmpty()) {
-            player.sendPacket(new PacketTakeBattlePassRewardRsp(options, granted));
-        }
+        BattlePassCompatHelper.takeReward(manager, options);
     }
 
     private static List<BattlePassRewardTakeOptionOuterClass.BattlePassRewardTakeOption> parseOptionsFromWire(byte[] payload) {
@@ -133,10 +101,8 @@ public class HandlerTakeBattlePassRewardReq extends PacketHandler {
         int maxLevel = Math.min(Math.max(manager.getLevel(), 0), 50);
         Map<Integer, BattlePassReward> taken = manager.getTakenRewards();
         for (int level = 1; level <= maxLevel; level++) {
-            BattlePassRewardData data = GameData.getBattlePassRewardDataMap().get(BattlePassCompatHelper.rewardDataKey(level));
-            if (data == null) {
-                for (int plan = 1; plan <= 4 && data == null; plan++) data = GameData.getBattlePassRewardDataMap().get(plan * 100 + level);
-            }
+            BattlePassRewardData data = GameData.getBattlePassRewardDataMap().get(
+                    BattlePassCompatHelper.getSelectedPlan(manager.getPlayer()) * 100 + level);
             if (data == null) continue;
             addOptions(result, taken, level, data.getFreeRewardIdList(), false);
             if (manager.isPaid()) addOptions(result, taken, level, data.getPaidRewardIdList(), true);

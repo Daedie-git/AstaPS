@@ -150,7 +150,7 @@ public final class ActionHealHP extends AbilityActionHandler {
                 && furinaTarget.getAvatar().getAvatarId() == 10000089) {
             var player = ability.getPlayerOwner();
             if (player != null) {
-                float baseAmount = finalAmount / abilityRatio;
+                float baseAmount = amountToRegenerate * action.healRatio.get(ability, 1f);
                 var seen = new java.util.HashSet<Long>();
                 seen.add(furinaTarget.getAvatar().getGuid());
                 for (var member : player.getTeamManager().getActiveTeam()) {
@@ -179,8 +179,8 @@ public final class ActionHealHP extends AbilityActionHandler {
         for (int depth = 0; depth < 4 && owner instanceof EntityClientGadget gadget; depth++) {
             var scene = gadget.getScene();
             if (scene == null) return null;
-            owner = scene.getEntityById(gadget.getOwnerEntityId());
-            if (owner == null) owner = scene.getEntityById(gadget.getOriginalOwnerEntityId());
+            owner = scene.getEntityById(gadget.getOriginalOwnerEntityId());
+            if (owner == null) owner = scene.getEntityById(gadget.getOwnerEntityId());
             if (owner == null
                     && (gadget.gadgetId == 41089011 || gadget.gadgetId == 41089012 || gadget.gadgetId == 41089013)
                     && ability.getPlayerOwner() != null) {

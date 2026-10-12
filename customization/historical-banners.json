@@ -1,0 +1,2758 @@
+{
+  "sources": {
+    "history": "https://github.com/MadeBaruna/paimon-moe/blob/main/src/data/banners.js",
+    "ids": "https://github.com/theBowja/genshin-db/tree/main/src/data/English"
+  },
+  "phases": [
+    {
+      "id": "2022-08-24",
+      "version": "3.0",
+      "characters": [
+        {
+          "name": "Tighnari",
+          "card": 1069,
+          "prefabPath": "GachaShowPanel_A091",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A091_TITLE"
+        },
+        {
+          "name": "Zhongli",
+          "card": 1030,
+          "prefabPath": "GachaShowPanel_A092",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A092_TITLE"
+        }
+      ],
+      "fourStars": [
+        1067,
+        1031,
+        1039
+      ],
+      "weapons": [
+        15511,
+        13504
+      ],
+      "fourStarWeapons": [
+        11401,
+        12402,
+        13407,
+        14401,
+        15402
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A093"
+    },
+    {
+      "id": "2022-09-09",
+      "version": "3.0",
+      "characters": [
+        {
+          "name": "Ganyu",
+          "card": 1037,
+          "prefabPath": "GachaShowPanel_A094",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A094_TITLE"
+        },
+        {
+          "name": "Sangonomiya Kokomi",
+          "card": 1054,
+          "prefabPath": "GachaShowPanel_A095",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A095_TITLE"
+        }
+      ],
+      "fourStars": [
+        1025,
+        1043,
+        1068
+      ],
+      "weapons": [
+        15502,
+        14506
+      ],
+      "fourStarWeapons": [
+        11403,
+        12401,
+        13401,
+        14409,
+        15405
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A096"
+    },
+    {
+      "id": "2022-09-28",
+      "version": "3.1",
+      "characters": [
+        {
+          "name": "Cyno",
+          "card": 1071,
+          "prefabPath": "GachaShowPanel_A097",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A097_TITLE"
+        },
+        {
+          "name": "Venti",
+          "card": 1022,
+          "prefabPath": "GachaShowPanel_A098",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A098_TITLE"
+        }
+      ],
+      "fourStars": [
+        1053,
+        1072,
+        1065
+      ],
+      "weapons": [
+        13511,
+        15503
+      ],
+      "fourStarWeapons": [
+        12415,
+        11405,
+        13407,
+        14403,
+        15401
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A099"
+    },
+    {
+      "id": "2022-10-14",
+      "version": "3.1",
+      "characters": [
+        {
+          "name": "Nilou",
+          "card": 1070,
+          "prefabPath": "GachaShowPanel_A100",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A100_TITLE"
+        },
+        {
+          "name": "Albedo",
+          "card": 1038,
+          "prefabPath": "GachaShowPanel_A101",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A101_TITLE"
+        }
+      ],
+      "fourStars": [
+        1014,
+        1023,
+        1024
+      ],
+      "weapons": [
+        11511,
+        11505
+      ],
+      "fourStarWeapons": [
+        11418,
+        14416,
+        12405,
+        13401,
+        15403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A102"
+    },
+    {
+      "id": "2022-12-27",
+      "version": "3.3",
+      "characters": [
+        {
+          "name": "Raiden Shogun",
+          "card": 1052,
+          "prefabPath": "GachaShowPanel_A112",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A112_TITLE"
+        },
+        {
+          "name": "Kamisato Ayato",
+          "card": 1066,
+          "prefabPath": "GachaShowPanel_A113",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A113_TITLE"
+        }
+      ],
+      "fourStars": [
+        1053,
+        1045,
+        1056
+      ],
+      "weapons": [
+        13509,
+        11510
+      ],
+      "fourStarWeapons": [
+        12416,
+        15416,
+        11405,
+        13407,
+        14403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A114"
+    },
+    {
+      "id": "2023-01-18",
+      "version": "3.4",
+      "characters": [
+        {
+          "name": "Alhaitham",
+          "card": 1078,
+          "prefabPath": "GachaShowPanel_A115",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A115_TITLE"
+        },
+        {
+          "name": "Xiao",
+          "card": 1026,
+          "prefabPath": "GachaShowPanel_A116",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A116_TITLE"
+        }
+      ],
+      "fourStars": [
+        1044,
+        1064,
+        1077
+      ],
+      "weapons": [
+        11512,
+        13505
+      ],
+      "fourStarWeapons": [
+        13406,
+        11402,
+        12405,
+        14402,
+        15403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A117"
+    },
+    {
+      "id": "2023-03-01",
+      "version": "3.5",
+      "characters": [
+        {
+          "name": "Dehya",
+          "card": 1079,
+          "prefabPath": "GachaShowPanel_A121",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A121_TITLE"
+        },
+        {
+          "name": "Cyno",
+          "card": 1071,
+          "prefabPath": "GachaShowPanel_A122",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A122_TITLE"
+        }
+      ],
+      "fourStars": [
+        1032,
+        1067,
+        1014
+      ],
+      "weapons": [
+        12511,
+        13511
+      ],
+      "fourStarWeapons": [
+        11410,
+        15410,
+        12403,
+        13401,
+        14409
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A123"
+    },
+    {
+      "id": "2023-03-21",
+      "version": "3.5",
+      "characters": [
+        {
+          "name": "Shenhe",
+          "card": 1063,
+          "prefabPath": "GachaShowPanel_A124",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A124_TITLE"
+        },
+        {
+          "name": "Kamisato Ayaka",
+          "card": 1002,
+          "prefabPath": "GachaShowPanel_A125",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A125_TITLE"
+        }
+      ],
+      "fourStars": [
+        1039,
+        1043,
+        1080
+      ],
+      "weapons": [
+        13507,
+        11509
+      ],
+      "fourStarWeapons": [
+        14410,
+        11403,
+        12402,
+        13407,
+        15401
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A126"
+    },
+    {
+      "id": "2023-05-24",
+      "version": "3.7",
+      "characters": [
+        {
+          "name": "Yoimiya",
+          "card": 1049,
+          "prefabPath": "GachaShowPanel_A133",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A133_TITLE"
+        },
+        {
+          "name": "Yae Miko",
+          "card": 1058,
+          "prefabPath": "GachaShowPanel_A134",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A134_TITLE"
+        }
+      ],
+      "fourStars": [
+        1061,
+        1064,
+        1036
+      ],
+      "weapons": [
+        15509,
+        14509
+      ],
+      "fourStarWeapons": [
+        12416,
+        11402,
+        13401,
+        14402,
+        15405
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A135"
+    },
+    {
+      "id": "2023-07-05",
+      "version": "3.8",
+      "characters": [
+        {
+          "name": "Eula",
+          "card": 1051,
+          "prefabPath": "GachaShowPanel_A139",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A139_TITLE"
+        },
+        {
+          "name": "Klee",
+          "card": 1029,
+          "prefabPath": "GachaShowPanel_A140",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A140_TITLE"
+        }
+      ],
+      "fourStars": [
+        1080,
+        1020,
+        1050
+      ],
+      "weapons": [
+        12503,
+        14502
+      ],
+      "fourStarWeapons": [
+        11410,
+        15410,
+        12405,
+        13407,
+        14409
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A141"
+    },
+    {
+      "id": "2023-09-05",
+      "version": "4.0",
+      "characters": [
+        {
+          "name": "Tartaglia",
+          "card": 1033,
+          "prefabPath": "GachaShowPanel_A148",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A148_TITLE"
+        },
+        {
+          "name": "Zhongli",
+          "card": 1030,
+          "prefabPath": "GachaShowPanel_A149",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A149_TITLE"
+        }
+      ],
+      "fourStars": [
+        1085,
+        1053,
+        1034
+      ],
+      "weapons": [
+        15507,
+        13504
+      ],
+      "fourStarWeapons": [
+        11402,
+        12403,
+        13401,
+        14402,
+        15405
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A150"
+    },
+    {
+      "id": "2024-01-31",
+      "version": "4.4",
+      "characters": [
+        {
+          "name": "Xianyun",
+          "card": 1093,
+          "prefabPath": "GachaShowPanel_A169",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A169_TITLE"
+        },
+        {
+          "name": "Nahida",
+          "card": 1073,
+          "prefabPath": "GachaShowPanel_A170",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A170_TITLE"
+        }
+      ],
+      "fourStars": [
+        1092,
+        1076,
+        1034
+      ],
+      "weapons": [
+        14515,
+        14511
+      ],
+      "fourStarWeapons": [
+        13406,
+        11403,
+        12403,
+        14403,
+        15403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A171"
+    },
+    {
+      "id": "2024-03-13",
+      "version": "4.5",
+      "characters": [
+        {
+          "name": "Chiori",
+          "card": 1094,
+          "prefabPath": "GachaShowPanel_A175",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A175_TITLE"
+        },
+        {
+          "name": "Arataki Itto",
+          "card": 1057,
+          "prefabPath": "GachaShowPanel_A176",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A176_TITLE"
+        }
+      ],
+      "fourStars": [
+        1064,
+        1055,
+        1068
+      ],
+      "weapons": [
+        11514,
+        12510
+      ],
+      "fourStarWeapons": [
+        11410,
+        15410,
+        12402,
+        13401,
+        14401
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A177"
+    },
+    {
+      "id": "2024-05-14",
+      "version": "4.6",
+      "characters": [
+        {
+          "name": "Wanderer",
+          "card": 1075,
+          "prefabPath": "GachaShowPanel_A184",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A184_TITLE"
+        },
+        {
+          "name": "Baizhu",
+          "card": 1082,
+          "prefabPath": "GachaShowPanel_A185",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A185_TITLE"
+        }
+      ],
+      "fourStars": [
+        1074,
+        1076,
+        1024
+      ],
+      "weapons": [
+        14512,
+        14505
+      ],
+      "fourStarWeapons": [
+        13427,
+        15427,
+        11401,
+        12405,
+        14403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A186"
+    },
+    {
+      "id": "2024-06-25",
+      "version": "4.7",
+      "characters": [
+        {
+          "name": "Sigewinne",
+          "card": 1095,
+          "prefabPath": "GachaShowPanel_A190",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A190_TITLE"
+        },
+        {
+          "name": "Furina",
+          "card": 1089,
+          "prefabPath": "GachaShowPanel_A191",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A191_TITLE"
+        }
+      ],
+      "fourStars": [
+        1034,
+        1092,
+        1045
+      ],
+      "weapons": [
+        15513,
+        11513
+      ],
+      "fourStarWeapons": [
+        12410,
+        11405,
+        13407,
+        14401,
+        15403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A192"
+    },
+    {
+      "id": "2024-07-17",
+      "version": "4.8",
+      "characters": [
+        {
+          "name": "Navia",
+          "card": 1091,
+          "prefabPath": "GachaShowPanel_A193",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A193_TITLE"
+        },
+        {
+          "name": "Nilou",
+          "card": 1070,
+          "prefabPath": "GachaShowPanel_A194",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A194_TITLE"
+        }
+      ],
+      "fourStars": [
+        1061,
+        1081,
+        1027
+      ],
+      "weapons": [
+        12512,
+        11511
+      ],
+      "fourStarWeapons": [
+        11418,
+        12402,
+        13401,
+        14409,
+        15405
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A195"
+    },
+    {
+      "id": "2024-08-06",
+      "version": "4.8",
+      "characters": [
+        {
+          "name": "Emilie",
+          "card": 1099,
+          "prefabPath": "GachaShowPanel_A196",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A196_TITLE"
+        },
+        {
+          "name": "Yelan",
+          "card": 1060,
+          "prefabPath": "GachaShowPanel_A197",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A197_TITLE"
+        }
+      ],
+      "fourStars": [
+        1048,
+        1023,
+        1020
+      ],
+      "weapons": [
+        13513,
+        15508
+      ],
+      "fourStarWeapons": [
+        12415,
+        14416,
+        11402,
+        13407,
+        15401
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A198"
+    },
+    {
+      "id": "2024-08-28",
+      "version": "5.0",
+      "characters": [
+        {
+          "name": "Mualani",
+          "card": 4102,
+          "prefabPath": "GachaShowPanel_A199",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A199_TITLE"
+        },
+        {
+          "name": "Kaedehara Kazuha",
+          "card": 1047,
+          "prefabPath": "GachaShowPanel_A200",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A200_TITLE"
+        }
+      ],
+      "fourStars": [
+        4100,
+        1044,
+        1032
+      ],
+      "weapons": [
+        14516,
+        11503
+      ],
+      "fourStarWeapons": [
+        11401,
+        12401,
+        13401,
+        14403,
+        15402
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A201"
+    },
+    {
+      "id": "2024-10-29",
+      "version": "5.1",
+      "characters": [
+        {
+          "name": "Nahida",
+          "card": 1073,
+          "prefabPath": "GachaShowPanel_A208",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A208_TITLE"
+        },
+        {
+          "name": "Hu Tao",
+          "card": 1046,
+          "prefabPath": "GachaShowPanel_A209",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A209_TITLE"
+        }
+      ],
+      "fourStars": [
+        1097,
+        1025,
+        1065
+      ],
+      "weapons": [
+        14511,
+        13501
+      ],
+      "fourStarWeapons": [
+        12430,
+        11405,
+        13401,
+        14409,
+        15401
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A210"
+    },
+    {
+      "id": "2024-11-20",
+      "version": "5.2",
+      "characters": [
+        {
+          "name": "Chasca",
+          "card": 4104,
+          "prefabPath": "GachaShowPanel_A211",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A211_TITLE"
+        },
+        {
+          "name": "Lyney",
+          "card": 1084,
+          "prefabPath": "GachaShowPanel_A212",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A212_TITLE"
+        }
+      ],
+      "fourStars": [
+        4105,
+        1043,
+        1014
+      ],
+      "weapons": [
+        15514,
+        15512
+      ],
+      "fourStarWeapons": [
+        14430,
+        15430,
+        11402,
+        12402,
+        13407
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A213"
+    },
+    {
+      "id": "2024-12-10",
+      "version": "5.2",
+      "characters": [
+        {
+          "name": "Neuvillette",
+          "card": 1087,
+          "prefabPath": "GachaShowPanel_A214",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A214_TITLE"
+        },
+        {
+          "name": "Zhongli",
+          "card": 1030,
+          "prefabPath": "GachaShowPanel_A215",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A215_TITLE"
+        }
+      ],
+      "fourStars": [
+        1059,
+        1031,
+        1077
+      ],
+      "weapons": [
+        14514,
+        13504
+      ],
+      "fourStarWeapons": [
+        15412,
+        11401,
+        12401,
+        13401,
+        14403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A216"
+    },
+    {
+      "id": "2025-01-01",
+      "version": "5.3",
+      "characters": [
+        {
+          "name": "Mavuika",
+          "card": 4106,
+          "prefabPath": "GachaShowPanel_A217",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A217_TITLE"
+        },
+        {
+          "name": "Citlali",
+          "card": 4107,
+          "prefabPath": "GachaShowPanel_A218",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A218_TITLE"
+        }
+      ],
+      "fourStars": [
+        4100,
+        1032,
+        1039
+      ],
+      "weapons": [
+        12514,
+        14517
+      ],
+      "fourStarWeapons": [
+        12410,
+        11403,
+        13407,
+        14401,
+        15402
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A219"
+    },
+    {
+      "id": "2025-01-21",
+      "version": "5.3",
+      "characters": [
+        {
+          "name": "Arlecchino",
+          "card": 1096,
+          "prefabPath": "GachaShowPanel_A220",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A220_TITLE"
+        },
+        {
+          "name": "Clorinde",
+          "card": 1098,
+          "prefabPath": "GachaShowPanel_A221",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A221_TITLE"
+        }
+      ],
+      "fourStars": [
+        4108,
+        1090,
+        1045
+      ],
+      "weapons": [
+        13512,
+        11515
+      ],
+      "fourStarWeapons": [
+        13406,
+        11405,
+        12405,
+        14402,
+        15403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A222"
+    },
+    {
+      "id": "2025-02-12",
+      "version": "5.4",
+      "characters": [
+        {
+          "name": "Yumemizuki Mizuki",
+          "card": 4109,
+          "prefabPath": "GachaShowPanel_A223",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A223_TITLE"
+        },
+        {
+          "name": "Sigewinne",
+          "card": 1095,
+          "prefabPath": "GachaShowPanel_A224",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A224_TITLE"
+        }
+      ],
+      "fourStars": [
+        1055,
+        1053,
+        1023
+      ],
+      "weapons": [
+        14518,
+        15513
+      ],
+      "fourStarWeapons": [
+        12416,
+        13416,
+        15416,
+        11402,
+        14409
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A225"
+    },
+    {
+      "id": "2025-03-04",
+      "version": "5.4",
+      "characters": [
+        {
+          "name": "Wriothesley",
+          "card": 1086,
+          "prefabPath": "GachaShowPanel_A227",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A227_TITLE"
+        },
+        {
+          "name": "Furina",
+          "card": 1089,
+          "prefabPath": "GachaShowPanel_A226",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A226_TITLE"
+        }
+      ],
+      "fourStars": [
+        1088,
+        1036,
+        1080
+      ],
+      "weapons": [
+        11513,
+        14513
+      ],
+      "fourStarWeapons": [
+        11401,
+        12403,
+        13401,
+        14403,
+        15405
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A228"
+    },
+    {
+      "id": "2025-03-26",
+      "version": "5.5",
+      "characters": [
+        {
+          "name": "Varesa",
+          "card": 4111,
+          "prefabPath": "GachaShowPanel_A229",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A229_TITLE"
+        },
+        {
+          "name": "Xianyun",
+          "card": 1093,
+          "prefabPath": "GachaShowPanel_A230",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A230_TITLE"
+        }
+      ],
+      "fourStars": [
+        4110,
+        1090,
+        1092
+      ],
+      "weapons": [
+        14519,
+        14515
+      ],
+      "fourStarWeapons": [
+        11430,
+        12430,
+        13430,
+        14430,
+        15430
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A231"
+    },
+    {
+      "id": "2025-04-15",
+      "version": "5.5",
+      "characters": [
+        {
+          "name": "Xilonen",
+          "card": 4103,
+          "prefabPath": "GachaShowPanel_A232",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A232_TITLE"
+        },
+        {
+          "name": "Venti",
+          "card": 1022,
+          "prefabPath": "GachaShowPanel_A233",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A233_TITLE"
+        }
+      ],
+      "fourStars": [
+        1076,
+        1024,
+        1048
+      ],
+      "weapons": [
+        11516,
+        15503
+      ],
+      "fourStarWeapons": [
+        11403,
+        12402,
+        13407,
+        14401,
+        15401
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A234"
+    },
+    {
+      "id": "2025-05-27",
+      "version": "5.6",
+      "characters": [
+        {
+          "name": "Kinich",
+          "card": 4101,
+          "prefabPath": "GachaShowPanel_A238",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A238_TITLE"
+        },
+        {
+          "name": "Raiden Shogun",
+          "card": 1052,
+          "prefabPath": "GachaShowPanel_A239",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A239_TITLE"
+        }
+      ],
+      "fourStars": [
+        1050,
+        1056,
+        1083
+      ],
+      "weapons": [
+        12513,
+        13509
+      ],
+      "fourStarWeapons": [
+        11405,
+        12401,
+        13401,
+        14409,
+        15402
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A240"
+    },
+    {
+      "id": "2025-09-10",
+      "version": "6.0",
+      "characters": [
+        {
+          "name": "Lauma",
+          "card": 4119,
+          "prefabPath": "GachaShowPanel_A253",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A253_TITLE"
+        },
+        {
+          "name": "Nahida",
+          "card": 1073,
+          "prefabPath": "GachaShowPanel_A254",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A254_TITLE"
+        }
+      ],
+      "fourStars": [
+        1014,
+        1065,
+        1081
+      ],
+      "weapons": [
+        14520,
+        14511
+      ],
+      "fourStarWeapons": [
+        11402,
+        12403,
+        13401,
+        14403,
+        15402
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A255"
+    },
+    {
+      "id": "2025-10-22",
+      "version": "6.1",
+      "characters": [
+        {
+          "name": "Nefer",
+          "card": 4122,
+          "prefabPath": "GachaShowPanel_A259",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A259_TITLE"
+        },
+        {
+          "name": "Furina",
+          "card": 1089,
+          "prefabPath": "GachaShowPanel_A260",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A260_TITLE"
+        }
+      ],
+      "fourStars": [
+        1025,
+        1067,
+        1077
+      ],
+      "weapons": [
+        14521,
+        11513
+      ],
+      "fourStarWeapons": [
+        11434,
+        13434,
+        14434,
+        12402,
+        15401
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A261"
+    },
+    {
+      "id": "2026-01-14",
+      "version": "6.3",
+      "characters": [
+        {
+          "name": "Columbina",
+          "card": 4125,
+          "prefabPath": "GachaShowPanel_A271",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A271_TITLE"
+        },
+        {
+          "name": "Ineffa",
+          "card": 4116,
+          "prefabPath": "GachaShowPanel_A272",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A272_TITLE"
+        }
+      ],
+      "fourStars": [
+        1031,
+        1097,
+        4113
+      ],
+      "weapons": [
+        14522,
+        13515
+      ],
+      "fourStarWeapons": [
+        13430,
+        14430,
+        15412,
+        11402,
+        12403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A273"
+    },
+    {
+      "id": "2026-02-03",
+      "version": "6.3",
+      "characters": [
+        {
+          "name": "Zibai",
+          "card": 4126,
+          "prefabPath": "GachaShowPanel_A274",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A274_TITLE"
+        },
+        {
+          "name": "Neuvillette",
+          "card": 1087,
+          "prefabPath": "GachaShowPanel_A275",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A275_TITLE"
+        }
+      ],
+      "fourStars": [
+        4127,
+        4121,
+        1055
+      ],
+      "weapons": [
+        11519,
+        14514
+      ],
+      "fourStarWeapons": [
+        11418,
+        12401,
+        13401,
+        14409,
+        15401
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A276"
+    },
+    {
+      "id": "2026-02-25",
+      "version": "6.4",
+      "characters": [
+        {
+          "name": "Varka",
+          "card": 4128,
+          "prefabPath": "GachaShowPanel_A277",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A277_TITLE"
+        },
+        {
+          "name": "Flins",
+          "card": 4120,
+          "prefabPath": "GachaShowPanel_A278",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A278_TITLE"
+        }
+      ],
+      "fourStars": [
+        1032,
+        1023,
+        1043
+      ],
+      "weapons": [
+        12515,
+        13516
+      ],
+      "fourStarWeapons": [
+        13434,
+        11401,
+        12401,
+        14403,
+        15403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A279"
+    },
+    {
+      "id": "2026-03-17",
+      "version": "6.4",
+      "characters": [
+        {
+          "name": "Skirk",
+          "card": 4114,
+          "prefabPath": "GachaShowPanel_A280",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A280_TITLE"
+        },
+        {
+          "name": "Escoffier",
+          "card": 4112,
+          "prefabPath": "GachaShowPanel_A281",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A281_TITLE"
+        }
+      ],
+      "fourStars": [
+        4115,
+        1072,
+        1088
+      ],
+      "weapons": [
+        11517,
+        13514
+      ],
+      "fourStarWeapons": [
+        11402,
+        12402,
+        13407,
+        14401,
+        15405
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A282"
+    },
+    {
+      "id": "2026-04-08",
+      "version": "6.5",
+      "characters": [
+        {
+          "name": "Linnea",
+          "card": 4130,
+          "prefabPath": "GachaShowPanel_A283",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A283_TITLE"
+        },
+        {
+          "name": "Chasca",
+          "card": 4104,
+          "prefabPath": "GachaShowPanel_A284",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A284_TITLE"
+        }
+      ],
+      "fourStars": [
+        4127,
+        4121,
+        1034
+      ],
+      "weapons": [
+        15516,
+        15514
+      ],
+      "fourStarWeapons": [
+        15430,
+        11405,
+        12403,
+        13401,
+        14409
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A285"
+    },
+    {
+      "id": "2026-05-20",
+      "version": "6.6",
+      "characters": [
+        {
+          "name": "Nicole",
+          "card": 4131,
+          "prefabPath": "GachaShowPanel_A289",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A289_TITLE"
+        },
+        {
+          "name": "Durin",
+          "card": 4123,
+          "prefabPath": "GachaShowPanel_A290",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A290_TITLE"
+        }
+      ],
+      "fourStars": [
+        4132,
+        1031,
+        1020
+      ],
+      "weapons": [
+        14523,
+        11518
+      ],
+      "fourStarWeapons": [
+        11434,
+        15412,
+        12402,
+        13401,
+        14402
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A291"
+    },
+    {
+      "id": "2026-06-09",
+      "version": "6.6",
+      "characters": [
+        {
+          "name": "Lohen",
+          "card": 4129,
+          "prefabPath": "GachaShowPanel_A292",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A292_TITLE"
+        },
+        {
+          "name": "Mavuika",
+          "card": 4106,
+          "prefabPath": "GachaShowPanel_A293",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A293_TITLE"
+        }
+      ],
+      "fourStars": [
+        1080,
+        1023,
+        1032
+      ],
+      "weapons": [
+        13517,
+        12514
+      ],
+      "fourStarWeapons": [
+        11410,
+        14410,
+        15410,
+        12405,
+        13407
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A294"
+    },
+    {
+      "id": "2026-07-01",
+      "version": "6.7",
+      "characters": [
+        {
+          "name": "Sandrone",
+          "card": 4133,
+          "prefabPath": "GachaShowPanel_A295",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A295_TITLE"
+        },
+        {
+          "name": "Citlali",
+          "card": 4107,
+          "prefabPath": "GachaShowPanel_A296",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A296_TITLE"
+        }
+      ],
+      "fourStars": [
+        1024,
+        1039,
+        1085
+      ],
+      "weapons": [
+        12516,
+        14517
+      ],
+      "fourStarWeapons": [
+        11401,
+        12405,
+        13401,
+        14403,
+        15403
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A297"
+    },
+    {
+      "id": "2026-07-21",
+      "version": "6.7",
+      "characters": [
+        {
+          "name": "Columbina",
+          "card": 4125,
+          "prefabPath": "GachaShowPanel_A298",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A298_TITLE"
+        },
+        {
+          "name": "Raiden Shogun",
+          "card": 1052,
+          "prefabPath": "GachaShowPanel_A299",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A299_TITLE"
+        }
+      ],
+      "fourStars": [
+        4124,
+        4105,
+        1097
+      ],
+      "weapons": [
+        14522,
+        13509
+      ],
+      "fourStarWeapons": [
+        14430,
+        11403,
+        12402,
+        13407,
+        15401
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A300"
+    },
+    {
+      "id": "2026-08-12",
+      "version": "7.0",
+      "characters": [
+        {
+          "name": "Odette",
+          "card": 4150,
+          "prefabPath": "GachaShowPanel_A301",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A0301_TITLE"
+        },
+        {
+          "name": "Arlecchino",
+          "card": 1096,
+          "prefabPath": "GachaShowPanel_A302",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A302_TITLE"
+        }
+      ],
+      "fourStars": [
+        4148,
+        1043,
+        1083
+      ],
+      "weapons": [
+        11520,
+        13512
+      ],
+      "fourStarWeapons": [
+        11401,
+        12402,
+        13401,
+        14403,
+        15405
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A303"
+    },
+    {
+      "id": "2026-09-23",
+      "version": "7.1",
+      "characters": [
+        {
+          "name": "Vesna",
+          "card": 4143,
+          "prefabPath": "GachaShowPanel_A307",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A307_TITLE"
+        },
+        {
+          "name": "Vodyanitsa",
+          "card": 4140,
+          "prefabPath": "GachaShowPanel_A308",
+          "titlePath": "UI_GACHA_SHOW_PANEL_A308_TITLE"
+        }
+      ],
+      "fourStars": [
+        1039,
+        1076,
+        1036
+      ],
+      "weapons": [
+        11522,
+        14524
+      ],
+      "fourStarWeapons": [
+        11437,
+        14437,
+        15437,
+        12401,
+        13401
+      ],
+      "weaponPrefabPath": "GachaShowPanel_A309"
+    }
+  ],
+  "chronicles": [
+    {
+      "id": "2024-03-13",
+      "name": "Ode to the Dawn Breeze",
+      "version": "4.5",
+      "prefabPath": "GachaShowPanel_N?5",
+      "previewPrefabPath": "UI_Tab_GachaShowPanel_N5",
+      "titlePath": "UI_GACHA_SHOW_PANEL_B001_TITLE",
+      "fiveStars": [
+        1051,
+        1041,
+        1038,
+        1029,
+        1016,
+        1003,
+        11502,
+        11501,
+        12511,
+        12503,
+        12502,
+        12501,
+        13502,
+        14502,
+        14501,
+        15511,
+        15501
+      ],
+      "fourStars": [
+        1080,
+        1045,
+        1043,
+        1039,
+        1034,
+        1032,
+        1031,
+        1021,
+        1020,
+        1015,
+        1014,
+        1006,
+        11410,
+        11405,
+        11403,
+        11402,
+        11401,
+        12405,
+        12403,
+        12402,
+        12401,
+        13407,
+        13401,
+        14410,
+        14409,
+        14403,
+        14402,
+        14401,
+        15412,
+        15410,
+        15405,
+        15403,
+        15402,
+        15401
+      ]
+    },
+    {
+      "id": "2025-01-21",
+      "name": "Remembrance of Jade and Stone",
+      "version": "5.3",
+      "prefabPath": "GachaShowPanel_N?5",
+      "previewPrefabPath": "UI_Tab_GachaShowPanel_N5",
+      "titlePath": "UI_GACHA_SHOW_PANEL_B002_TITLE",
+      "fiveStars": [
+        1082,
+        1063,
+        1042,
+        1037,
+        1035,
+        1033,
+        1026,
+        11505,
+        11504,
+        12504,
+        13507,
+        13505,
+        14505,
+        14504,
+        15507,
+        15502
+      ],
+      "fourStars": [
+        1092,
+        1077,
+        1064,
+        1048,
+        1044,
+        1036,
+        1027,
+        1025,
+        1024,
+        1023,
+        11405,
+        11403,
+        11402,
+        11401,
+        12410,
+        12405,
+        12403,
+        12402,
+        12401,
+        13407,
+        13406,
+        13401,
+        14409,
+        14403,
+        14402,
+        14401,
+        15405,
+        15403,
+        15402,
+        15401
+      ]
+    }
+  ],
+  "items": {
+    "12516": {
+      "name": "A Teaspoon of Transcendence",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "12514": {
+      "name": "A Thousand Blazing Suns",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14511": {
+      "name": "A Thousand Floating Dreams",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11515": {
+      "name": "Absolution",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "4121": {
+      "name": "Aino",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "12416": {
+      "name": "Akuoumaru",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "1038": {
+      "name": "Albedo",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1078": {
+      "name": "Alhaitham",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "15410": {
+      "name": "Alley Hunter",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "4148": {
+      "name": "Alyosha",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1021": {
+      "name": "Amber",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "15502": {
+      "name": "Amos' Bow",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14523": {
+      "name": "Angelos' Heptades",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "15508": {
+      "name": "Aqua Simulacra",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11501": {
+      "name": "Aquila Favonia",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1057": {
+      "name": "Arataki Itto",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1096": {
+      "name": "Arlecchino",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "15514": {
+      "name": "Astral Vulture's Crimson Plumage",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11518": {
+      "name": "Athame Artis",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11517": {
+      "name": "Azurelight",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1082": {
+      "name": "Baizhu",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1014": {
+      "name": "Barbara",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "12511": {
+      "name": "Beacon of the Reed Sea",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1024": {
+      "name": "Beidou",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1032": {
+      "name": "Bennett",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "11522": {
+      "name": "Beyond the Chrysalis",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "13516": {
+      "name": "Bloodsoaked Ruins",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "15437": {
+      "name": "Breezeborne Refrain",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "13507": {
+      "name": "Calamity Queller",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1072": {
+      "name": "Candace",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "14513": {
+      "name": "Cashflow Supervision",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1088": {
+      "name": "Charlotte",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "4104": {
+      "name": "Chasca",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1090": {
+      "name": "Chevreuse",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1094": {
+      "name": "Chiori",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1036": {
+      "name": "Chongyun",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "4107": {
+      "name": "Citlali",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1098": {
+      "name": "Clorinde",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1067": {
+      "name": "Collei",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "4125": {
+      "name": "Columbina",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "14515": {
+      "name": "Crane's Echoing Call",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "13512": {
+      "name": "Crimson Moon's Semblance",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1071": {
+      "name": "Cyno",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "4115": {
+      "name": "Dahlia",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "14434": {
+      "name": "Dawning Frost",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "1079": {
+      "name": "Dehya",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1016": {
+      "name": "Diluc",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1039": {
+      "name": "Diona",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "13517": {
+      "name": "Disaster and Remorse",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1068": {
+      "name": "Dori",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "13401": {
+      "name": "Dragon's Bane",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "4123": {
+      "name": "Durin",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "15503": {
+      "name": "Elegy for the End",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1099": {
+      "name": "Emilie",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "13509": {
+      "name": "Engulfing Lightning",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "4112": {
+      "name": "Escoffier",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1051": {
+      "name": "Eula",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "14506": {
+      "name": "Everlasting Moonglow",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14409": {
+      "name": "Eye of Perception",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "12513": {
+      "name": "Fang of the Mountain King",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1076": {
+      "name": "Faruzan",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "14401": {
+      "name": "Favonius Codex",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "12401": {
+      "name": "Favonius Greatsword",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "13407": {
+      "name": "Favonius Lance",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "11401": {
+      "name": "Favonius Sword",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "15401": {
+      "name": "Favonius Warbow",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "1031": {
+      "name": "Fischl",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "4120": {
+      "name": "Flins",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "15430": {
+      "name": "Flower-Wreathed Feathers",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "13515": {
+      "name": "Fractured Halo",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11503": {
+      "name": "Freedom-Sworn",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1085": {
+      "name": "Freminet",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "12430": {
+      "name": "Fruitful Hook",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "1089": {
+      "name": "Furina",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1092": {
+      "name": "Gaming",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1037": {
+      "name": "Ganyu",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "12515": {
+      "name": "Gest of the Mighty Wolf",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "15516": {
+      "name": "Golden Frostbound Oath",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1055": {
+      "name": "Gorou",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "11510": {
+      "name": "Haran Geppaku Futsu",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1046": {
+      "name": "Hu Tao",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "15511": {
+      "name": "Hunter's Path",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14524": {
+      "name": "Hymn of the Maelstrom",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "4110": {
+      "name": "Iansan",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "4113": {
+      "name": "Ifa",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "4127": {
+      "name": "Illuga",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "4116": {
+      "name": "Ineffa",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "14505": {
+      "name": "Jadefall's Splendor",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "4124": {
+      "name": "Jahoda",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1003": {
+      "name": "Jean",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "4100": {
+      "name": "Kachina",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1047": {
+      "name": "Kaedehara Kazuha",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1015": {
+      "name": "Kaeya",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "14509": {
+      "name": "Kagura's Verity",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1002": {
+      "name": "Kamisato Ayaka",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1066": {
+      "name": "Kamisato Ayato",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1081": {
+      "name": "Kaveh",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1042": {
+      "name": "Keqing",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "11511": {
+      "name": "Key of Khaj-Nisut",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "4101": {
+      "name": "Kinich",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1061": {
+      "name": "Kirara",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1029": {
+      "name": "Klee",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1056": {
+      "name": "Kujou Sara",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1065": {
+      "name": "Kuki Shinobu",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "4108": {
+      "name": "Lan Yan",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "4119": {
+      "name": "Lauma",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1074": {
+      "name": "Layla",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "11512": {
+      "name": "Light of Foliar Incision",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11519": {
+      "name": "Lightbearing Moonshard",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "4130": {
+      "name": "Linnea",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "11405": {
+      "name": "Lion's Roar",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "1006": {
+      "name": "Lisa",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "12410": {
+      "name": "Lithic Blade",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "13406": {
+      "name": "Lithic Spear",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "4129": {
+      "name": "Lohen",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "14502": {
+      "name": "Lost Prayer to the Sacred Winds",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "13513": {
+      "name": "Lumidouce Elegy",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1083": {
+      "name": "Lynette",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1084": {
+      "name": "Lyney",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "12415": {
+      "name": "Makhaira Aquamarine",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "4106": {
+      "name": "Mavuika",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "14504": {
+      "name": "Memory of Dust",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1080": {
+      "name": "Mika",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "11509": {
+      "name": "Mistsplitter Reforged",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "15412": {
+      "name": "Mitternachts Waltz",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "1041": {
+      "name": "Mona",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "11434": {
+      "name": "Moonweaver's Dawn",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "13430": {
+      "name": "Mountain-Bracing Bolt",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "15416": {
+      "name": "Mouun's Moon",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "4102": {
+      "name": "Mualani",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1073": {
+      "name": "Nahida",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1091": {
+      "name": "Navia",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "4122": {
+      "name": "Nefer",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1087": {
+      "name": "Neuvillette",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "11437": {
+      "name": "New Bough",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "4131": {
+      "name": "Nicole",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "14520": {
+      "name": "Nightweaver's Looking Glass",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1070": {
+      "name": "Nilou",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1027": {
+      "name": "Ningguang",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "14522": {
+      "name": "Nocturne's Curtain Call",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1034": {
+      "name": "Noelle",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "4150": {
+      "name": "Odette",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "4105": {
+      "name": "Ororon",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "11516": {
+      "name": "Peak Patrol Song",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "15507": {
+      "name": "Polar Star",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "12427": {
+      "name": "Portable Power Saw",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "11505": {
+      "name": "Primordial Jade Cutter",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "13505": {
+      "name": "Primordial Jade Winged-Spear",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "13427": {
+      "name": "Prospector's Drill",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "4132": {
+      "name": "Prune",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1035": {
+      "name": "Qiqi",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1052": {
+      "name": "Raiden Shogun",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "12405": {
+      "name": "Rainslasher",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "15427": {
+      "name": "Range Gauge",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "1020": {
+      "name": "Razor",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "12510": {
+      "name": "Redhorn Stonethresher",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14521": {
+      "name": "Reliquary of Truth",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1045": {
+      "name": "Rosaria",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "15405": {
+      "name": "Rust",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "13434": {
+      "name": "Sacrificer's Staff",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "15403": {
+      "name": "Sacrificial Bow",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "14403": {
+      "name": "Sacrificial Fragments",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "12403": {
+      "name": "Sacrificial Greatsword",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "11403": {
+      "name": "Sacrificial Sword",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "4133": {
+      "name": "Sandrone",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1054": {
+      "name": "Sangonomiya Kokomi",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1053": {
+      "name": "Sayu",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1097": {
+      "name": "Sethos",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1063": {
+      "name": "Shenhe",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1059": {
+      "name": "Shikanoin Heizou",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1095": {
+      "name": "Sigewinne",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "15513": {
+      "name": "Silvershower Heartstrings",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "4114": {
+      "name": "Skirk",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "14501": {
+      "name": "Skyward Atlas",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11502": {
+      "name": "Skyward Blade",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "15501": {
+      "name": "Skyward Harp",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "12501": {
+      "name": "Skyward Pride",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "13502": {
+      "name": "Skyward Spine",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "12503": {
+      "name": "Song of Broken Pines",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11513": {
+      "name": "Splendor of Tranquil Waters",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "13501": {
+      "name": "Staff of Homa",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "13511": {
+      "name": "Staff of the Scarlet Sands",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14517": {
+      "name": "Starcaller's Watch",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11430": {
+      "name": "Sturdy Bone",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "1043": {
+      "name": "Sucrose",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "11504": {
+      "name": "Summit Shaper",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14518": {
+      "name": "Sunny Morning Sleep-In",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14516": {
+      "name": "Surf's Up",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "13514": {
+      "name": "Symphonist of Scents",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1033": {
+      "name": "Tartaglia",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "11410": {
+      "name": "The Alley Flash",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "12402": {
+      "name": "The Bell",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "15515": {
+      "name": "The Daybreak Chronicles",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11427": {
+      "name": "The Dockhand's Assistant",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "15512": {
+      "name": "The First Great Magic",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11402": {
+      "name": "The Flute",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "15402": {
+      "name": "The Stringless",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "12504": {
+      "name": "The Unforged",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14402": {
+      "name": "The Widsith",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "1050": {
+      "name": "Thoma",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "15509": {
+      "name": "Thundering Pulse",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1069": {
+      "name": "Tighnari",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "14514": {
+      "name": "Tome of the Eternal Flow",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14512": {
+      "name": "Tulaytullah's Remembrance",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "11514": {
+      "name": "Uraku Misugiri",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "4111": {
+      "name": "Varesa",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "4128": {
+      "name": "Varka",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1022": {
+      "name": "Venti",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "12512": {
+      "name": "Verdict",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "4143": {
+      "name": "Vesna",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "14519": {
+      "name": "Vivid Notions",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "4140": {
+      "name": "Vodyanitsa",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "13504": {
+      "name": "Vortex Vanquisher",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1075": {
+      "name": "Wanderer",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "14416": {
+      "name": "Wandering Evenstar",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "13416": {
+      "name": "Wavebreaker's Fin",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "14430": {
+      "name": "Waveriding Whirl",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "11520": {
+      "name": "Whitelake Frostfeather",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "14410": {
+      "name": "Wine and Song",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "14437": {
+      "name": "Winter's Heavy Heart",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "12502": {
+      "name": "Wolf's Gravestone",
+      "rarity": 5,
+      "kind": "weapons"
+    },
+    "1086": {
+      "name": "Wriothesley",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1023": {
+      "name": "Xiangling",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1093": {
+      "name": "Xianyun",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1026": {
+      "name": "Xiao",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "4103": {
+      "name": "Xilonen",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1025": {
+      "name": "Xingqiu",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1044": {
+      "name": "Xinyan",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "11418": {
+      "name": "Xiphos' Moonlight",
+      "rarity": 4,
+      "kind": "weapons"
+    },
+    "1058": {
+      "name": "Yae Miko",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1048": {
+      "name": "Yanfei",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1077": {
+      "name": "Yaoyao",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1060": {
+      "name": "Yelan",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1049": {
+      "name": "Yoimiya",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "4109": {
+      "name": "Yumemizuki Mizuki",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "1064": {
+      "name": "Yun Jin",
+      "rarity": 4,
+      "kind": "characters"
+    },
+    "1030": {
+      "name": "Zhongli",
+      "rarity": 5,
+      "kind": "characters"
+    },
+    "4126": {
+      "name": "Zibai",
+      "rarity": 5,
+      "kind": "characters"
+    }
+  }
+}

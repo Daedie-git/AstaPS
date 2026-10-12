@@ -41,8 +41,11 @@ public class ActiveCookCompoundData {
     }
 
     public void addCompound(int count, int currentTime) {
-        if (getOutputCount(currentTime) == totalCount) startTime = currentTime - totalCount * costTime;
-        totalCount += count;
+        if (count <= 0) throw new IllegalArgumentException("count must be positive");
+        int newTotal = Math.addExact(totalCount, count);
+        if (getOutputCount(currentTime) == totalCount)
+            startTime = Math.subtractExact(currentTime, Math.multiplyExact(totalCount, costTime));
+        totalCount = newTotal;
     }
 
     /**

@@ -18,7 +18,7 @@ public class HandlerPlayerLoginReq extends PacketHandler {
 
     @Override
     public void handle(GameSession session, byte[] header, byte[] payload) throws Exception {
-        if (session.getAccount() == null) {
+        if (!session.acceptsGameWork() || session.getAccount() == null || !session.ownsAccountLease()) {
             session.close();
             return;
         }

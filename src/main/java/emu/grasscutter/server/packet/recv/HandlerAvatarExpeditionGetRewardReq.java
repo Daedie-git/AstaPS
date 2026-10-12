@@ -17,6 +17,7 @@ public class HandlerAvatarExpeditionGetRewardReq extends PacketHandler {
     public void handle(GameSession session, byte[] header, byte[] payload) throws Exception {
         AvatarExpeditionGetRewardReq req = AvatarExpeditionGetRewardReq.parseFrom(payload);
         var player = session.getPlayer();
+        synchronized (player) {
 
         int clientSeq = 0;
         try {
@@ -29,6 +30,7 @@ public class HandlerAvatarExpeditionGetRewardReq extends PacketHandler {
         ExpeditionHelper.refreshFinishedStates(player);
 
         List<GameItem> allItems = new ArrayList<>();
+        List<Long> claimedGuids = new ArrayList<>();
         List<_AvatarExpeditionRewardInfo> rewardInfos = new ArrayList<>();
 
         List<Map.Entry<Long, ExpeditionInfo>> toClaim = new ArrayList<>();
@@ -47,15 +49,27 @@ public class HandlerAvatarExpeditionGetRewardReq extends PacketHandler {
 
         for (var entry : toClaim) {
             long guid = entry.getKey();
+            if (player.getAvatars().getAvatarByGuid(guid) == null) continue;
             ExpeditionInfo expInfo = entry.getValue();
             List<GameItem> items = ExpeditionHelper.rollRewards(player, expInfo);
+            if (items.isEmpty()) continue;
             allItems.addAll(items);
+            claimedGuids.add(guid);
             rewardInfos.add(PacketAvatarExpeditionGetRewardRsp.toRewardInfo(guid, expInfo, items));
-            player.removeExpeditionInfo(guid);
+
         }
 
-        if (!allItems.isEmpty()) {
-            player.getInventory().addItems(allItems, ActionReason.ExpeditionReward);
+        var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(player,
+                claimedGuids.stream().map(guid -> "expedition:" + guid).toList());
+        if (claim != null) {
+            if (!allItems.isEmpty() && emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(player.getInventory(), allItems, ActionReason.ExpeditionReward)) {
+                claimedGuids.forEach(player::removeExpeditionInfo);
+            } else {
+                rewardInfos.clear();
+            }
+            claim.release();
+        } else {
+            rewardInfos.clear();
         }
 
         player.save();
@@ -68,5 +82,6 @@ public class HandlerAvatarExpeditionGetRewardReq extends PacketHandler {
         session.send(
                 new PacketAvatarExpeditionAllDataRsp(
                         player.getExpeditionInfo(), player.getExpeditionLimit()));
+        }
     }
 }

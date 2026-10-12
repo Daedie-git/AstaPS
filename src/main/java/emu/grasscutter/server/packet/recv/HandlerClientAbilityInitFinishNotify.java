@@ -2,6 +2,7 @@ package emu.grasscutter.server.packet.recv;
 
 import emu.grasscutter.Grasscutter;
 import emu.grasscutter.game.player.Player;
+import emu.grasscutter.game.ability.AmberSupport;
 import emu.grasscutter.game.tps.TpsWeaponSystem;
 import emu.grasscutter.net.packet.*;
 import emu.grasscutter.net.proto.AbilityInvokeEntryOuterClass.AbilityInvokeEntry;
@@ -19,7 +20,8 @@ public class HandlerClientAbilityInitFinishNotify extends PacketHandler {
 
         player.getAbilityManager().onSkillEnd(player);
 
-        for (AbilityInvokeEntry entry : notif.getInvokesList()) {
+        for (AbilityInvokeEntry original : notif.getInvokesList()) {
+            AbilityInvokeEntry entry = AmberSupport.tuneInvoke(player, original);
             player.getAbilityManager().onAbilityInvoke(entry);
             player.getClientAbilityInitFinishHandler().addEntry(entry.getForwardType(), entry);
         }

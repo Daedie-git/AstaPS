@@ -732,7 +732,7 @@ public class Player implements PlayerHook, FieldFetch {
     }
 
     public boolean setPrimogems(int primogem) {
-        return this.setProperty(PlayerProperty.PROP_PLAYER_HCOIN, primogem);
+        return emu.grasscutter.game.inventory.PrimogemAutoConvert.setPrimogems(this, primogem);
     }
 
     public int getMora() {
@@ -953,7 +953,7 @@ public class Player implements PlayerHook, FieldFetch {
         return true;
     }
 
-    public void getTodayMoonCard() {
+    public synchronized void getTodayMoonCard() {
         if (!moonCard) {
             return;
         }
@@ -961,23 +961,26 @@ public class Player implements PlayerHook, FieldFetch {
         if (moonCardGetTimes.contains(now)) {
             return;
         }
-        Date stopTime = new Date();
         Calendar stopCalendar = Calendar.getInstance();
-        stopCalendar.setTime(stopTime);
-        stopCalendar.add(Calendar.DATE, moonCardDuration);
-        stopTime = stopCalendar.getTime();
-        if (now.after(stopTime)) {
+        if (moonCardStartTime == null || moonCardDuration <= 0) {
             moonCard = false;
             return;
         }
-        moonCardGetTimes.add(now);
-        addMoonCardDays(1);
+        stopCalendar.setTime(moonCardStartTime);
+        stopCalendar.add(Calendar.DATE, moonCardDuration);
+        Date stopTime = stopCalendar.getTime();
+        if (!now.before(stopTime)) {
+            moonCard = false;
+            return;
+        }
         GameItem item = new GameItem(201, 90);
-        getInventory().addItem(item, ActionReason.BlessingRedeemReward);
+        if (!getInventory().addItem(item, ActionReason.BlessingRedeemReward)) return;
+        moonCardGetTimes.add(now);
         session.send(new PacketCardProductRewardNotify(getMoonCardRemainDays()));
     }
 
-    public void addExpeditionInfo(long avatarGuid, int expId, int hourTime, int startTime) {
+    public synchronized void addExpeditionInfo(long avatarGuid, int expId, int hourTime, int startTime) {
+        if (!emu.grasscutter.game.expedition.ExpeditionHelper.canStart(this, avatarGuid, expId, hourTime)) return;
         ExpeditionInfo exp = new ExpeditionInfo();
         exp.setExpId(expId);
         exp.setHourTime(hourTime);
@@ -1324,13 +1327,13 @@ public class Player implements PlayerHook, FieldFetch {
             .build();
     }
 
-    public void loadBattlePassManager() {
+    public synchronized void loadBattlePassManager() {
         if (this.battlePassManager != null) return;
         this.battlePassManager = DatabaseHelper.loadBattlePass(this);
         this.battlePassManager.getMissions().values().removeIf(mission -> mission.getData() == null);
     }
 
-    public void loadDailyTaskManager() {
+    public synchronized void loadDailyTaskManager() {
         if (this.dailyTaskManager != null) return;
         this.dailyTaskManager = DatabaseHelper.loadDailyTaskManager(this);
     }
@@ -1426,7 +1429,7 @@ public class Player implements PlayerHook, FieldFetch {
         var needNotify = false;
         for (ExpeditionInfo e : expeditionInfo.values()) {
             if (e.getState() == 1) {
-                if (timeNow - e.getStartTime() >= e.getHourTime() * 60 * 60) {
+                if ((long) timeNow - e.getStartTime() >= (long) e.getHourTime() * 60 * 60) {
                     e.setState(2);
                     needNotify = true;
                 }
@@ -1465,7 +1468,8 @@ public class Player implements PlayerHook, FieldFetch {
 
         this.getBattlePassManager().triggerMission(WatcherTriggerType.TRIGGER_LOGIN);
 
-        if (currentDate.getDayOfWeek() == DayOfWeek.MONDAY) {
+        if (!currentDate.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                .equals(lastResetDate.with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)))) {
             this.getBattlePassManager().resetWeeklyMissions();
         }
 
@@ -1512,8 +1516,22 @@ public class Player implements PlayerHook, FieldFetch {
         return this.tpsAmmunition;
     }
 
+    /** Offline maintenance objects have no session and do not participate in login fencing. */
+    public boolean canSubmitSessionWrite() {
+        return this.session == null || this.session.canSubmitSessionWrite();
+    }
+
+    /** Writer execution fence: remains true while this generation's final writes drain. */
+    public boolean isSessionGenerationCurrent() {
+        return this.session == null || this.session.ownsAccountLease();
+    }
+
+    public long getSessionGeneration() {
+        return this.session == null ? 0 : this.session.getAccountSessionGeneration();
+    }
+
     public void save() {
-        DatabaseHelper.savePlayer(this);
+        if (this.canSubmitSessionWrite()) DatabaseHelper.savePlayer(this);
     }
 
     public void loadFromDatabase() {
@@ -1528,49 +1546,22 @@ public class Player implements PlayerHook, FieldFetch {
             this.getProfile().syncWithCharacter(this);
         }
 
-        var runner = Grasscutter.getThreadPool();
-        runner.submit(() -> this.achievements = Achievements.getByPlayer(this));
-
-        var avatarsLoad = runner.submit(this.getAvatars()::loadFromDatabase);
-        var inventoryLoad = runner.submit(this.getInventory()::loadFromDatabase);
-
-        runner.submit(this.getFriendsList()::loadFromDatabase);
-        runner.submit(this.getMailHandler()::loadFromDatabase);
-        runner.submit(this.getQuestManager()::loadFromDatabase);
-
-        runner.submit(this::loadBattlePassManager);
-        runner.submit(this::loadDailyTaskManager);
-
-        // With asyncLogin off this runs on the one thread that handles every player's packets.
-        // Waiting on the loaded flags forever meant a loader that threw - its exception swallowed
-        // by the pool - or a pool full of stuck tasks froze the whole server. Fail this one login
-        // instead.
-        awaitLoad("avatars", avatarsLoad);
-        awaitLoad("inventory", inventoryLoad);
-
+        LoginLoadGroup.load(Grasscutter.getThreadPool(), java.time.Duration.ofSeconds(30),
+                () -> this.achievements = Achievements.getByPlayer(this),
+                () -> {
+                    this.getAvatars().loadFromDatabase();
+                    this.getInventory().loadFromDatabase();
+                },
+                this.getFriendsList()::loadFromDatabase,
+                this.getMailHandler()::loadFromDatabase,
+                this.getQuestManager()::loadFromDatabase,
+                this::loadBattlePassManager,
+                this::loadDailyTaskManager);
         this.getPlayerProgress().setPlayer(this);
     }
 
-    private static final long LOAD_TIMEOUT_SECONDS = 30;
-
-    private void awaitLoad(String what, java.util.concurrent.Future<?> load) {
-        try {
-            load.get(LOAD_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS);
-        } catch (java.util.concurrent.ExecutionException e) {
-            throw new IllegalStateException(
-                    "Loading " + what + " for uid " + this.getUid() + " failed.", e.getCause());
-        } catch (java.util.concurrent.TimeoutException e) {
-            load.cancel(true);
-            throw new IllegalStateException(
-                    "Loading " + what + " for uid " + this.getUid() + " took over "
-                            + LOAD_TIMEOUT_SECONDS + "s; the load pool may be stuck.");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted loading " + what + " for uid " + this.getUid());
-        }
-    }
-
     public void onLogin() {
+        if (!session.acceptsGameWork() || !session.ownsAccountLease()) { session.close(); return; }
         // A trial avatar saved into a team (e.g. logging out inside a trial dungeon) has no avatar
         // to build an entity from.
         this.getTeamManager().removeUnownedAvatarsFromTeams();
@@ -1660,8 +1651,7 @@ public class Player implements PlayerHook, FieldFetch {
         this.cookingCompoundManager.onPlayerLogin();
         this.teamManager.onPlayerLogin();
 
-        // Idempotent, and not merely a null check: the load is submitted to the pool and nothing
-        // waits on it, so skipping here would silently cost the player a day of commissions.
+        // Also supports trusted callers outside the token-login component group.
         this.loadDailyTaskManager();
         this.dailyTaskManager.onPlayerLogin();
 
@@ -1699,10 +1689,35 @@ public class Player implements PlayerHook, FieldFetch {
             return;
         }
 
+        if (!session.acceptsGameWork() || !session.ownsAccountLease() || !session.isConnected()) {
+            session.close();
+            return;
+        }
         getServer().registerPlayer(this);
     }
 
+    @Transient private final transient java.util.concurrent.atomic.AtomicBoolean logoutStarted =
+            new java.util.concurrent.atomic.AtomicBoolean();
+    @Transient private transient CompletableFuture<Void> scriptDepartureCompletion;
+
+    /** Scene departure registers final-save producers without waiting under scene/world monitors. */
+    public synchronized void recordScriptDeparture(CompletableFuture<Void> completion) {
+        scriptDepartureCompletion = scriptDepartureCompletion == null
+                ? completion : CompletableFuture.allOf(scriptDepartureCompletion, completion);
+    }
+
+    /**
+     * Call after logout has removed the player from its scenes. Join outside scene/logic monitors
+     * before retiring owned write admission, then flush acknowledged persistence.
+     */
+    public synchronized CompletableFuture<Void> getScriptDepartureCompletion() {
+        return scriptDepartureCompletion == null
+                ? CompletableFuture.completedFuture(null) : scriptDepartureCompletion;
+    }
+
     public void onLogout() {
+        if (!logoutStarted.compareAndSet(false, true)) return;
+        Throwable failure = null;
         try {
 
             this.getServer().getChatSystem().clearHistoryOnLogout(this);
@@ -1734,15 +1749,27 @@ public class Player implements PlayerHook, FieldFetch {
             PlayerQuitEvent event = new PlayerQuitEvent(this);
             event.call();
         } catch (Throwable e) {
-            Grasscutter.getLogger().warn("Player (UID {}) save failure", getUid(), e);
+            failure = e;
         } finally {
-            Utils.runAll(
-                    "Player (UID " + getUid() + ") logout save",
-                    this::save,
-                    () -> this.getTeamManager().saveAvatars(),
-                    () -> this.getFriendsList().save());
-            removeFromServer();
+            try {
+                saveLogoutState();
+            } catch (Throwable saveFailure) {
+                if (failure == null) failure = saveFailure;
+                else if (failure != saveFailure) failure.addSuppressed(saveFailure);
+            } finally {
+                removeFromServer();
+            }
         }
+        if (failure != null) {
+            if (this.session != null) this.session.quarantineCleanupFailure();
+            Grasscutter.getLogger().warn("Player (UID {}) logout failure", getUid(), failure);
+            throw new IllegalStateException("Player logout persistence did not complete", failure);
+        }
+    }
+
+    protected void saveLogoutState() {
+        new emu.grasscutter.server.ShutdownSequence().run(
+                this::save, () -> this.getTeamManager().saveAvatars(), () -> this.getFriendsList().save());
     }
 
     public void removeFromServer() {
@@ -1803,37 +1830,70 @@ public class Player implements PlayerHook, FieldFetch {
         }
     }
 
-    private boolean setPropertyWithSanityCheck(PlayerProperty prop, int value, boolean sendPacket) {
-        var currentValue = this.properties.getOrDefault(prop.getId(), 0);
-
-        var event = new PlayerPropertyChangeEvent(this, prop, currentValue, value);
-        if (!event.call()) return false;
-
+    /** Resolves the property event without applying it; callers may preflight a whole batch. */
+    public PreparedPropertyChange preparePropertyChange(PlayerProperty prop, int value) {
+        var originalProperty = prop;
+        int oldValue = getProperty(prop);
+        var event = new PlayerPropertyChangeEvent(this, prop, oldValue, value);
+        if (!event.call()) return null;
         prop = event.getProperty();
         value = event.getNewValue();
+        if (prop == null || value < getPropertyMin(prop) || value > getPropertyMax(prop)) return null;
+        return new PreparedPropertyChange(prop, prop == originalProperty ? oldValue : getProperty(prop), value);
+    }
 
-        var min = this.getPropertyMin(prop);
-        var max = this.getPropertyMax(prop);
-        if (min <= value && value <= max) {
-            this.properties.put(prop.getId(), value);
-            if (sendPacket) {
+    public final class PreparedPropertyChange {
+        private final PlayerProperty property;
+        private final int oldValue;
+        private final int newValue;
+        private boolean applied;
 
-                switch (prop) {
-                    case PROP_PLAYER_EXP -> this.sendPacket(new PacketPlayerPropChangeReasonNotify(this, prop, currentValue, value,
-                        PropChangeReason.PropChangeReason_PROP_CHANGE_PLAYER_ADD_EXP));
-                    case PROP_PLAYER_LEVEL -> this.sendPacket(new PacketPlayerPropChangeReasonNotify(this, prop, currentValue, value,
-                        PropChangeReason.PropChangeReason_PROP_CHANGE_LEVELUP));
-                    case PROP_MAX_STAMINA -> this.sendPacket(new PacketPlayerPropChangeReasonNotify(this, prop, currentValue, value,
-                        PropChangeReason.PropChangeReason_PROP_CHANGE_CITY_LEVELUP));
+        private PreparedPropertyChange(PlayerProperty property, int oldValue, int newValue) {
+            this.property = property;
+            this.oldValue = oldValue;
+            this.newValue = newValue;
+        }
 
-                }
+        public PlayerProperty getProperty() { return property; }
+        public int getNewValue() { return newValue; }
 
-                this.sendPacket(new PacketPlayerPropNotify(this, prop));
-                this.sendPacket(new PacketPlayerPropChangeNotify(this, prop, value - currentValue));
+        public boolean matches(PlayerProperty prop, int value) {
+            return property == prop && newValue == value;
+        }
+
+        public void validate() {
+            if (applied || Player.this.getProperty(property) != oldValue)
+                throw new IllegalStateException("Stale prepared property change");
+        }
+
+        /** Applies once without dispatching the already resolved event again. */
+        public void apply(boolean sendPacket) {
+            validate();
+            applied = true;
+            applyPreparedProperty(property, oldValue, newValue, sendPacket);
+        }
+    }
+
+    private boolean setPropertyWithSanityCheck(PlayerProperty prop, int value, boolean sendPacket) {
+        var change = preparePropertyChange(prop, value);
+        if (change == null) return false;
+        change.apply(sendPacket);
+        return true;
+    }
+
+    private void applyPreparedProperty(PlayerProperty prop, int currentValue, int value, boolean sendPacket) {
+        this.properties.put(prop.getId(), value);
+        if (sendPacket) {
+            switch (prop) {
+                case PROP_PLAYER_EXP -> this.sendPacket(new PacketPlayerPropChangeReasonNotify(this, prop, currentValue, value,
+                    PropChangeReason.PropChangeReason_PROP_CHANGE_PLAYER_ADD_EXP));
+                case PROP_PLAYER_LEVEL -> this.sendPacket(new PacketPlayerPropChangeReasonNotify(this, prop, currentValue, value,
+                    PropChangeReason.PropChangeReason_PROP_CHANGE_LEVELUP));
+                case PROP_MAX_STAMINA -> this.sendPacket(new PacketPlayerPropChangeReasonNotify(this, prop, currentValue, value,
+                    PropChangeReason.PropChangeReason_PROP_CHANGE_CITY_LEVELUP));
             }
-            return true;
-        } else {
-            return false;
+            this.sendPacket(new PacketPlayerPropNotify(this, prop));
+            this.sendPacket(new PacketPlayerPropChangeNotify(this, prop, value - currentValue));
         }
     }
 

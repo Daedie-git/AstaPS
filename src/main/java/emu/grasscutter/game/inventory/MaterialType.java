@@ -46,7 +46,9 @@ public enum MaterialType {
     MATERIAL_ACTIVITY_GEAR(39),
     MATERIAL_ACTIVITY_JIGSAW(40),
     MATERIAL_ARANARA(41),
-    MATERIAL_DESHRET_MANUAL(46);
+    MATERIAL_DESHRET_MANUAL(46),
+    // Resource identity only: the native numeric identity has not been verified.
+    MATERIAL_TPS_ACCESSORY(-1);
 
     private static final Int2ObjectMap<MaterialType> map = new Int2ObjectOpenHashMap<>();
     private static final Map<String, MaterialType> stringMap = new HashMap<>();
@@ -55,7 +57,7 @@ public enum MaterialType {
         Stream.of(values())
                 .forEach(
                         e -> {
-                            map.put(e.getValue(), e);
+                            if (e.getValue() >= 0) map.put(e.getValue(), e);
                             stringMap.put(e.name(), e);
                         });
     }

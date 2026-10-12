@@ -1,0 +1,26 @@
+{
+  "anchorDate": "2026-10-10",
+  "archonOrder": [1022, 4106, 1073, 1089, 1052, 1030],
+  "days": [
+    {"characters": [1022, 4102, 1047, 4103, 4104], "theme": "Venti crowd control with elemental damage dealers and resistance reduction"},
+    {"characters": [4106, 4107, 4103, 4102, 4101], "theme": "Mavuika with Citlali and Xilonen for melt; Mualani and Kinich for off-field Pyro alternatives"},
+    {"characters": [1073, 1078, 1070, 1054, 1071], "theme": "Nahida for Alhaitham/Cyno quicken or Nilou/Kokomi bloom"},
+    {"characters": [1089, 1087, 1086, 1093, 1095], "theme": "Furina with Neuvillette/Wriothesley and team healing from Xianyun or Sigewinne"},
+    {"characters": [1052, 1058, 1047, 1060, 1051], "theme": "Raiden with Yae/Kazuha/Yelan; Eula as a separate superconduct and energy option"},
+    {"characters": [1030, 1046, 1060, 1038, 1026], "theme": "Zhongli shielding Hu Tao/Yelan with Albedo, or a separate Xiao team"},
+    {"characters": [1022, 1002, 1063, 1054, 1037], "theme": "Venti freeze grouping with Ayaka or Ganyu, Shenhe and Kokomi"},
+    {"characters": [4106, 1099, 4101, 4104, 4107], "theme": "Mavuika Pyro for Kinich/Emilie burning; Chasca/Citlali as another elemental option"},
+    {"characters": [1073, 4122, 4119, 1082, 1098], "theme": "Nahida with Dendro reaction options and Baizhu sustain; Clorinde aggravate alternative"},
+    {"characters": [1089, 4114, 4112, 1066, 1049], "theme": "Furina with Skirk/Escoffier freeze; Ayato and Yoimiya as alternative drivers"},
+    {"characters": [1052, 4111, 1093, 1051, 1075], "theme": "Raiden energy and off-field Electro, Varesa/Xianyun plunge or Eula superconduct"},
+    {"characters": [1030, 1057, 1094, 1091, 4130], "theme": "Zhongli with Itto/Chiori Geo, or Navia and Linnea alternatives"},
+    {"characters": [1022, 1029, 1084, 1096, 1033], "theme": "Venti grouping and resistance reduction for ranged Pyro or Tartaglia teams"},
+    {"characters": [4106, 4129, 4131, 4123, 4128], "theme": "Mavuika with newer damage/support options; resource availability does not establish gameplay synergy"},
+    {"characters": [1073, 4125, 4116, 4120, 4133], "theme": "Nahida with newer reaction options; verify newer kits in the installed client"},
+    {"characters": [1089, 4143, 4140, 4150, 4126], "theme": "Furina with remaining newer roster options; verify newer kits in the installed client"},
+    {"characters": [1052, 1058, 1078, 1082, 1066], "theme": "Raiden/Yae with Alhaitham/Baizhu quicken, or Ayato Electro-charged"},
+    {"characters": [1030, 1087, 1091, 1049, 1096], "theme": "Zhongli shielding Neuvillette, Navia, Yoimiya or Arlecchino alternatives"}
+  ],
+  "weaponOverrides": {"1086": 14513, "1089": 11513},
+  "associatedWeaponExceptions": {"1038": "Primordial Jade Cutter is the historical five-star pairing; Albedo's dedicated weapons are four-star.", "1029": "Lost Prayer to the Sacred Winds is Klee's historical five-star pairing, not a dedicated signature."}
+}

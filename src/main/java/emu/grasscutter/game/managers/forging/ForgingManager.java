@@ -121,7 +121,19 @@ public final class ForgingManager extends BasePlayerManager {
         ForgeData forgeData = GameData.getForgeDataMap().get(req.getForgeId());
 
         // Check if the player has sufficient forge points.
-        int requiredPoints = forgeData.getForgePoint() * req.getForgeCount();
+        int requiredPoints;
+        try {
+            int outputId = forgeData.getResultItemId() > 0 ? forgeData.getResultItemId() : forgeData.getShowItemId();
+            if (req.getForgeCount() <= 0 || forgeData.getForgePoint() < 0
+                    || forgeData.getForgeTime() < 0 || forgeData.getResultItemCount() <= 0
+                    || GameData.getItemDataMap().get(outputId) == null) throw new ArithmeticException();
+            requiredPoints = Math.multiplyExact(forgeData.getForgePoint(), req.getForgeCount());
+            Math.multiplyExact(forgeData.getResultItemCount(), req.getForgeCount());
+            Math.addExact(Utils.getCurrentSeconds(), Math.multiplyExact(forgeData.getForgeTime(), req.getForgeCount()));
+        } catch (ArithmeticException invalid) {
+            this.player.sendPacket(new PacketForgeStartRsp(Retcode.RET_FAIL));
+            return;
+        }
         if (requiredPoints > this.player.getForgePoints()) {
             this.player.sendPacket(new PacketForgeStartRsp(Retcode.RET_FORGE_POINT_NOT_ENOUGH));
             return;
@@ -138,7 +150,8 @@ public final class ForgingManager extends BasePlayerManager {
             // TODO:I'm not sure this one is correct.
             this.player.sendPacket(
                     new PacketForgeStartRsp(
-                            Retcode.RET_ITEM_COUNT_NOT_ENOUGH)); // ToDo: Probably the wrong return code.
+                            Retcode.RET_ITEM_COUNT_NOT_ENOUGH));
+            return;
         }
 
         // Consume forge points.
@@ -180,14 +193,18 @@ public final class ForgingManager extends BasePlayerManager {
 
         int resultId = data.getResultItemId() > 0 ? data.getResultItemId() : data.getShowItemId();
         ItemData resultItemData = GameData.getItemDataMap().get(resultId);
-        GameItem addItem = new GameItem(resultItemData, data.getResultItemCount() * finished);
+        if (resultItemData == null) return;
+        long outputCount = (long) data.getResultItemCount() * finished;
+        if (outputCount <= 0 || outputCount > Integer.MAX_VALUE) return;
+        GameItem addItem = new GameItem(resultItemData, (int) outputCount);
+        addItem.setCount((int) outputCount);
 
         // Call the PlayerForgeItemEvent.
         var event = new PlayerForgeItemEvent(this.player, addItem);
         if (!event.call()) return;
 
         addItem = event.getItemForged();
-        this.player.getInventory().addItem(addItem);
+        if (!this.player.getInventory().tryAddItems(List.of(addItem), ActionReason.ForgeOutput)) return;
 
         // Battle pass trigger handler
         this.player
@@ -246,16 +263,17 @@ public final class ForgingManager extends BasePlayerManager {
             GameItem returnItem =
                     new GameItem(resultItemData, material.getItemCount() * forge.getCount());
 
-            this.player.getInventory().addItem(returnItem);
+            returnItem.setCount(material.getItemCount() * forge.getCount());
             returnItems.add(returnItem);
         }
 
         // Return Mora to the player.
-        this.player.setMora(this.player.getMora() + data.getScoinCost() * forge.getCount());
+        // Refund the complete batch only when it can be delivered.
 
         ItemData moraItem = GameData.getItemDataMap().get(202);
         GameItem returnMora = new GameItem(moraItem, data.getScoinCost() * forge.getCount());
-        returnItems.add(returnMora);
+        if (returnMora.getCount() > 0) returnItems.add(returnMora);
+        if (!this.player.getInventory().tryAddItems(returnItems, ActionReason.ForgeReturn)) return;
 
         // Return forge points to the player.
         int requiredPoints = data.getForgePoint() * forge.getCount();
@@ -281,6 +299,7 @@ public final class ForgingManager extends BasePlayerManager {
         // Get info from the request.
         int queueId = req.getForgeQueueId();
         var manipulateType = req.getManipulateType();
+        if (queueId <= 0 || queueId > player.getActiveForges().size()) return;
 
         // Handle according to the manipulation type.
         switch (manipulateType) {

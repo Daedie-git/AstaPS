@@ -20,6 +20,7 @@ public class HandlerSetPlayerBornDataReq extends PacketHandler {
 
     @Override
     public void handle(GameSession session, byte[] header, byte[] payload) throws Exception {
+        if (!session.acceptsGameWork() || !session.ownsAccountLease()) return;
         SetPlayerBornDataReq req = SetPlayerBornDataReq.parseFrom(payload);
 
         int avatarId = req.getAvatarId();

@@ -1,0 +1,5 @@
+__pycache__/
+rotation-state.json
+backups/
+*-manifest.json
+*.lock

@@ -512,30 +512,16 @@ public final class DefaultAuthenticators {
 
             // Prepare the request.
             var client = Grasscutter.getGameServer().getDispatchClient();
-            var future = new CompletableFuture<Account>();
-
-            client.registerCallback(
-                    PacketIds.TokenValidateRsp,
+            return client.await(
+                    IDispatcher.JSON.toJsonTree(tokenRequest).getAsJsonObject(),
+                    PacketIds.TokenValidateReq, PacketIds.TokenValidateRsp,
                     packet -> {
                         var data = IDispatcher.decode(packet);
-
-                        // Check if the token is valid.
-                        var valid = data.get("valid").getAsBoolean();
-                        if (!valid) {
-                            future.complete(null);
-                            return;
-                        }
-
-                        // Return the account data.
-                        future.complete(IDispatcher.decode(data.get("account"), Account.class));
+                        if (!data.get("valid").getAsBoolean()) return null;
+                        var account = IDispatcher.decode(data.get("account"), Account.class);
+                        return account != null && java.util.Objects.equals(account.getId(), tokenRequest.uid)
+                                ? account : null;
                     });
-            client.sendMessage(PacketIds.TokenValidateReq, tokenRequest);
-
-            try {
-                return future.get(5, TimeUnit.SECONDS);
-            } catch (Exception ignored) {
-                return null;
-            }
         }
     }
 

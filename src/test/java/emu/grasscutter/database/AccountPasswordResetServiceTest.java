@@ -21,6 +21,8 @@ public final class AccountPasswordResetServiceTest {
         assertTrue(update.getDocument("$unset").containsKey("token"));
         assertTrue(update.getDocument("$unset").containsKey("sessionKey"));
         assertEquals(2, update.getDocument("$unset").size());
+        assertTrue(update.containsKey("$inc"), "password reset must invalidate stale account versions");
+        assertEquals(1L, update.getDocument("$inc").getInt64("persistenceVersion").getValue());
     }
 
     @Test

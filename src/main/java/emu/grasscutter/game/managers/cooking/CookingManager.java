@@ -32,13 +32,6 @@ public class CookingManager extends BasePlayerManager {
         }
     }
 
-    private static int firstSaneCount(int... candidates) {
-        for (int c : candidates) {
-            if (c >= 1 && c <= 99) return c;
-        }
-        return 1;
-    }
-
     public boolean unlockRecipe(int id) {
         if (this.player.getUnlockedRecipies().containsKey(id)) {
             return false;
@@ -59,7 +52,11 @@ public class CookingManager extends BasePlayerManager {
 
     public void handlePlayerCookReq(PlayerCookReq req) {
         int recipeId = req.getRecipeId();
-        int count = firstSaneCount(req.getCookCount());
+        int count = req.getCookCount();
+        if (count <= 0 || count > 99) {
+            player.sendPacket(new PacketPlayerCookRsp(Retcode.RET_FAIL));
+            return;
+        }
         int quality = req.getQteQuality();
         if (quality < 0 || quality > 3) {
             quality = 0;
@@ -86,13 +83,6 @@ public class CookingManager extends BasePlayerManager {
 
         int proficiency = this.player.getUnlockedRecipies().getOrDefault(recipeId, 0);
 
-        boolean success =
-                player.getInventory().payItems(recipeData.getInputVec(), count, ActionReason.Cook);
-        if (!success) {
-            this.player.sendPacket(new PacketPlayerCookRsp(Retcode.RET_FAIL));
-            return;
-        }
-
         var outputs = recipeData.getQualityOutputVec();
         // quality 1/2/3 → index 0/1/2; quality 0 (unset) → best available (usually delicious)
         int qualityIndex;
@@ -108,7 +98,8 @@ public class CookingManager extends BasePlayerManager {
                     outputs.stream().filter(p -> p.getId() > 0).findFirst().orElse(resultParam);
         }
         ItemData resultItemData = GameData.getItemDataMap().get(resultParam.getId());
-        if (resultItemData == null) {
+        if (resultItemData == null || resultParam.getCount() <= 0
+                || (long) resultParam.getCount() * count > Integer.MAX_VALUE) {
             this.player.sendPacket(new PacketPlayerCookRsp(Retcode.RET_FAIL));
             return;
         }
@@ -129,8 +120,8 @@ public class CookingManager extends BasePlayerManager {
         if (normalCount > 0) {
             GameItem cookResultNormal =
                     new GameItem(resultItemData, resultParam.getCount() * normalCount);
+            cookResultNormal.setCount(resultParam.getCount() * normalCount);
             cookResults.add(cookResultNormal);
-            this.player.getInventory().addItem(cookResultNormal, ActionReason.Cook);
         }
 
         if (specialtyCount > 0 && bonusData != null) {
@@ -139,14 +130,22 @@ public class CookingManager extends BasePlayerManager {
             if (specialtyItemData != null) {
                 GameItem cookResultSpecialty =
                         new GameItem(specialtyItemData, resultParam.getCount() * specialtyCount);
+                cookResultSpecialty.setCount(resultParam.getCount() * specialtyCount);
                 cookResults.add(cookResultSpecialty);
-                this.player.getInventory().addItem(cookResultSpecialty, ActionReason.Cook);
+            } else {
+                player.sendPacket(new PacketPlayerCookRsp(Retcode.RET_FAIL));
+                return;
             }
+        }
+        if (!player.getInventory().tryPayAndAddItems(
+                recipeData.getInputVec(), count, cookResults, ActionReason.Cook)) {
+            player.sendPacket(new PacketPlayerCookRsp(Retcode.RET_FAIL));
+            return;
         }
 
         // quality 0 is treated as perfect for proficiency; also accept explicit perfect (3)
         if (quality == 0 || quality == MANUAL_PERFECT_COOK_QUALITY) {
-            proficiency = Math.min(proficiency + count, recipeData.getMaxProficiency());
+            proficiency = (int) Math.min((long) proficiency + count, recipeData.getMaxProficiency());
             this.player.getUnlockedRecipies().put(recipeId, proficiency);
         }
 

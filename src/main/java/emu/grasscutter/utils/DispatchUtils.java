@@ -208,23 +208,9 @@ public interface DispatchUtils {
                 request.addProperty("page", page);
                 request.addProperty("gachaType", gachaType);
 
-                // Create a future for the response.
-                var future = new CompletableFuture<JsonObject>();
-                // Listen for the response.
-                var server = Grasscutter.getDispatchServer();
-                server.registerCallback(
-                        PacketIds.GachaHistoryRsp,
-                        packet -> future.complete(IDispatcher.decode(packet, JsonObject.class)));
-
-                // Broadcast the request.
-                server.sendMessage(PacketIds.GachaHistoryReq, request);
-
-                try {
-                    // Wait for the response.
-                    yield future.get(5L, TimeUnit.SECONDS);
-                } catch (Exception ignored) {
-                    yield null;
-                }
+                yield Grasscutter.getDispatchServer().await(
+                        request, PacketIds.GachaHistoryReq, PacketIds.GachaHistoryRsp,
+                        IDispatcher.DEFAULT_PARSER);
             }
             case HYBRID, GAME_ONLY -> {
                 // Create a response object.
@@ -260,26 +246,11 @@ public interface DispatchUtils {
                 request.addProperty("action", action.name());
                 request.add("data", JsonUtils.toJson(data));
 
-                // Create a future for the response.
-                var future = new CompletableFuture<Response>();
-                // Listen for the response.
-                var server = Grasscutter.getDispatchServer();
-                server.registerCallback(
-                        PacketIds.GmTalkRsp,
-                        packet -> future.complete(IDispatcher.decode(packet, Response.class)));
-
-                // Broadcast the request.
-                server.sendMessage(PacketIds.GmTalkReq, request);
-
-                try {
-                    // Wait for the response.
-                    yield future.get(5L, TimeUnit.SECONDS);
-                } catch (Exception ignored) {
-                    yield Response.builder()
-                            .status(400)
-                            .message("No response received from any server.")
-                            .build();
-                }
+                var response = Grasscutter.getDispatchServer().await(
+                        request, PacketIds.GmTalkReq, PacketIds.GmTalkRsp,
+                        packet -> IDispatcher.decode(packet, Response.class));
+                yield response != null ? response : Response.builder()
+                        .status(400).message("No response received from any server.").build();
             }
             case HYBRID, GAME_ONLY -> switch (action) {
                 case GRANT_AVATAR -> HandbookActions.grantAvatar((GrantAvatar) data);

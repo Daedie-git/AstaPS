@@ -46,29 +46,43 @@ public class ChatSystem implements ChatSystemHandler {
     /********************
      * Chat history handling
      ********************/
-    private synchronized void putInHistory(int uid, int partnerId, ChatInfo info) {
-        this.history
-                .computeIfAbsent(uid, x -> new HashMap<>())
-                .computeIfAbsent(partnerId, x -> new ArrayList<>())
-                .add(info);
+    private void putInHistory(int uid, int partnerId, ChatInfo info) {
+        synchronized (history) {
+            this.history.computeIfAbsent(uid, x -> new HashMap<>())
+                    .computeIfAbsent(partnerId, x -> new ArrayList<>()).add(info);
+        }
     }
 
-    public synchronized void clearHistoryOnLogout(Player player) {
-        this.history.remove(player.getUid());
-    }
-
-    /** Copies one conversation so packets never iterate the live list. */
-    private synchronized List<ChatInfo> copyHistory(int uid, int partnerId) {
-        return new ArrayList<>(
-                this.history.getOrDefault(uid, Map.of()).getOrDefault(partnerId, List.of()));
+    public void clearHistoryOnLogout(Player player) {
+        synchronized (history) { this.history.remove(player.getUid()); }
     }
 
     public void handlePullPrivateChatReq(Player player, int partnerId) {
-        player.sendPacket(new PacketPullPrivateChatRsp(copyHistory(player.getUid(), partnerId)));
+        final List<ChatInfo> chatHistory;
+        synchronized (history) {
+            chatHistory = List.copyOf(this.history.computeIfAbsent(player.getUid(), x -> new HashMap<>())
+                    .computeIfAbsent(partnerId, x -> new ArrayList<>()));
+        }
+        player.sendPacket(new PacketPullPrivateChatRsp(chatHistory));
     }
 
     public void handlePullRecentChatReq(Player player) {
-        this.ensureServerConversation(player);
+        final boolean needsWelcome;
+        synchronized (history) {
+            var conversations = this.history.computeIfAbsent(player.getUid(), x -> new HashMap<>());
+            var serverHistory = conversations.get(GameConstants.SERVER_CONSOLE_UID);
+            needsWelcome = serverHistory == null || serverHistory.isEmpty();
+        }
+        if (needsWelcome) this.sendServerWelcomeMessages(player);
+        final List<ChatInfo> snapshot;
+        synchronized (history) {
+            snapshot = this.history.getOrDefault(player.getUid(), Map.of()).values().stream()
+                    .flatMap(List::stream).toList();
+        }
+        var recentMessages = snapshot.stream()
+                .sorted(Comparator.comparingInt(ChatInfo::getTime).reversed()
+                        .thenComparingInt(ChatInfo::getUid).thenComparingInt(ChatInfo::getToUid)).toList();
+        player.sendPacket(new PacketPullRecentChatRsp(recentMessages));
     }
 
     /********************
@@ -265,19 +279,21 @@ public class ChatSystem implements ChatSystemHandler {
      * after login, not only once the client pulls it after a teleport.
      */
     public void ensureServerConversation(Player player) {
-        var serverHistory = copyHistory(player.getUid(), GameConstants.SERVER_CONSOLE_UID);
-        if (serverHistory.isEmpty()) {
-            this.sendServerWelcomeMessages(player);
-            serverHistory = copyHistory(player.getUid(), GameConstants.SERVER_CONSOLE_UID);
+        final boolean needsWelcome;
+        synchronized (history) {
+            var conversations = history.computeIfAbsent(player.getUid(), x -> new HashMap<>());
+            var messages = conversations.get(GameConstants.SERVER_CONSOLE_UID);
+            needsWelcome = messages == null || messages.isEmpty();
         }
-
-        if (serverHistory.isEmpty()) {
-            return;
+        if (needsWelcome) this.sendServerWelcomeMessages(player);
+        final List<ChatInfo> snapshot;
+        synchronized (history) {
+            snapshot = List.copyOf(history.getOrDefault(player.getUid(), Map.of())
+                    .getOrDefault(GameConstants.SERVER_CONSOLE_UID, List.of()));
         }
-
-        int historyLength = serverHistory.size();
-        var recentMessages = serverHistory.subList(Math.max(historyLength - 3, 0), historyLength);
+        if (snapshot.isEmpty()) return;
+        var recentMessages = snapshot.subList(Math.max(snapshot.size() - 3, 0), snapshot.size());
         player.sendPacket(new PacketPullRecentChatRsp(recentMessages));
-        player.sendPacket(new PacketPullPrivateChatRsp(serverHistory));
+        player.sendPacket(new PacketPullPrivateChatRsp(snapshot));
     }
 }

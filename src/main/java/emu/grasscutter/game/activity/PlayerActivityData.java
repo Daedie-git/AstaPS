@@ -31,7 +31,12 @@ public class PlayerActivityData {
     @Transient ActivityHandler activityHandler;
 
     public static PlayerActivityData getByPlayer(Player player, int activityId) {
-        return DatabaseHelper.getPlayerActivityData(player.getUid(), activityId);
+        var data = DatabaseHelper.getPlayerActivityData(player.getUid(), activityId);
+        if (data != null) {
+            data.setPlayer(player);
+            emu.grasscutter.game.player.SessionWriteFence.bind(data, player);
+        }
+        return data;
     }
 
     public void save() {

@@ -46,6 +46,7 @@ public class SceneScriptManager {
     private volatile boolean isInit;
     private volatile boolean initAttempted;
     private volatile boolean destroyed;
+    private CompletableFuture<Void> destructionCompletion;
     private int executingEvents;
     private final SceneScriptInitGate initialization = new SceneScriptInitGate();
     private boolean noCacheGroupGridsToDisk;
@@ -74,6 +75,29 @@ public class SceneScriptManager {
     private static final Int2ObjectMap<List<Grid>> groupGridsCache =
             Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>()); // scenes init on their own threads
     public static final ExecutorService eventExecutor;
+    private static final java.util.concurrent.atomic.AtomicReference<Throwable> finalizationFailure =
+            new java.util.concurrent.atomic.AtomicReference<>();
+
+    /**
+     * Stop script-event admission and join executing events, including their final-save callbacks.
+     * Call only after login/scene producers have stopped, outside scene and logic monitors.
+     * Failure or timeout must prevent a successful persistence drain acknowledgement.
+     */
+    public static void shutdownEventExecutor(long timeout, TimeUnit unit)
+            throws InterruptedException, TimeoutException, ExecutionException {
+        awaitEventExecutor(eventExecutor, timeout, unit);
+        var failure = finalizationFailure.get();
+        if (failure != null) throw new ExecutionException(failure);
+    }
+
+    static void awaitEventExecutor(ExecutorService executor, long timeout, TimeUnit unit)
+            throws InterruptedException, TimeoutException {
+        if (timeout < 0) throw new IllegalArgumentException("Negative script shutdown timeout");
+        executor.shutdown();
+        if (!executor.awaitTermination(timeout, unit)) {
+            throw new TimeoutException("Script producers did not stop before persistence drain");
+        }
+    }
 
     static {
         eventExecutor =
@@ -1028,11 +1052,14 @@ public class SceneScriptManager {
             Grasscutter.getLogger()
                     .error("Condition Trigger " + params.type + " triggered exception", throwable);
         } finally {
-            // make sure it is removed
-            ScriptLoader.getScriptLib().removeSceneScriptManager();
-            synchronized (this) {
-                // A destroy during this event left its final save to us.
-                if (--executingEvents == 0 && destroyed) clearDestroyedState();
+            try {
+                ScriptLoader.getScriptLib().removeSceneScriptManager();
+            } finally {
+                boolean finalize;
+                synchronized (this) {
+                    finalize = --executingEvents == 0 && destroyed;
+                }
+                if (finalize) clearDestroyedState();
             }
         }
     }
@@ -1387,6 +1414,7 @@ public class SceneScriptManager {
     }
 
     public int createGroupTimerEvent(int groupID, String source, double time) {
+        if (destroyed || source == null || !Double.isFinite(time) || time < 0) return 1;
         if (LiyueCloudDungeonSupport.isTimerGroup(getScene(), groupID))
             return liyueDungeonTimers.create(groupID, source, time);
         var group = getGroupById(groupID);
@@ -1400,7 +1428,8 @@ public class SceneScriptManager {
         }
         boolean hasTrigger =
                 group.triggers.values().stream()
-                        .anyMatch(t -> t.getEvent() == EVENT_TIMER_EVENT && t.getSource().equals(source));
+                        .anyMatch(t -> t.getEvent() == EVENT_TIMER_EVENT
+                                && (source.equals(t.getSource()) || "".equals(t.getSource()) || "*".equals(t.getSource())));
         if (!hasTrigger) return 0;
 
         // Lua passes seconds; the scene scheduler counts ticks and stops while the scene is paused.
@@ -1516,7 +1545,20 @@ public class SceneScriptManager {
         }
     }
 
+    /** Completes after final group saves have been submitted, not after database acknowledgement. */
+    public synchronized CompletableFuture<Void> onDestroyAsync() {
+        if (destructionCompletion == null) destructionCompletion = new CompletableFuture<>();
+        try {
+            onDestroy();
+        } catch (Throwable failure) {
+            finalizationFailure.compareAndSet(null, failure);
+            destructionCompletion.completeExceptionally(failure);
+        }
+        return destructionCompletion;
+    }
+
     public synchronized void onDestroy() {
+        if (destructionCompletion == null) destructionCompletion = new CompletableFuture<>();
         if (this.destroyed) {
             return;
         }
@@ -1574,18 +1616,24 @@ public class SceneScriptManager {
      * states and variables back on the next run of a weekly boss, quest dungeon or Abyss chamber.
      */
     private void clearDestroyedState() {
-        if (scene.getSceneType() == emu.grasscutter.game.props.SceneType.SCENE_WORLD) {
-            scene.saveGroups();
+        try {
+            if (scene.getSceneType() == emu.grasscutter.game.props.SceneType.SCENE_WORLD) {
+                scene.saveGroups();
+            }
+            currentTriggers.clear();
+            ongoingTriggers.clear();
+            triggersByGroupScene.clear();
+            triggerInvocations.clear();
+            regions.clear();
+            sceneGroups.clear();
+            sceneGroupsInstances.clear();
+            cachedSceneGroupsInstances.clear();
+            loadedGroupSetPerBlock.clear();
+            variables.clear();
+            destructionCompletion.complete(null);
+        } catch (Throwable failure) {
+            finalizationFailure.compareAndSet(null, failure);
+            destructionCompletion.completeExceptionally(failure);
         }
-        currentTriggers.clear();
-        ongoingTriggers.clear();
-        triggersByGroupScene.clear();
-        triggerInvocations.clear();
-        regions.clear();
-        sceneGroups.clear();
-        sceneGroupsInstances.clear();
-        cachedSceneGroupsInstances.clear();
-        loadedGroupSetPerBlock.clear();
-        variables.clear();
     }
 }

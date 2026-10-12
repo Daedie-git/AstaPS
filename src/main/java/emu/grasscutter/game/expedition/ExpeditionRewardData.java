@@ -13,7 +13,7 @@ public class ExpeditionRewardData {
     private static final int REWARD_MULTIPLIER = 3;
 
     public GameItem getReward() {
-        int count = Utils.randomRange(minCount, maxCount) * REWARD_MULTIPLIER;
-        return new GameItem(itemId, count);
+        int count = Math.multiplyExact(Utils.randomRange(minCount, maxCount), REWARD_MULTIPLIER);
+        return emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(itemId, count);
     }
 }

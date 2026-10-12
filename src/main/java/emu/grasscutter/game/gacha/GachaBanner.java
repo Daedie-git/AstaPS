@@ -334,6 +334,16 @@ public class GachaBanner {
         };
     }
 
+    private static void addUpInfo(GachaInfo.Builder info, int[] items) {
+        for (int category = 1; category <= 2; category++) {
+            var group = GachaUpInfo.newBuilder().setItemParentType(category);
+            for (int item : items) {
+                if ((item < 10000 ? 1 : 2) == category) group.addItemIdList(item);
+            }
+            if (group.getItemIdListCount() > 0) info.addGachaUpInfoList(group);
+        }
+    }
+
     public GachaInfo toProto(Player player) {
         // TODO: use other Nonce/key insteadof session key to ensure the overall security for the player
         String sessionKey = player.getAccount().getSessionKey();
@@ -364,8 +374,11 @@ public class GachaBanner {
         // Grasscutter.getLogger().info("record = " + record);
         PlayerGachaBannerInfo gachaInfo = player.getGachaInfo().getBannerInfo(this);
         int rawWishItemId = gachaInfo.getWishItemId();
-        int linkedCharacterWish = GachaEpitomizedPrefabHelper.resolveChronicleCharacterWish(player);
-        int linkedWeaponWish = GachaEpitomizedPrefabHelper.resolveChronicleWeaponWish(player);
+        // Legacy linked-tab migration must not consume a standalone Chronicle's selection.
+        int linkedCharacterWish = isChronicleLinkedBanner()
+                ? GachaEpitomizedPrefabHelper.resolveChronicleCharacterWish(player) : 0;
+        int linkedWeaponWish = isChronicleLinkedBanner()
+                ? GachaEpitomizedPrefabHelper.resolveChronicleWeaponWish(player) : 0;
         int wishItemId;
         if (this.scheduleId == GachaEpitomizedPrefabHelper.LINKED_WEAPON_SCHEDULE_ID) {
             wishItemId = linkedWeaponWish > 0 ? linkedWeaponWish : 0;
@@ -429,14 +442,10 @@ public class GachaBanner {
         }
 
         if (this.getRateUpItems5().length > 0) {
-            GachaUpInfo.Builder upInfo = GachaUpInfo.newBuilder().setItemParentType(1);
-
+            addUpInfo(info, getRateUpItems5());
             for (int id : getRateUpItems5()) {
-                upInfo.addItemIdList(id);
                 if (!hasEpitomized()) info.addDisplayUp5ItemList(id);
             }
-
-            info.addGachaUpInfoList(upInfo);
         }
 
         if (this.hasEpitomized() && !this.isChronicleLinkedBanner()) {
@@ -523,11 +532,7 @@ public class GachaBanner {
                         ? GachaEpitomizedCompanionHelper.resolveRateUp4(this, wishItemId)
                         : this.getRateUpItems4();
         if (displayRateUp4.length > 0) {
-            int parentType4 = this.isCharacterEpitomizedPool() ? 1 : 2;
-            GachaUpInfo.Builder upInfo = GachaUpInfo.newBuilder().setItemParentType(parentType4);
-            for (int id : displayRateUp4) {
-                upInfo.addItemIdList(id);
-            }
+            addUpInfo(info, displayRateUp4);
             int[] displaySample =
                     this.isCharacterEpitomizedPool()
                             ? GachaEpitomizedCompanionHelper.pickDisplaySample(displayRateUp4, 4)
@@ -537,7 +542,6 @@ public class GachaBanner {
             for (int id : displaySample) {
                 info.addDisplayUp4ItemList(id);
             }
-            info.addGachaUpInfoList(upInfo);
         }
 
         return info.build();

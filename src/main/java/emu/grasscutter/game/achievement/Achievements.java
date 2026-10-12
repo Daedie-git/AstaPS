@@ -53,12 +53,16 @@ public class Achievements {
                         ? DatabaseHelper.getAchievementData(player.getUid())
                         : player.getAchievements();
         if (achievements == null) {
-            achievements = create(player.getUid());
+            achievements = create(player.getUid(), player);
         }
+        emu.grasscutter.game.player.SessionWriteFence.bind(achievements, player);
+        achievements.setPlayer(player);
         return achievements;
     }
 
-    public static Achievements create(int uid) {
+    public static Achievements create(int uid) { return create(uid, null); }
+
+    private static Achievements create(int uid, Player player) {
         var newAchievement =
                 Achievements.of()
                         .uid(uid)
@@ -66,6 +70,8 @@ public class Achievements {
                         .finishedAchievementNum(0)
                         .takenGoalRewardIdList(Lists.newArrayList())
                         .build();
+        emu.grasscutter.game.player.SessionWriteFence.bind(newAchievement, player);
+        newAchievement.setPlayer(player);
         newAchievement.save();
         return newAchievement;
     }
@@ -340,68 +346,65 @@ public class Achievements {
                                     return;
                                 }
 
-                                rewards.add(new GameItem(itemData, itemParamData.getCount()));
+                                rewards.add(emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(itemData, itemParamData.getCount()));
                             });
         }
 
+        var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(this, ids.stream().map(id -> "achievement:" + id).toList());
+        if (claim == null) return;
+        if (rewards.isEmpty() || !emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(this.player.getInventory(), rewards, ActionReason.AchievementReward)) {
+            claim.release();
+            return;
+        }
         var claimedAchievements = new ArrayList<Achievement>(ids.size());
         for (int i : ids) {
             var achievement = this.getAchievement(i);
             achievement.setStatus(Status.Status_REWARD_TAKEN);
             claimedAchievements.add(achievement);
         }
+        claim.release();
         this.sendUpdatePacket(claimedAchievements);
         this.save();
 
-        this.player.getInventory().addItems(rewards, ActionReason.AchievementReward);
         this.player.sendPacket(
                 new PacketTakeAchievementRewardRsp(
                         ids, rewards.stream().map(GameItem::toItemParam).toList()));
     }
 
     public synchronized void takeGoalReward(List<Integer> ids) {
-        // A previously claimed goal (or the same goal twice in one request) is not payable.
-        if (ids.isEmpty()
-                || new HashSet<>(ids).size() != ids.size()
+        if (ids.isEmpty() || new HashSet<>(ids).size() != ids.size()
                 || ids.stream().anyMatch(this.takenGoalRewardIdList::contains)) {
             this.player.sendPacket(new PacketTakeAchievementGoalRewardRsp());
             return;
         }
-
-        List<GameItem> rewards = Lists.newArrayList();
-        for (int i : ids) {
-            var goalData = GameData.getAchievementGoalDataMap().get(i);
-            if (goalData == null) {
-                Grasscutter.getLogger().warn("null returned while getting goal reward data!");
-                continue;
+        List<GameItem> rewards = new ArrayList<>();
+        for (int id : ids) {
+            var goal = GameData.getAchievementGoalDataMap().get(id);
+            var members = GameData.getAchievementDataMap().values().stream()
+                    .filter(row -> row.isUsed() && row.getGoalId() == id).toList();
+            if (goal == null || members.isEmpty() || members.stream().anyMatch(row -> !isFinished(row.getId()))) {
+                this.player.sendPacket(new PacketTakeAchievementGoalRewardRsp());
+                return;
             }
-
-            var data = GameData.getRewardDataMap().get(goalData.getFinishRewardId());
-            if (data == null) {
-                Grasscutter.getLogger().warn("null returned while getting reward data!");
-                continue;
+            var reward = GameData.getRewardDataMap().get(goal.getFinishRewardId());
+            if (reward == null || reward.getRewardItemList() == null) return;
+            for (var entry : reward.getRewardItemList()) {
+                var item = GameData.getItemDataMap().get(entry.getId());
+                if (item == null || entry.getCount() <= 0) return;
+                rewards.add(emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(item, entry.getCount()));
             }
-
-            data.getRewardItemList()
-                    .forEach(
-                            itemParamData -> {
-                                var itemData = GameData.getItemDataMap().get(itemParamData.getId());
-                                if (itemData == null) {
-                                    Grasscutter.getLogger().warn("itemData == null!");
-                                    return;
-                                }
-
-                                rewards.add(new GameItem(itemData, itemParamData.getCount()));
-                            });
-
-            this.takenGoalRewardIdList.add(i);
-            this.save();
         }
-
-        this.player.getInventory().addItems(rewards, ActionReason.AchievementGoalReward);
-        this.player.sendPacket(
-                new PacketTakeAchievementGoalRewardRsp(
-                        ids, rewards.stream().map(GameItem::toItemParam).toList()));
+        var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(this, ids.stream().map(id -> "goal:" + id).toList());
+        if (claim == null) return;
+        if (rewards.isEmpty() || !emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(this.player.getInventory(), rewards, ActionReason.AchievementGoalReward)) {
+            claim.release();
+            this.player.sendPacket(new PacketTakeAchievementGoalRewardRsp());
+            return;
+        }
+        this.takenGoalRewardIdList.addAll(ids);
+        claim.release();
+        this.save();
+        this.player.sendPacket(new PacketTakeAchievementGoalRewardRsp(ids, rewards.stream().map(GameItem::toItemParam).toList()));
     }
 
     public boolean isRewardTaken(int achievementId) {

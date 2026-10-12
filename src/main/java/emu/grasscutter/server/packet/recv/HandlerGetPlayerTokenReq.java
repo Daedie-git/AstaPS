@@ -39,6 +39,9 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
     private static final java.util.Set<GameSession> LOGGING_IN =
             java.util.concurrent.ConcurrentHashMap.newKeySet();
 
+    private static final Object LOGIN_ADMISSION = new Object();
+    private static volatile boolean loginAdmissionClosed;
+
     private static final java.util.concurrent.atomic.AtomicInteger LOGIN_THREADS =
             new java.util.concurrent.atomic.AtomicInteger();
 
@@ -62,12 +65,43 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
                         return thread;
                     });
 
+    private static final emu.grasscutter.server.game.LoginProducerLifecycle LOGIN_PRODUCERS =
+            new emu.grasscutter.server.game.LoginProducerLifecycle(LOGIN_EXECUTOR);
+
+    public static boolean submitNativeLogin(GameSession session, Runnable action) {
+        return LOGIN_PRODUCERS.submit(session, action, true);
+    }
+
+    public static void shutdownLoginProducers(java.time.Duration timeout) {
+        java.util.List<GameSession> pending;
+        synchronized (LOGIN_ADMISSION) {
+            loginAdmissionClosed = true;
+            pending = java.util.List.copyOf(LOGGING_IN);
+        }
+        pending.forEach(GameSession::close);
+        new emu.grasscutter.server.ShutdownSequence().run(
+                () -> LOGIN_PRODUCERS.shutdown(timeout),
+                () -> {
+                    long deadline = System.nanoTime() + timeout.toNanos();
+                    for (var session : pending) {
+                        try { session.retireAccountLease().get(Math.max(1, deadline - System.nanoTime()),
+                                java.util.concurrent.TimeUnit.NANOSECONDS); }
+                        catch (Exception failure) {
+                            session.quarantineUnstoppedLoader();
+                            if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
+                            throw new IllegalStateException("Pending token session did not retire", failure);
+                        }
+                    }
+                });
+    }
+
     /** The login steps, run either across the login and logic threads or inline (asyncLogin off). */
     private record Login(GameSession session, boolean async, String accountId, String clientRandKey, int keyId) {
         /** Runs a step that only does database work. */
         void offLogic(Runnable step) {
-            if (this.async) LOGIN_EXECUTOR.execute(() -> this.guarded(step));
-            else this.guarded(step);
+            try {
+                if (!LOGIN_PRODUCERS.submit(this.session, () -> this.guarded(step), this.async)) this.close();
+            } catch (RuntimeException failure) { this.close(); }
         }
 
         /** Runs a step that touches game state or the client. */
@@ -78,7 +112,8 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
 
         /** Skips steps for a client that has gone, and drops the client if a step throws. */
         private void guarded(Runnable step) {
-            if (!this.session.isConnected()) {
+            if (loginAdmissionClosed || !this.session.acceptsGameWork() || !this.session.isConnected()
+                    || (this.session.getAccount() != null && !this.session.ownsAccountLease())) {
                 this.done();
                 return;
             }
@@ -98,8 +133,7 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
 
         void close() {
             this.done();
-            if (this.async) GameSessionManager.getLogicThread().execute(this.session::close);
-            else this.session.close();
+            this.session.close();
         }
     }
 
@@ -110,7 +144,9 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
         var clientRandKey = ProtoRead.string(payload, F_CLIENT_RAND_KEY);
         var keyId = (int) ProtoRead.varint(payload, F_KEY_ID);
 
-        if (!LOGGING_IN.add(session)) return;
+        synchronized (LOGIN_ADMISSION) {
+            if (loginAdmissionClosed || !session.acceptsGameWork() || !LOGGING_IN.add(session)) return;
+        }
 
         var login =
                 new Login(
@@ -139,6 +175,10 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
             }
         }
 
+        if (!java.util.Objects.equals(account.getId(), login.accountId())) {
+            login.close();
+            return;
+        }
         var authenticated = account;
         login.onLogic(() -> takeOver(login, authenticated));
     }
@@ -146,6 +186,29 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
     /** Game state: replaces an earlier session of the same account and checks the player limit. */
     private static void takeOver(Login login, emu.grasscutter.game.Account account) {
         var session = login.session();
+        if (!session.claimAccountLease(login.accountId())) {
+            var current = emu.grasscutter.server.game.AccountSessionLease.current(login.accountId());
+            if (current == null || !(current.owner() instanceof GameSession old) || !old.isActive()) {
+                login.close();
+                return;
+            }
+            old.close();
+            var handoff = old.retireAccountLease();
+            login.offLogic(() -> {
+                try {
+                    handoff.get(30, java.util.concurrent.TimeUnit.SECONDS);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    login.close();
+                    return;
+                } catch (Exception failure) {
+                    login.close();
+                    return;
+                }
+                login.onLogic(() -> takeOver(login, account));
+            });
+            return;
+        }
         session.setAccount(account);
 
         boolean kicked = false;
@@ -153,7 +216,6 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
         if (exists != null) {
             var existsSession = exists.getSession();
             if (existsSession != session) {
-                exists.onLogout();
                 existsSession.close();
                 Grasscutter.getLogger()
                     .warn("Player {} was kicked due to duplicated login", account.getUsername());
@@ -180,6 +242,7 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
     /** Database: finds or creates the player and applies an IP ban. */
     private static void findPlayer(Login login, Class<? extends Player> playerClass) {
         var session = login.session();
+        session.markLeaseLoaded();
         var player = DatabaseHelper.getPlayerByAccount(session.getAccount(), playerClass);
 
         if (player == null) {
@@ -280,7 +343,11 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
     private static void load(Login login, Player player) {
         try {
             player.loadFromDatabase();
+            login.session().markComponentsReady();
         } catch (IllegalStateException e) {
+            if (e instanceof emu.grasscutter.game.player.LoginLoadGroup.UnstoppedLoaderException) {
+                login.session().quarantineUnstoppedLoader();
+            }
             // Load failed or timed out: drop this one client rather than leave it hanging.
             Grasscutter.getLogger().error("Refused uid {}: {}", player.getUid(), e.getMessage(), e.getCause());
             login.close();

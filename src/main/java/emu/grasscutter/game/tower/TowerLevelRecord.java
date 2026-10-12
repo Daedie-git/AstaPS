@@ -11,12 +11,35 @@ public class TowerLevelRecord {
     private Map<Integer, Integer> passedLevelMap;
 
     private int floorStarRewardProgress;
+    private Set<Integer> firstPassPaidLevels;
+
+    public boolean isCompleted(int levelId) {
+        return passedLevelMap != null && passedLevelMap.keySet().stream()
+                .anyMatch(key -> String.valueOf(levelId).equals(String.valueOf(key)));
+    }
+
+    public boolean isFirstPassPaid(int levelId) {
+        // Positive legacy stars were written only after the old first-pass path.
+        if (firstPassPaidLevels == null) {
+            firstPassPaidLevels = new HashSet<>();
+            if (passedLevelMap != null) passedLevelMap.forEach((id, stars) -> {
+                if (stars != null && stars > 0) firstPassPaidLevels.add(id);
+            });
+        }
+        return firstPassPaidLevels.contains(levelId);
+    }
+
+    public void markFirstPassPaid(int levelId) {
+        if (firstPassPaidLevels == null) firstPassPaidLevels = new HashSet<>();
+        firstPassPaidLevels.add(levelId);
+    }
 
     public TowerLevelRecord() {}
 
     public TowerLevelRecord(int floorId) {
         this.floorId = floorId;
         this.passedLevelMap = new HashMap<>();
+        this.firstPassPaidLevels = new HashSet<>();
         this.floorStarRewardProgress = 0;
     }
 

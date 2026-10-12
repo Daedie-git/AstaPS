@@ -251,9 +251,13 @@ public class EntityMonster extends GameEntity {
             return;
         }
         this.envGatherRewarded = true;
-        player.onGadgetInteracted(interactReq.getGadgetId());
+        creditInteraction(player, interactReq);
 
         this.getScene().killEntity(this);
+    }
+
+    protected void creditInteraction(Player player, GadgetInteractReq request) {
+        player.onGadgetInteracted(request.getGadgetId());
     }
 
     @Override
@@ -309,8 +313,13 @@ public class EntityMonster extends GameEntity {
                 this, hpBeforeDamage, amount, killerId);
 
         // Invoke energy drop logic.
-        for (Player player : this.getScene().getPlayers()) {
-            player.getEnergyManager().handleMonsterEnergyDrop(this, hpBeforeDamage, hpAfterDamage);
+        // One shared pool, not one shared copy per participant. Existing pickup policy awards
+        // only the collector's party; the lowest UID supplies stable drop GUID ownership.
+        if (hpAfterDamage < hpBeforeDamage) {
+            this.getScene().getPlayers().stream()
+                    .min(java.util.Comparator.comparingInt(Player::getUid))
+                    .ifPresent(player -> player.getEnergyManager()
+                            .handleMonsterEnergyDrop(this, hpBeforeDamage, hpAfterDamage));
         }
     }
 

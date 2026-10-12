@@ -548,7 +548,7 @@ public class StaminaManager extends BasePlayerManager {
         }
     }
 
-    private void handleDrowning() {
+    private synchronized void handleDrowning() {
         // TODO: fix drowning waverider entity
         int stamina = getCurrentCharacterStamina();
         if (stamina < 10) {

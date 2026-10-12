@@ -59,6 +59,12 @@ final class InventoryRewardAdmission {
         return admissionFailure(rewards, getTab, ignored -> 0) == null;
     }
 
+    static boolean canAccept(
+            Collection<GameItem> rewards, Function<ItemType, InventoryTab> getTab,
+            IntUnaryOperator currentBalance) {
+        return admissionFailure(rewards, getTab, currentBalance) == null;
+    }
+
     private static InventoryAddResult.Status admissionFailure(
             Collection<GameItem> rewards,
             Function<ItemType, InventoryTab> getTab,

@@ -365,7 +365,8 @@ public final class Utils {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
+                throw new java.util.concurrent.CancellationException("Interrupted waiting for dependency");
             }
         }
     }

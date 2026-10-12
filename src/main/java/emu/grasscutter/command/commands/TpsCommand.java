@@ -2,10 +2,8 @@ package emu.grasscutter.command.commands;
 
 import emu.grasscutter.command.*;
 import emu.grasscutter.data.GameData;
-import emu.grasscutter.game.inventory.GameItem;
 import emu.grasscutter.game.player.Player;
 import emu.grasscutter.game.tps.TpsWeaponSystem;
-import emu.grasscutter.server.packet.send.PacketStoreItemChangeNotify;
 import java.util.*;
 import picocli.CommandLine;
 import picocli.CommandLine.Parameters;
@@ -144,24 +142,9 @@ public final class TpsCommand implements CommandHandler {
     }
 
     private void unlockAccessories(Player sender, Player target) {
-        var changed = new ArrayList<GameItem>();
-        for (var accessory : GameData.getTpsWeaponAccessoryDataMap().values()) {
-            var item = TpsWeaponSystem.findOwnedWeapon(target, accessory.getTpsWeaponId());
-            if (item == null || item.getTpsAccessoryIds().contains(accessory.getId())) continue;
-            item.getTpsAccessoryIds().add(accessory.getId());
-            if (!changed.contains(item)) changed.add(item);
-        }
-        changed.forEach(GameItem::save);
-        if (!changed.isEmpty()) target.sendPacket(new PacketStoreItemChangeNotify(changed));
-        // Accessory affixes add abilities, so the wearers of changed weapons need them rebuilt.
-        var changedIds = changed.stream().map(GameItem::getItemId).toList();
-        for (var avatar : TpsWeaponSystem.getTpsWearers(target)) {
-            if (avatar.getTpsWeaponIds().stream().noneMatch(changedIds::contains)) continue;
-            avatar.recalcStats();
-            TpsWeaponSystem.sendEquipChange(avatar);
-        }
+        int changed = TpsWeaponSystem.unlockAllAccessories(target);
         CommandOutput.sendMessage(
-                sender, "Unlocked accessories on " + changed.size() + " TPS weapons.");
+                sender, "Unlocked accessories on " + changed + " TPS weapons.");
     }
 
     private void wear(Player sender, Player target, List<String> args) {

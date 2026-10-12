@@ -57,20 +57,21 @@ public final class DatabaseHelper {
 
                 @Override
                 public AccountCreationService.InsertResult tryInsert(Account account) {
-                    try {
-                        runSynchronousDatabaseWrite(
-                                () -> DatabaseManager.getAccountDatastore().insert(account));
-                        return AccountCreationService.InsertResult.INSERTED;
-                    } catch (MongoWriteException e) {
-                        if (e.getError() == null || e.getError().getCode() != 11000) throw e;
-                        if (DatabaseHelper.getAccountByName(account.getUsername()) != null) {
-                            return AccountCreationService.InsertResult.USERNAME_TAKEN;
+                    return callSynchronousDatabaseWrite(() -> {
+                        try {
+                            DatabaseManager.getAccountDatastore().insert(account);
+                            return AccountCreationService.InsertResult.INSERTED;
+                        } catch (MongoWriteException e) {
+                            if (e.getError() == null || e.getError().getCode() != 11000) throw e;
+                            if (DatabaseHelper.getAccountByName(account.getUsername()) != null) {
+                                return AccountCreationService.InsertResult.USERNAME_TAKEN;
+                            }
+                            if (DatabaseHelper.getAccountById(account.getId()) != null) {
+                                return AccountCreationService.InsertResult.ID_TAKEN;
+                            }
+                            throw e;
                         }
-                        if (DatabaseHelper.getAccountById(account.getId()) != null) {
-                            return AccountCreationService.InsertResult.ID_TAKEN;
-                        }
-                        throw e;
-                    }
+                    });
                 }
             };
 
@@ -231,7 +232,10 @@ public final class DatabaseHelper {
                     databaseWriters,
                     eventExecutorItem,
                     DatabaseHelper::saveWithRetry,
-                    item -> DatabaseManager.getGameDatastore().delete(item));
+                    item -> {
+                        if (PersistenceWriteFence.mayExecute(item))
+                            DatabaseManager.getGameDatastore().delete(item);
+                    });
 
     static DatabaseWriterManager getWriterManager() {
         return databaseWriters;
@@ -249,6 +253,15 @@ public final class DatabaseHelper {
 
     private static void submitDatabaseWrite(ExecutorService executor, Runnable task) {
         databaseWriters.submit(executor, task);
+    }
+
+    /**
+     * Completes when every pre-call write is acknowledged, or exceptionally on a write failure.
+     * The caller must stop its old-session producers first. Admission remains open; this is not
+     * a session generation fence, a transaction, or a snapshot of concurrently mutating objects.
+     */
+    public static CompletableFuture<Void> flushForLoginHandoff() {
+        return databaseWriters.flush();
     }
 
     public static DatabaseWriterManager.ShutdownResult shutdownWriters(Duration timeout) {
@@ -326,16 +339,31 @@ public final class DatabaseHelper {
 
     /** Lifts the ban on every account this IP took down. Returns how many were unbanned. */
     public static int unbanAccountsBannedByIp(String ip) {
-        int unbanned = 0;
-        for (var account : DatabaseHelper.getAccountsBannedByIp(ip)) {
-            try {
-                unbanAccount(account);
-                unbanned++;
-            } catch (RuntimeException e) {
-                Grasscutter.getLogger().error("Failed to unban account {}.", account.getId(), e);
-            }
+        var count = new java.util.concurrent.atomic.AtomicInteger();
+        var updates = getAccountsBannedByIp(ip).stream().map(account -> (Runnable) () -> {
+            boolean cleared = updateAccount(account, fresh -> clearBanForIp(fresh, ip));
+            if (cleared) count.incrementAndGet();
+        }).toArray(Runnable[]::new);
+        new emu.grasscutter.server.ShutdownSequence().run(updates);
+        return count.get();
+    }
+
+    static boolean clearBanForIp(Account account, String ip) {
+        if (ip == null) return false;
+        var provenance = account.getBannedByIp();
+        boolean matches = java.util.Objects.equals(ip, provenance);
+        if (provenance == null && account.getBanReason() != null) {
+            matches = java.util.regex.Pattern.compile(
+                    "^" + java.util.regex.Pattern.quote(LEGACY_IP_BAN_REASON_PREFIX + ip) + "(?:$|\\s)")
+                    .matcher(account.getBanReason()).find();
         }
-        return unbanned;
+        if (!matches) return false;
+        account.setBanned(false);
+        account.setBanReason(null);
+        account.setBanEndTime(0);
+        account.setBanStartTime(0);
+        account.setBannedByIp(null);
+        return true;
     }
 
     /** The account fields a ban sets. */
@@ -362,11 +390,15 @@ public final class DatabaseHelper {
      * whatever else changed since it was loaded, such as a newer login token.
      */
     public static void updateAccount(Account account, Consumer<Account> change, String... fields) {
-        change.accept(account);
+        updateAccount(account, fresh -> {
+            change.accept(fresh);
+            return null;
+        });
         var server = Grasscutter.getGameServer();
         var online = server == null ? null : server.getPlayerByAccountId(account.getId());
-        if (online != null && online.getAccount() != account) change.accept(online.getAccount());
-        saveAccountFields(account, fields);
+        if (online != null && online.getAccount() != account) {
+            online.getAccount().refreshPersistedState(account);
+        }
     }
 
     /**
@@ -381,12 +413,9 @@ public final class DatabaseHelper {
         var update = accountFieldUpdate(datastore, account, fields);
         databaseWriters.submitOrderedUncapped(
                 eventExecutorAccount,
-                new AccountKey(account.getId()),
+                PersistenceKey.of(account),
                 () -> datastore.getDatabase().getCollection("accounts").updateOne(eq("_id", account.getId()), update));
     }
-
-    /** Orders one account's writes; whole-document saves and field updates share it. */
-    private record AccountKey(String accountId) {}
 
     /** Kept for callers of the earlier synchronous form; {@link #saveAccountFields} is queued already. */
     public static void saveAccountFieldsAsync(Account account, String... fields) {
@@ -426,7 +455,7 @@ public final class DatabaseHelper {
         if (account.getId() == null) {
             submitDatabaseWrite(eventExecutorAccount, save);
         } else {
-            databaseWriters.submitOrderedUncapped(eventExecutorAccount, new AccountKey(account.getId()), save);
+            databaseWriters.submitOrderedUncapped(eventExecutorAccount, PersistenceKey.of(account), save);
         }
     }
 
@@ -437,7 +466,11 @@ public final class DatabaseHelper {
      */
     public static void saveGameAsync(Object object) {
         if (object == null) return;
+        PersistenceKey.of(object);
+        PersistenceWriteFence.submit(object, () -> saveGameAdmitted(object));
+    }
 
+    private static void saveGameAdmitted(Object object) {
         // The three types are unrelated, so the order of these tests carries no meaning.
         if (object instanceof GameItem gameItem) {
             itemWrites.save(gameItem);
@@ -450,22 +483,6 @@ public final class DatabaseHelper {
         }
     }
 
-    /**
-     * Orders writes by object identity: a save queued while an earlier one runs must not land
-     * first and leave the older state in the database.
-     */
-    private record SameObject(Object object) {
-        @Override
-        public boolean equals(Object other) {
-            return other instanceof SameObject same && same.object == object;
-        }
-
-        @Override
-        public int hashCode() {
-            return System.identityHashCode(object);
-        }
-    }
-
     /** Queues a save on the default pool, unless one is already queued for this object. */
     private static void submitDefaultSave(Object object) {
         // Already queued: that pending write will pick up this change too.
@@ -474,7 +491,7 @@ public final class DatabaseHelper {
         try {
             databaseWriters.submitOrderedUncapped(
                     eventExecutor,
-                    new SameObject(object),
+                    PersistenceKey.of(object),
                     () -> {
                         // Cleared before the write, not after: anything changed while this one runs
                         // has to be able to queue a write of its own.
@@ -495,7 +512,7 @@ public final class DatabaseHelper {
         try {
             databaseWriters.submitOrderedUncapped(
                     eventExecutorGroup,
-                    new SameObject(groupInstance),
+                    PersistenceKey.of(groupInstance),
                     () -> {
                         pendingGroupSaves.remove(groupInstance);
                         saveWithRetry(groupInstance);
@@ -516,13 +533,14 @@ public final class DatabaseHelper {
      * silently, so progress simply disappeared.
      */
     private static void saveWithRetry(Object object) {
+        if (!PersistenceWriteFence.mayExecute(object)) return;
         var name = object.getClass().getSimpleName();
         try {
             DatabaseManager.getGameDatastore().save(object);
         } catch (MongoWriteException e) {
             if (e.getError() == null || e.getError().getCode() != 11000) {
                 Grasscutter.getLogger().error("Failed to save {}.", name, e);
-                return;
+                throw e;
             }
             // The id is reflected back onto the object by the failed insert, so the retry
             // becomes a replace.
@@ -530,6 +548,7 @@ public final class DatabaseHelper {
                 DatabaseManager.getGameDatastore().save(object);
             } catch (Throwable t) {
                 Grasscutter.getLogger().error("Failed to save {} after a duplicate key.", name, t);
+                throw new IllegalStateException("Database replacement failed after duplicate key", t);
             }
         } catch (ConcurrentModificationException e) {
             for (var attempt = 0; attempt < 8; attempt++) {
@@ -541,15 +560,17 @@ public final class DatabaseHelper {
                     // The other thread has not settled yet.
                 } catch (InterruptedException interrupted) {
                     Thread.currentThread().interrupt();
-                    return;
+                    throw new IllegalStateException("Database replacement interrupted", interrupted);
                 } catch (Throwable t) {
                     Grasscutter.getLogger().error("Failed to save {}.", name, t);
-                    return;
+                    throw new IllegalStateException("Database replacement failed", t);
                 }
             }
             Grasscutter.getLogger().error("Failed to save {} - it kept being modified.", name, e);
+            throw new IllegalStateException("Database replacement could not serialize stable state", e);
         } catch (Throwable t) {
             Grasscutter.getLogger().error("Failed to save {}.", name, t);
+            throw new IllegalStateException("Database replacement failed", t);
         }
     }
 
@@ -662,8 +683,62 @@ public final class DatabaseHelper {
         return AccountCreationService.insert(account, ACCOUNT_CREATION_STORE);
     }
 
+    public static <T> T updateAccount(Account cached, java.util.function.Function<Account, T> mutation) {
+        return AccountUpdateService.update(cached, mutation, new AccountUpdateService.Store() {
+            @Override public Account load(String id) { return getAccountById(id); }
+            @Override public void save(Account account) { saveAccount(account); }
+        });
+    }
+
     public static void saveAccount(Account account) {
-        DatabaseHelper.saveAccountAsync(account);
+        java.util.Objects.requireNonNull(account.getId(), "account.id");
+        synchronized (account) {
+            Long version = account.getPersistenceVersion();
+            long nextVersion = version == null ? 1L : Math.addExact(version, 1L);
+            databaseWriters.runSynchronous(PersistenceKey.of(account), () -> {
+                var datastore = DatabaseManager.getAccountDatastore();
+                // Morphia 2.2.7 treats an absent version as an insert; its unsetMissing merge
+                // also sets and increments the version in one update. Encode normally, then
+                // replace with an explicit CAS and no upsert, including legacy null versions.
+                var document = datastore.getMapper().toDocument(account);
+                document.put("persistenceVersion", nextVersion);
+                var result = datastore.getDatabase().getCollection("accounts").replaceOne(
+                        com.mongodb.client.model.Filters.and(eq("_id", account.getId()), eq("persistenceVersion", version)),
+                        document);
+                if (result.getMatchedCount() != 1) {
+                    throw new dev.morphia.VersionMismatchException(Account.class, account.getId());
+                }
+            });
+            account.setPersistenceVersion(nextVersion);
+        }
+    }
+
+    /** Atomically rotates one credential, rejecting a stale account snapshot. */
+    public static void updateAccountCredential(Account account, String field, String credential) {
+        if (!field.equals("token") && !field.equals("sessionKey")) {
+            throw new IllegalArgumentException("Not an account credential field");
+        }
+        java.util.Objects.requireNonNull(account.getId(), "account.id");
+        synchronized (account) {
+            Long version = account.getPersistenceVersion();
+            long nextVersion = version == null ? 1L : Math.addExact(version, 1L);
+            databaseWriters.runSynchronous(PersistenceKey.of(account),
+                    () -> {
+                        var result = DatabaseManager.getAccountDatastore().getDatabase()
+                                .getCollection("accounts")
+                                .updateOne(
+                                        com.mongodb.client.model.Filters.and(
+                                                eq("_id", account.getId()),
+                                                eq("persistenceVersion", version)),
+                                        com.mongodb.client.model.Updates.combine(
+                                                com.mongodb.client.model.Updates.set(field, credential),
+                                                com.mongodb.client.model.Updates.inc("persistenceVersion", 1L)));
+                        if (result.getMatchedCount() != 1) {
+                            throw new AccountWriteConflictException();
+                        }
+                    });
+            account.setPersistenceVersion(nextVersion);
+        }
     }
 
     public static Account getAccountByName(String username) {
@@ -811,7 +886,7 @@ public final class DatabaseHelper {
     }
 
     public static void deleteItem(GameItem item) {
-        itemWrites.delete(item);
+        PersistenceWriteFence.submit(item, () -> itemWrites.delete(item));
     }
 
     /**
@@ -825,6 +900,7 @@ public final class DatabaseHelper {
                 .find(GameItem.class)
                 .filter(Filters.eq("ownerId", player.getUid()))
                 .stream()
+                .peek(item -> PersistenceWriteFence.bindOwner(item, player))
                 .toList();
     }
 
@@ -849,7 +925,25 @@ public final class DatabaseHelper {
     }
 
     public static void deleteFriendship(Friendship friendship) {
-        DatabaseHelper.asyncOperation(() -> DatabaseManager.getGameDatastore().delete(friendship));
+        deleteSessionDocument(friendship);
+    }
+
+    /** Reverse mutations belong to their initiator, not a peer resolved by UID. */
+    public static void saveFriendship(Friendship friendship, Player origin) {
+        submitFriendshipMutation(friendship, origin, false);
+    }
+
+    public static void deleteFriendship(Friendship friendship, Player origin) {
+        submitFriendshipMutation(friendship, origin, true);
+    }
+
+    private static void submitFriendshipMutation(Friendship friendship, Player origin, boolean delete) {
+        PersistenceWriteFence.submit(origin, () ->
+                databaseWriters.submitOrdered(eventExecutor, PersistenceKey.of(friendship), () -> {
+                    if (!PersistenceWriteFence.mayExecute(origin)) return;
+                    if (delete) DatabaseManager.getGameDatastore().delete(friendship);
+                    else DatabaseManager.getGameDatastore().save(friendship);
+                }));
     }
 
     public static Friendship getReverseFriendship(Friendship friendship) {
@@ -901,6 +995,7 @@ public final class DatabaseHelper {
                 .find(Mail.class)
                 .filter(Filters.eq("ownerUid", player.getUid()))
                 .stream()
+                .peek(mail -> PersistenceWriteFence.bindOwner(mail, player))
                 .toList();
     }
 
@@ -909,7 +1004,7 @@ public final class DatabaseHelper {
     }
 
     public static void deleteMail(Mail mail) {
-        DatabaseHelper.asyncOperation(() -> DatabaseManager.getGameDatastore().delete(mail));
+        deleteSessionDocument(mail);
     }
 
     public static List<GameMainQuest> getAllQuests(Player player) {
@@ -925,7 +1020,15 @@ public final class DatabaseHelper {
     }
 
     public static void deleteQuest(GameMainQuest quest) {
-        DatabaseHelper.asyncOperation(() -> DatabaseManager.getGameDatastore().delete(quest));
+        deleteSessionDocument(quest);
+    }
+
+    private static void deleteSessionDocument(Object object) {
+        PersistenceWriteFence.submit(object, () ->
+                databaseWriters.submitOrdered(eventExecutor, PersistenceKey.of(object), () -> {
+                    if (PersistenceWriteFence.mayExecute(object))
+                        DatabaseManager.getGameDatastore().delete(object);
+                }));
     }
 
     public static GameHome getHomeByUid(int id) {
@@ -957,7 +1060,10 @@ public final class DatabaseHelper {
     }
 
     public static void saveDailyTaskManager(emu.grasscutter.game.dailytask.DailyTaskManager manager) {
-        runSynchronousDatabaseWrite(() -> DatabaseManager.getGameDatastore().save(manager));
+        PersistenceWriteFence.submit(manager, () -> runSynchronousDatabaseWrite(() -> {
+            if (PersistenceWriteFence.mayExecute(manager))
+                DatabaseManager.getGameDatastore().save(manager);
+        }));
     }
 
     public static BattlePassManager loadBattlePass(Player player) {
@@ -1029,9 +1135,10 @@ public final class DatabaseHelper {
     }
 
     public static SceneGroupInstance loadGroupInstance(int groupId, Player owner) {
-        return DatabaseManager.getGameDatastore()
-                .find(SceneGroupInstance.class)
-                .filter(Filters.and(Filters.eq("ownerUid", owner.getUid()), Filters.eq("groupId", groupId)))
-                .first();
+        return PersistenceWriteFence.bindOwner(
+                DatabaseManager.getGameDatastore()
+                        .find(SceneGroupInstance.class)
+                        .filter(Filters.and(Filters.eq("ownerUid", owner.getUid()), Filters.eq("groupId", groupId)))
+                        .first(), owner);
     }
 }

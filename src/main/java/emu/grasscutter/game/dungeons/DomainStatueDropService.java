@@ -28,8 +28,12 @@ public final class DomainStatueDropService {
 
     private DomainStatueDropService() {}
 
-    public static boolean claim(
-            Player player, DungeonManager dm, ClaimMode mode, int groupId) {
+    public static boolean claim(Player player, DungeonManager dm, ClaimMode mode, int groupId) {
+        if (dm == null) return false;
+        synchronized (dm) { return claimLocked(player, dm, mode, groupId); }
+    }
+
+    private static boolean claimLocked(Player player, DungeonManager dm, ClaimMode mode, int groupId) {
         if (player == null || dm == null) {
             return false;
         }
@@ -69,54 +73,34 @@ public final class DomainStatueDropService {
             return false;
         }
 
-        if (!payCost(player, dungeonData, mode)) {
-            Grasscutter.getLogger()
-                    .warn(
-                            "StatueDrop abort: payCost failed uid={} dungeon={} mode={}",
-                            player.getUid(),
-                            dungeonData.getId(),
-                            mode);
-            return false;
-        }
-
-        try {
-            DungeonDropLoader.ensureLoaded();
-        } catch (Throwable ignored) {
-        }
-
+        final ClaimMode claimMode = mode;
+        final RewardPreviewData resolvedPreview = preview;
         int rollTimes = Math.max(1, mode.rollTimes);
-        List<GameItem> rewards = buildRewards(player, dm, dungeonData, preview, hasPreview, rollTimes);
-        if (rewards == null || rewards.isEmpty()) {
-            Grasscutter.getLogger()
-                    .warn(
-                            "StatueDrop abort: empty rewards dungeon={} statueDrop={}",
-                            dungeonData.getId(),
-                            dungeonData.getStatueDrop());
-            return false;
+        var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(dm, "domain:" + player.getUid());
+        if (claim == null) return false;
+        boolean[] paid = {false};
+        List<GameItem> rewards;
+        synchronized (player.getInventory()) {
+            rewards = DomainRewardDelivery.grant(() -> {
+                DungeonDropLoader.ensureLoaded();
+                var generated = buildRewards(player, dm, dungeonData, resolvedPreview, hasPreview, rollTimes);
+                if (generated == null) return List.of();
+                ReliquaryDomainBonusHelper.appendToRewards(dm, generated);
+                generated.removeIf(item -> item == null || item.getCount() <= 0);
+                return generated;
+            }, items -> emu.grasscutter.game.inventory.ClaimRewardDelivery.canGrant(player.getInventory(), items),
+                    () -> paid[0] = payCost(player, dungeonData, claimMode),
+                    items -> emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(player.getInventory(), items, ActionReason.DungeonStatueDrop));
         }
-
-        try {
-            ReliquaryDomainBonusHelper.appendToRewards(dm, rewards);
-        } catch (Throwable t) {
-            Grasscutter.getLogger().warn("appendToRewards failed", t);
-        }
-
-        // Never grant/show empty stacks (e.g. drop table rolled count 0).
-        rewards.removeIf(it -> it == null || it.getCount() <= 0);
         if (rewards.isEmpty()) {
-            Grasscutter.getLogger()
-                    .warn(
-                            "StatueDrop abort: all rewards filtered empty dungeon={}",
-                            dungeonData.getId());
+            if (!paid[0]) claim.release(); // A post-payment failure stays quarantined, not retry-safe.
             return false;
         }
-
-        player.getInventory().addItems(rewards, ActionReason.DungeonStatueDrop);
-        player.sendPacket(new PacketGadgetAutoPickDropInfoNotify(rewards));
-
         if (rewarded != null) {
             rewarded.add(player.getUid());
+            claim.release();
         }
+        player.sendPacket(new PacketGadgetAutoPickDropInfoNotify(rewards));
 
         try {
             dm.getScene()
@@ -152,13 +136,16 @@ public final class DomainStatueDropService {
             case HCOIN -> player.getResinManager().payHcoinRewardClaim();
             case NORMAL_2X -> {
                 if (dungeonData.getStatueCostID() != 0 && dungeonData.getStatueCostID() != 106) {
-                    yield true;
+                    int cost;
+                    try { cost = Math.multiplyExact(baseResinCost, 2); }
+                    catch (ArithmeticException overflow) { yield false; }
+                    yield player.getInventory().payItem(dungeonData.getStatueCostID(), cost);
                 }
                 yield player.getResinManager().useResin(40);
             }
             case NORMAL_1X -> {
                 if (dungeonData.getStatueCostID() != 0 && dungeonData.getStatueCostID() != 106) {
-                    yield true;
+                    yield player.getInventory().payItem(dungeonData.getStatueCostID(), baseResinCost);
                 }
                 int cost = baseResinCost > 0 ? baseResinCost : 20;
                 yield player.getResinManager().useResin(cost);
@@ -191,8 +178,8 @@ public final class DomainStatueDropService {
         if ((rewards == null || rewards.isEmpty()) && hasPreview) {
             rewards = new ArrayList<>();
             for (ItemParamData param : preview.getPreviewItems()) {
-                if (param != null && param.getId() > 0) {
-                    rewards.add(new GameItem(param.getId(), Math.max(param.getCount(), 1) * rollTimes));
+                if (param != null && param.getId() > 0 && param.getCount() > 0) {
+                    rewards.add(emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(param.getId(), Math.multiplyExact(param.getCount(), rollTimes)));
                 }
             }
         }
@@ -236,13 +223,13 @@ public final class DomainStatueDropService {
 
             int amount = 0;
             for (int t = 0; t < times; t++) {
-                amount += Utils.drawRandomListElement(candidateAmounts, entry.getProbabilities());
+                amount = Math.addExact(amount, Utils.drawRandomListElement(candidateAmounts, entry.getProbabilities()));
             }
             if (entry.isMpDouble() && dm.getScene().getPlayerCount() > 1) {
-                amount *= 2;
+                amount = Math.multiplyExact(amount, 2);
             }
             if (entry.getItems().size() == 1) {
-                rewards.add(new GameItem(entry.getItems().get(0), amount));
+                rewards.add(emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(entry.getItems().get(0), amount));
             } else {
                 for (int i = 0; i < amount; i++) {
                     int itemId =

@@ -18,6 +18,10 @@ public class HandlerHomeUpdateArrangementInfoReq extends PacketHandler {
         var homeScene =
                 session.getPlayer().getHome().getHomeSceneItem(session.getPlayer().getSceneId());
 
+        if (homeScene == null || !homeScene.validateArrangement(req.getSceneArrangementInfo(), session.getPlayer())) {
+            session.send(new PacketHomeUpdateArrangementInfoRsp());
+            return;
+        }
         var roomSceneId = homeScene.getRoomSceneId();
         homeScene.update(req.getSceneArrangementInfo(), session.getPlayer());
         if (roomSceneId != homeScene.getRoomSceneId()) {

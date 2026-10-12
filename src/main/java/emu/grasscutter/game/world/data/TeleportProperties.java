@@ -16,4 +16,6 @@ public final class TeleportProperties {
     private Position teleportTo;
     private Position teleportRot;
     private EnterTypeOuterClass.EnterType enterType;
+    /** Trusted preparation, run only after teleport authorization and destination validation. */
+    private Runnable beforeTransfer;
 }

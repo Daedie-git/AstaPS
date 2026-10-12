@@ -37,9 +37,12 @@ final class PlayerLevelRewardClaimTest {
     private GameServerPacketHandler router;
     private final Map<Integer, PlayerLevelData> oldLevels = new HashMap<>();
     private RewardData oldReward;
+    private emu.grasscutter.data.excels.ItemData oldItem;
 
     @BeforeEach
     void setup() throws Exception {
+        oldItem = GameData.getItemDataMap().put(201, new Gson().fromJson(
+                "{\"id\":201,\"itemType\":\"ITEM_VIRTUAL\"}", emu.grasscutter.data.excels.ItemData.class));
         for (int level : List.of(2, 3, 4, 5, 6)) {
             oldLevels.put(level, GameData.getPlayerLevelDataMap().get(level));
             GameData.getPlayerLevelDataMap()
@@ -67,6 +70,8 @@ final class PlayerLevelRewardClaimTest {
 
     @AfterEach
     void restore() {
+        if (oldItem == null) GameData.getItemDataMap().remove(201);
+        else GameData.getItemDataMap().put(201, oldItem);
         oldLevels.forEach(
                 (id, row) -> {
                     if (row == null) GameData.getPlayerLevelDataMap().remove((int) id);
@@ -89,6 +94,19 @@ final class PlayerLevelRewardClaimTest {
         assertEquals(0, reply().getRetcode(), "A duplicate must be answered without paying again");
         assertEquals(1, player.inventory.grants.size());
         assertEquals(1, player.saves);
+    }
+
+    @Test
+    void rejectedDeliveryPreservesClaimForRetry() throws Exception {
+        player.inventory.rejectDelivery = true;
+        claim(5);
+        assertFalse(player.getRewardedLevels().contains(5));
+        assertEquals(0, player.saves);
+        player.inventory.rejectDelivery = false;
+        session.sent.clear();
+        claim(5);
+        assertTrue(player.getRewardedLevels().contains(5));
+        assertEquals(1, player.inventory.grants.size());
     }
 
     @Test
@@ -204,6 +222,14 @@ final class PlayerLevelRewardClaimTest {
 
     private static final class RecordingInventory extends Inventory {
         List<List<ItemParamData>> grants;
+        boolean rejectDelivery;
+
+        @Override
+        public boolean tryAddItemParamDatas(Collection<ItemParamData> items, ActionReason reason) {
+            if (rejectDelivery) return false;
+            addItemParamDatas(items, reason);
+            return true;
+        }
 
         private RecordingInventory() {
             super(null);

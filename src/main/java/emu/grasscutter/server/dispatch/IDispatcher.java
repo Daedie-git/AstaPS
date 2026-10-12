@@ -14,6 +14,17 @@ import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 
 public interface IDispatcher {
+    record Pending(int responseId, Consumer<JsonElement> complete) {}
+    Map<IDispatcher, ConcurrentMap<String, Pending>> REQUESTS =
+            Collections.synchronizedMap(new WeakHashMap<>());
+    ThreadLocal<String> REQUEST_KEY = new ThreadLocal<>();
+
+    default ConcurrentMap<String, Pending> pendingRequests() {
+        synchronized (REQUESTS) {
+            return REQUESTS.computeIfAbsent(this, ignored -> new ConcurrentHashMap<>());
+        }
+    }
+
     Gson JSON =
             new GsonBuilder()
                     .disableHtmlEscaping()
@@ -79,8 +90,13 @@ public interface IDispatcher {
         try {
             // Try to return the value.
             return future.get(5L, TimeUnit.SECONDS);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            return null;
         } catch (Exception ignored) {
             return null;
+        } finally {
+            future.cancel(true);
         }
     }
 
@@ -107,13 +123,25 @@ public interface IDispatcher {
      */
     default <T> CompletableFuture<T> async(
             JsonObject request, int requestId, int responseId, Function<JsonElement, T> parser) {
-        // Create the future.
         var future = new CompletableFuture<T>();
-        // Listen for the response.
-        this.registerCallback(responseId, packet -> future.complete(parser.apply(packet)));
-        // Broadcast the packet.
-        this.sendMessage(requestId, request);
-
+        var key = UUID.randomUUID().toString();
+        var pending = this.pendingRequests();
+        pending.put(key, new Pending(responseId, packet -> {
+            try { future.complete(parser.apply(packet)); }
+            catch (Throwable failure) { future.completeExceptionally(failure); }
+        }));
+        future.whenComplete((result, failure) -> pending.remove(key));
+        future.orTimeout(5, TimeUnit.SECONDS);
+        var previous = REQUEST_KEY.get();
+        try {
+            REQUEST_KEY.set(key);
+            this.sendMessage(requestId, request);
+        } catch (Throwable failure) {
+            future.completeExceptionally(failure);
+        } finally {
+            if (previous == null) REQUEST_KEY.remove();
+            else REQUEST_KEY.set(previous);
+        }
         return future;
     }
 
@@ -149,6 +177,7 @@ public interface IDispatcher {
         // Create a message from the message data.
         var serverMessage = new JsonObject();
         serverMessage.addProperty("packetId", packetId);
+        if (REQUEST_KEY.get() != null) serverMessage.addProperty("requestKey", REQUEST_KEY.get());
         serverMessage.addProperty("message", JSON.toJson(message));
 
         return serverMessage;
@@ -191,16 +220,24 @@ public interface IDispatcher {
                 // Get the handler.
                 var handler = this.getHandlers().get(packetId);
                 // Handle the packet.
-                handler.accept(socket, packetData);
+                var previous = REQUEST_KEY.get();
+                try {
+                    if (decoded.has("requestKey")) REQUEST_KEY.set(decoded.get("requestKey").getAsString());
+                    else REQUEST_KEY.remove();
+                    handler.accept(socket, packetData);
+                } finally {
+                    if (previous == null) REQUEST_KEY.remove();
+                    else REQUEST_KEY.set(previous);
+                }
             }
 
-            // Check if the packet ID has callbacks.
-            if (this.getCallbacks().containsKey(packetId)) {
-                // Get the callbacks.
-                var callbacks = this.getCallbacks().get(packetId);
-                // Call the callbacks.
-                callbacks.forEach(callback -> callback.accept(packetData));
-                callbacks.clear();
+            if (decoded.has("requestKey")) {
+                var key = decoded.get("requestKey").getAsString();
+                var pending = this.pendingRequests().get(key);
+                if (pending != null && pending.responseId() == packetId
+                        && this.pendingRequests().remove(key, pending)) {
+                    pending.complete().accept(packetData);
+                }
             }
         } catch (Exception exception) {
             this.getLogger().warn("Exception occurred while handling packet {}.", packetId);
@@ -229,13 +266,9 @@ public interface IDispatcher {
      * @param packetId The packet ID to register.
      * @param callback The callback to register.
      */
+    @Deprecated
     default void registerCallback(int packetId, Consumer<JsonElement> callback) {
-        // Check if the packet ID has a list for callbacks.
-        if (!this.getCallbacks().containsKey(packetId))
-            this.getCallbacks().put(packetId, new LinkedList<>());
-
-        // Register the callback.
-        this.getCallbacks().get(packetId).add(callback);
+        throw new UnsupportedOperationException("Use async/await with per-request correlation");
     }
 
     /**

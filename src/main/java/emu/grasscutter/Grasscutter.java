@@ -78,6 +78,8 @@ public final class Grasscutter {
     @Getter @Setter private static PermissionHandler permissionHandler;
 
     private static LineReader consoleLineReader = null;
+    private static final emu.grasscutter.server.ShutdownSequence shutdown =
+            new emu.grasscutter.server.ShutdownSequence();
 
     @Getter
     private static final ExecutorService threadPool =
@@ -232,36 +234,44 @@ public final class Grasscutter {
 
     /** Server shutdown event. */
     private static void onShutdown() {
-        // Disable all plugins.
-        if (pluginManager != null) Utils.runAll("Plugin shutdown", pluginManager::disablePlugins);
-        // Shutdown the game server.
-        if (gameServer != null) Utils.runAll("Game server shutdown", gameServer::onServerShutdown);
-
-        // Held until the database writers have drained, so its waits are not cut short.
-        boolean interrupted = Thread.interrupted();
         try {
-            // Wait for Grasscutter's thread pool to finish.
-            var executor = Grasscutter.getThreadPool();
-            executor.shutdown();
-            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
-                executor.shutdownNow();
-            }
-        } catch (InterruptedException ignored) {
-            // Still drain accepted database writes before restoring the shutdown hook's interrupt.
-            interrupted = true;
+            shutdown.run(
+                    () -> { if (pluginManager != null) pluginManager.disablePlugins(); },
+                    () -> { if (gameServer != null) gameServer.onServerShutdown(); },
+                    Grasscutter::shutdownLoaders,
+                    Grasscutter::drainDatabaseWriters);
+        } catch (RuntimeException failure) {
+            logger.error("Shutdown failed after attempting all cleanup stages.", failure);
         }
+    }
 
+    private static void shutdownLoaders() {
+        new emu.grasscutter.server.ShutdownSequence().run(
+                () -> emu.grasscutter.server.packet.recv.HandlerGetPlayerTokenReq
+                        .shutdownLoginProducers(Duration.ofSeconds(5)),
+                () -> emu.grasscutter.server.game.LoginProducerLifecycle
+                        .stopExecutor(Grasscutter.getThreadPool(), Duration.ofSeconds(5)),
+                () -> {
+                    try { emu.grasscutter.scripts.SceneScriptManager.shutdownEventExecutor(5, TimeUnit.SECONDS); }
+                    catch (Exception failure) {
+                        if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
+                        throw new IllegalStateException("Script final-save producers did not stop", failure);
+                    }
+                });
+    }
+
+    private static void drainDatabaseWriters() {
         // Stop admission first, then drain every database writer against one shared deadline.
         var databaseShutdown = DatabaseHelper.shutdownWriters(Duration.ofSeconds(5));
         if (!databaseShutdown.completed()) {
             logger.error(
-                    "Database shutdown incomplete: {} active at timeout, {} accepted tasks never started, interrupted={}; pools={}",
+                    "Database shutdown incomplete: {} active at timeout, {} accepted tasks never started, interrupted={}, writeFailed={}; pools={}",
                     databaseShutdown.activeAtTimeoutTaskCount(),
                     databaseShutdown.notStartedTaskCount(),
                     databaseShutdown.interrupted(),
+                    databaseShutdown.writeFailed(),
                     databaseShutdown.pools());
         }
-        if (interrupted) Thread.currentThread().interrupt();
     }
 
     /** Utility method for starting the: - SDK server - Dispatch server */
@@ -289,6 +299,9 @@ public final class Grasscutter {
 
     /** Attempts to load the configuration from a file. */
     public static void loadConfig() {
+        if (config != null) {
+            throw new IllegalStateException("Configuration changes require a server restart");
+        }
         // Check if config.json exists. If not, we generate a new config.
         if (!configFile.exists()) {
             getLogger().info("config.json could not be found. Generating a default configuration ...");
@@ -299,7 +312,7 @@ public final class Grasscutter {
 
         // If the file already exists, we attempt to load it.
         try {
-            config = JsonUtils.loadToClass(configFile.toPath(), ConfigContainer.class);
+            config = emu.grasscutter.config.ConfigFileStore.load(configFile.toPath());
         } catch (Exception exception) {
             getLogger()
                     .error(
@@ -316,12 +329,10 @@ public final class Grasscutter {
     public static void saveConfig(@Nullable ConfigContainer config) {
         if (config == null) config = new ConfigContainer();
 
-        try (FileWriter file = new FileWriter(configFile)) {
-            file.write(JsonUtils.encode(config));
-        } catch (IOException ignored) {
-            logger.error("Unable to write to config file.");
-        } catch (Exception e) {
-            logger.error("Unable to save config file.", e);
+        try {
+            emu.grasscutter.config.ConfigFileStore.save(configFile.toPath(), config);
+        } catch (IOException exception) {
+            throw new java.io.UncheckedIOException("Unable to save configuration", exception);
         }
     }
 

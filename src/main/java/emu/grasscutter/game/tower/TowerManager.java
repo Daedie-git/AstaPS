@@ -321,7 +321,7 @@ public class TowerManager extends BasePlayerManager {
     private static final int STARS_PER_LEVEL = 3;
     private static final int STARS_PER_FLOOR = LEVELS_PER_FLOOR * STARS_PER_LEVEL;
 
-    public Map<Integer, TowerLevelRecord> getRecordMap() {
+    public synchronized Map<Integer, TowerLevelRecord> getRecordMap() {
         Map<Integer, TowerLevelRecord> recordMap = getTowerData().recordMap;
         if (recordMap == null) {
             recordMap = new HashMap<>();
@@ -347,7 +347,10 @@ public class TowerManager extends BasePlayerManager {
 
         int currentId = schedule.getScheduleId();
         int lastId = getTowerData().lastScheduleId;
-        if (lastId == currentId) return;
+        if (lastId == currentId) {
+            if (getTowerData().skipFloorState == 2) grantSkipRewards(recordMap, towerSystem.getScheduleFloors());
+            return;
+        }
 
         var scheduleFloorList = towerSystem.getScheduleFloors();
         var scheduleFloors = new HashSet<>(scheduleFloorList);
@@ -425,7 +428,6 @@ public class TowerManager extends BasePlayerManager {
         int skipThroughIndex = previousBestFloorIndex >= 12 ? 10 : 9;
         data.skipToFloorIndex = skipThroughIndex + 1;
 
-        var granted = new LinkedHashMap<Integer, Integer>();
         for (int floorId : scheduleFloors) {
             var floorData = GameData.getTowerFloorDataMap().get(floorId);
             if (floorData == null) continue;
@@ -434,24 +436,13 @@ public class TowerManager extends BasePlayerManager {
 
             if (index <= skipThroughIndex) {
                 fillFloorFullStars(recordMap, floorId);
-                mergeFirstPassRewards(floorId, granted);
             } else if (index == data.skipToFloorIndex) {
                 recordMap.computeIfAbsent(floorId, TowerLevelRecord::new);
             }
         }
 
-        if (!granted.isEmpty()) {
-            var items = new ArrayList<emu.grasscutter.game.inventory.GameItem>();
-            granted.forEach(
-                    (id, count) ->
-                            items.add(new emu.grasscutter.game.inventory.GameItem(id, count)));
-            player.getInventory()
-                    .addItems(items, emu.grasscutter.game.props.ActionReason.TowerSkipFloorReward);
-            data.skipFloorGrantedRewards = granted;
-            data.skipFloorState = 3; // TAKEN_REWARD (chamber treasure already granted; star treasure still manual)
-        } else {
-            data.skipFloorState = 2; // HAS_REWARD
-        }
+        data.skipFloorState = 2;
+        grantSkipRewards(recordMap, scheduleFloors);
     }
 
     private void fillFloorFullStars(Map<Integer, TowerLevelRecord> recordMap, int floorId) {
@@ -468,19 +459,39 @@ public class TowerManager extends BasePlayerManager {
         record.setFloorStarRewardProgress(0);
     }
 
-    private void mergeFirstPassRewards(int floorId, Map<Integer, Integer> into) {
-        int firstLevelId = getFirstLevelId(floorId);
-        if (firstLevelId == 0) return;
-        for (int i = 0; i < LEVELS_PER_FLOOR; i++) {
-            var levelData = GameData.getTowerLevelDataMap().get(firstLevelId + i);
-            if (levelData == null || levelData.getFirstPassRewardId() <= 0) continue;
-            var reward = GameData.getRewardDataMap().get(levelData.getFirstPassRewardId());
-            if (reward == null || reward.getRewardItemList() == null) continue;
-            for (var param : reward.getRewardItemList()) {
-                if (param == null || param.getId() <= 0 || param.getCount() <= 0) continue;
-                into.merge(param.getId(), param.getCount(), Integer::sum);
+    private void grantSkipRewards(Map<Integer, TowerLevelRecord> records, List<Integer> floors) {
+        var data = getTowerData();
+        var schedule = player.getServer().getTowerSystem().getCurrentTowerScheduleData();
+        boolean pending = false;
+        for (int floorId : floors) {
+            var floor = GameData.getTowerFloorDataMap().get(floorId);
+            if (floor == null || floor.getFloorIndex() < 9 || floor.getFloorIndex() >= data.skipToFloorIndex) continue;
+            var record = records.get(floorId);
+            int first = getFirstLevelId(floorId);
+            if (record == null || first == 0) { pending = true; continue; }
+            for (int i = 0; i < LEVELS_PER_FLOOR; i++) {
+                int levelId = first + i;
+                if (record.isFirstPassPaid(levelId)) continue;
+                var level = GameData.getTowerLevelDataMap().get(levelId);
+                int rewardId = TowerRewards.chamberRewardId(schedule, floor, level);
+                var reward = rewardId <= 0 ? null : GameData.getRewardDataMap().get(rewardId);
+                if (reward == null || reward.getRewardItemList() == null) { pending = true; continue; }
+                var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(this, "first-pass:" + floorId + ":" + levelId);
+                if (claim == null) { pending = true; continue; }
+                if (!emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrantParams(player.getInventory(), reward.getRewardItemList(),
+                        emu.grasscutter.game.props.ActionReason.TowerSkipFloorReward)) {
+                    claim.release();
+                    pending = true;
+                    continue;
+                }
+                record.markFirstPassPaid(levelId);
+                claim.release();
+                for (var param : reward.getRewardItemList())
+                    data.skipFloorGrantedRewards.merge(param.getId(), param.getCount(), Math::addExact);
             }
         }
+        data.skipFloorState = pending ? 2 : 3;
+        player.save();
     }
 
     /**
@@ -622,7 +633,7 @@ public class TowerManager extends BasePlayerManager {
             return 0;
         }
         for (int i = 0; i < LEVELS_PER_FLOOR; i++) {
-            if (record.getLevelStars(firstLevelId + i) <= 0) {
+            if (!record.isCompleted(firstLevelId + i)) {
                 return i;
             }
         }
@@ -830,24 +841,19 @@ public class TowerManager extends BasePlayerManager {
             return false;
         }
 
-        clearAwaitingTeamReconfigure();
-        forceChamberOneOnEnter = false;
-        notifyCurLevelRecordChange();
-        // Resolve abyssal moon blessing / floor LevelEntity before handoff so enter-scene ability blocks include them.
-        refreshLevelEntityConfigs();
-        // Always enter a chamber on the upper-half team + slot 1.
-        getTowerData().abyssTempTeamIndex = 0;
-        if (!player.getTeamManager().hasTemporaryTeam()) {
-            ensureAbyssTemporaryTeams();
-        }
-        player.getTeamManager().useTemporaryTeam(0);
-        TowerAbyssFix.prepareFirstChamber(player);
         if (!player.getServer()
                 .getDungeonSystem()
-                .handoffDungeon(player, dungeonId, towerDungeonSettleListener)) {
+                .handoffDungeon(player, dungeonId, towerDungeonSettleListener, () -> {
+                    clearAwaitingTeamReconfigure();
+                    forceChamberOneOnEnter = false;
+                    notifyCurLevelRecordChange();
+                    refreshLevelEntityConfigs();
+                    getTowerData().abyssTempTeamIndex = 0;
+                    if (!player.getTeamManager().hasTemporaryTeam()) ensureAbyssTemporaryTeams();
+                    player.getTeamManager().useTemporaryTeam(0);
+                    TowerAbyssFix.prepareFirstChamber(player);
+                })) {
             restoreLevel(previousFloorId, previousLevel, previousLevelId);
-            player.getTeamManager().cleanTemporaryTeam();
-            notifyCurLevelRecordChange();
             return false;
         }
 
@@ -974,7 +980,7 @@ public class TowerManager extends BasePlayerManager {
             var prevRecord = recordMap.get(currentFloorId);
             int levelId = getCurrentLevelId();
             int prevStars = prevRecord.getLevelStars(levelId);
-            if (stars > prevStars) {
+            if (!prevRecord.isCompleted(levelId) || stars > prevStars) {
                 recordMap.put(currentFloorId, prevRecord.setLevelStars(levelId, stars));
             }
         }
@@ -1052,7 +1058,7 @@ public class TowerManager extends BasePlayerManager {
      * Claim every unpaid 3/6/9-star chest the player has earned on this floor. One client click is
      * expected to drain all pending tiers; {@code floorStarRewardProgress} is the claim cursor.
      */
-    public boolean claimFloorStarReward(int floorId) {
+    public synchronized boolean claimFloorStarReward(int floorId) {
         var record = getRecordMap().get(floorId);
         if (record == null) {
             Grasscutter.getLogger().warn("Tower claim stars: no record floor={}", floorId);
@@ -1075,17 +1081,12 @@ public class TowerManager extends BasePlayerManager {
             return false;
         }
 
+        var schedule = player.getServer().getTowerSystem().getCurrentTowerScheduleData();
         var items = new ArrayList<emu.grasscutter.game.inventory.GameItem>();
         int progress = claimed;
         while (progress + 3 <= 9 && stars >= progress + 3) {
             int tier = progress + 3;
-            int rewardId =
-                    switch (tier) {
-                        case 3 -> floorData.getRewardIdThreeStars();
-                        case 6 -> floorData.getRewardIdSixStars();
-                        case 9 -> floorData.getRewardIdNineStars();
-                        default -> 0;
-                    };
+            int rewardId = TowerRewards.starRewardId(schedule, floorData, tier);
             if (rewardId <= 0) {
                 Grasscutter.getLogger()
                         .warn("Tower claim stars: no rewardId floor={} tier={}", floorId, tier);
@@ -1099,7 +1100,7 @@ public class TowerManager extends BasePlayerManager {
             }
             for (var param : reward.getRewardItemList()) {
                 if (param == null || param.getId() <= 0 || param.getCount() <= 0) continue;
-                items.add(new emu.grasscutter.game.inventory.GameItem(param.getId(), param.getCount()));
+                items.add(emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(param.getId(), param.getCount()));
             }
             progress = tier;
             Grasscutter.getLogger()
@@ -1117,12 +1118,19 @@ public class TowerManager extends BasePlayerManager {
             // Merge stacks so the obtain popup shows totals (e.g. 150 primogems) not three tiny bursts.
             var merged = new java.util.LinkedHashMap<Integer, Integer>();
             for (var item : items) {
-                merged.merge(item.getItemId(), item.getCount(), Integer::sum);
+                merged.merge(item.getItemId(), item.getCount(), Math::addExact);
             }
             var grant = new ArrayList<emu.grasscutter.game.inventory.GameItem>();
-            merged.forEach((id, count) -> grant.add(new emu.grasscutter.game.inventory.GameItem(id, count)));
-            player.getInventory()
-                    .addItems(grant, emu.grasscutter.game.props.ActionReason.TowerFloorStarReward);
+            merged.forEach((id, count) -> grant.add(emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(id, count)));
+            var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(this, "stars:" + floorId);
+            if (claim == null) return false;
+            if (!emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(player.getInventory(), grant,
+                    emu.grasscutter.game.props.ActionReason.TowerFloorStarReward)) {
+                claim.release();
+                return false;
+            }
+            record.setFloorStarRewardProgress(progress);
+            claim.release();
         }
         record.setFloorStarRewardProgress(progress);
         player.save();

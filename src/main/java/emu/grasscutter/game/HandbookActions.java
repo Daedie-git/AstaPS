@@ -93,7 +93,8 @@ public interface HandbookActions {
      */
     static Response giveItem(GiveItem request) {
         // Validate the request.
-        if (request.getPlayer() == null || request.getItem() == null) {
+        if (request.getPlayer() == null || request.getItem() == null
+                || request.getAmount() <= 0 || request.getAmount() > 1000) {
             return Response.builder().status(400).message("Invalid request.").build();
         }
 
@@ -118,18 +119,7 @@ public interface HandbookActions {
             }
 
             // Add the item to the player's inventory.
-            var amount = request.getAmount();
-            if (amount > Integer.MAX_VALUE) {
-                // Calculate the amount of times we need to add the item.
-                var times = Math.floor((double) amount / Integer.MAX_VALUE);
-                amount = amount % Integer.MAX_VALUE;
-
-                // Add the item the amount of times we need to.
-                for (var i = 0; i < times; i++) {
-                    var itemStack = new GameItem(itemData, Integer.MAX_VALUE);
-                    player.getInventory().addItem(itemStack, ActionReason.Gm);
-                }
-            }
+            var amount = request.getAmount(); // At most 1000 single-item allocations downstream.
 
             // Create the item stack and add it to the player's inventory.
             var itemStack = new GameItem(itemData, (int) amount);

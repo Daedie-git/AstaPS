@@ -378,6 +378,11 @@ public class World implements Iterable<Player> {
         return this.transferPlayerToScene(player, sceneId, TeleportType.DUNGEON, data, null);
     }
 
+    public boolean transferPlayerToScene(Player player, int sceneId, DungeonData data, Runnable prepare) {
+        return transferPlayerToScene(player, sceneId, TeleportType.DUNGEON,
+                EnterReason.DungeonEnter, data, null, prepare);
+    }
+
     public boolean transferPlayerToScene(
             Player player,
             int sceneId,
@@ -408,12 +413,19 @@ public class World implements Iterable<Player> {
             EnterReason enterReason,
             DungeonData dungeonData,
             Position teleportTo) {
+        return transferPlayerToScene(player, sceneId, teleportType, enterReason, dungeonData, teleportTo, null);
+    }
+
+    private boolean transferPlayerToScene(
+            Player player, int sceneId, TeleportType teleportType, EnterReason enterReason,
+            DungeonData dungeonData, Position teleportTo, Runnable prepare) {
         // Get enter types
         val teleportProps =
                 TeleportProperties.builder()
                         .sceneId(sceneId)
                         .teleportType(teleportType)
                         .enterReason(enterReason)
+                        .beforeTransfer(prepare)
                         .teleportTo(teleportTo)
                         .enterType(EnterType.EnterType_ENTER_JUMP);
 
@@ -453,6 +465,10 @@ public class World implements Iterable<Player> {
             return false;
         }
 
+        if (teleportProperties.getBeforeTransfer() != null) {
+            teleportProperties.getBeforeTransfer().run();
+        }
+
         // Being soul-attached is bound to the dragon's position in the world, and the client keeps
         // steering that entity until it is told otherwise. Moving the character out from under the mount
         // therefore teleports the avatar and leaves the camera, the inputs and the dragon behind at the
@@ -472,6 +488,7 @@ public class World implements Iterable<Player> {
         }
 
         Scene oldScene = player.getScene();
+        boolean previousEmptyHold = oldScene != null && oldScene.isDontDestroyWhenEmpty();
         var newScene = this.getSceneById(teleportProperties.getSceneId());
         // Re-entering the same dungeon starts a fresh instance instead of keeping the old chamber.
         if (newScene == oldScene
@@ -539,6 +556,7 @@ public class World implements Iterable<Player> {
             // disconnect would keep this scene registered and the next entry would reuse it.
             if (newScene == oldScene) newScene.setDontDestroyWhenEmpty(false);
             player.getTeamManager().applyAbilities(newScene);
+            if (newScene == oldScene) oldScene.setDontDestroyWhenEmpty(previousEmptyHold);
         }
 
         if (oldScene != null && newScene != null && newScene != oldScene) {
@@ -637,10 +655,14 @@ public class World implements Iterable<Player> {
 
     public void close() {}
 
+    protected long nowMillis() {
+        return System.currentTimeMillis();
+    }
+
     /** Returns the in-game world time in real milliseconds. */
     public long getWorldTime() {
         if (!this.isPaused && !this.timeLocked) {
-            var newUpdateTime = System.currentTimeMillis();
+            var newUpdateTime = nowMillis();
             this.currentWorldTime += (newUpdateTime - lastUpdateTime);
             this.lastUpdateTime = newUpdateTime;
         }
@@ -690,7 +712,7 @@ public class World implements Iterable<Player> {
 
         // If the world is being un-paused, update the last update time.
         if (this.isPaused != paused && !paused) {
-            this.lastUpdateTime = System.currentTimeMillis();
+            this.lastUpdateTime = nowMillis();
         }
 
         this.isPaused = paused;
@@ -746,7 +768,7 @@ public class World implements Iterable<Player> {
         if (this.timeLocked != locked) {
             // Bank the running time, and restart the clock so locked time is not counted later.
             this.getWorldTime();
-            this.lastUpdateTime = System.currentTimeMillis();
+            this.lastUpdateTime = nowMillis();
             Grasscutter.getLogger()
                     .info(
                             "Game time for uid {} is now {}.",

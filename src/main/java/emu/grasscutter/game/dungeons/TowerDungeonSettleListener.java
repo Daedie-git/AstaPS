@@ -6,6 +6,7 @@ import emu.grasscutter.game.dungeons.dungeon_results.BaseDungeonResult.DungeonEn
 import emu.grasscutter.game.dungeons.dungeon_results.TowerResult;
 import emu.grasscutter.game.inventory.GameItem;
 import emu.grasscutter.game.props.ActionReason;
+import emu.grasscutter.game.tower.TowerRewards;
 import emu.grasscutter.server.packet.send.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,9 +90,16 @@ public class TowerDungeonSettleListener implements DungeonSettleListener {
     /** First-clear chamber loot from TowerLevelExcel firstPassRewardId. */
     private static List<GameItem> grantFirstPassRewards(
             emu.grasscutter.game.tower.TowerManager towerManager, int levelId) {
+        synchronized (towerManager) {
+            return grantFirstPassRewardsLocked(towerManager, levelId);
+        }
+    }
+
+    private static List<GameItem> grantFirstPassRewardsLocked(
+            emu.grasscutter.game.tower.TowerManager towerManager, int levelId) {
         var record = towerManager.getRecordMap().get(towerManager.getCurrentFloorId());
         int prevStars = record != null ? record.getLevelStars(levelId) : 0;
-        if (prevStars > 0) {
+        if (record != null && record.isFirstPassPaid(levelId)) {
             emu.grasscutter.Grasscutter.getLogger()
                     .info(
                             "Tower firstPass skip uid={} floor={} levelId={} prevStars={}",
@@ -106,7 +114,11 @@ public class TowerDungeonSettleListener implements DungeonSettleListener {
         if (levelData == null) {
             levelData = towerManager.getCurrentTowerLevelDataMap();
         }
-        if (levelData == null || levelData.getFirstPassRewardId() <= 0) {
+        var schedule =
+                towerManager.getPlayer().getServer().getTowerSystem().getCurrentTowerScheduleData();
+        var floorData = GameData.getTowerFloorDataMap().get(towerManager.getCurrentFloorId());
+        int rewardId = TowerRewards.chamberRewardId(schedule, floorData, levelData);
+        if (rewardId <= 0) {
             emu.grasscutter.Grasscutter.getLogger()
                     .warn(
                             "Tower firstPass missing reward uid={} levelId={}",
@@ -114,7 +126,7 @@ public class TowerDungeonSettleListener implements DungeonSettleListener {
                             levelId);
             return List.of();
         }
-        var reward = GameData.getRewardDataMap().get(levelData.getFirstPassRewardId());
+        var reward = GameData.getRewardDataMap().get(rewardId);
         if (reward == null || reward.getRewardItemList() == null) {
             return List.of();
         }
@@ -122,20 +134,29 @@ public class TowerDungeonSettleListener implements DungeonSettleListener {
         List<GameItem> items = new ArrayList<>();
         for (var param : reward.getRewardItemList()) {
             if (param == null || param.getId() <= 0 || param.getCount() <= 0) continue;
-            items.add(new GameItem(param.getId(), param.getCount()));
+            items.add(emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(param.getId(), param.getCount()));
         }
         if (!items.isEmpty()) {
-            towerManager
-                    .getPlayer()
-                    .getInventory()
-                    .addItems(items, ActionReason.TowerFirstPassReward);
+            var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(towerManager,
+                    "first-pass:" + towerManager.getCurrentFloorId() + ":" + levelId);
+            if (claim == null) return List.of();
+            if (!emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(towerManager.getPlayer().getInventory(), items, ActionReason.TowerFirstPassReward)) {
+                claim.release();
+                return List.of();
+            }
+            if (record == null) {
+                record = new emu.grasscutter.game.tower.TowerLevelRecord(towerManager.getCurrentFloorId());
+                towerManager.getRecordMap().put(towerManager.getCurrentFloorId(), record);
+            }
+            record.markFirstPassPaid(levelId);
+            claim.release();
             emu.grasscutter.Grasscutter.getLogger()
                     .info(
                             "Tower firstPass grant uid={} floor={} levelId={} rewardId={} items={}",
                             towerManager.getPlayer().getUid(),
                             towerManager.getCurrentFloorId(),
                             levelId,
-                            levelData.getFirstPassRewardId(),
+                            rewardId,
                             items.size());
         }
         return items;

@@ -18,7 +18,8 @@ public final class AccountPasswordResetService {
         return combine(
                 set("password", passwordHash),
                 unset("token"),
-                unset("sessionKey"));
+                unset("sessionKey"),
+                com.mongodb.client.model.Updates.inc("persistenceVersion", 1L));
     }
 
     public static void resetPassword(Account account, String passwordHash) {
@@ -28,11 +29,14 @@ public final class AccountPasswordResetService {
 
         // Async account writes must finish before the password and token update. A single
         // MongoDB update makes the new password and the two token revocations atomic.
+        synchronized (account) {
+        Long version = account.getPersistenceVersion();
         try (DatabaseWriteBarrier ignored = DatabaseWriteBarrier.acquire()) {
             var accounts = DatabaseManager.getAccountDatastore().getDatabase().getCollection("accounts");
-            var result = accounts.updateOne(eq("_id", account.getId()), update);
+            var result = accounts.updateOne(
+                    com.mongodb.client.model.Filters.and(eq("_id", account.getId()), eq("persistenceVersion", version)), update);
             if (result.getMatchedCount() != 1) {
-                throw new IllegalStateException("Account no longer exists: " + account.getUsername());
+                throw new AccountWriteConflictException();
             }
         }
 
@@ -40,5 +44,7 @@ public final class AccountPasswordResetService {
         account.setPassword(passwordHash);
         account.setToken(null);
         account.setSessionKey(null);
+        account.setPersistenceVersion(version == null ? 1L : Math.addExact(version, 1L));
+        }
     }
 }

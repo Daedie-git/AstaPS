@@ -13,6 +13,7 @@ import emu.grasscutter.game.avatar.Avatar;
 import emu.grasscutter.game.entity.*;
 import emu.grasscutter.game.props.*;
 import emu.grasscutter.game.tps.TpsAvatarSystem;
+import emu.grasscutter.game.tps.TpsWeaponSystem;
 import emu.grasscutter.game.world.*;
 import emu.grasscutter.net.packet.*;
 import emu.grasscutter.net.proto.*;
@@ -441,6 +442,11 @@ public final class TeamManager extends BasePlayerDataManager {
     }
 
     public void updateTeamEntities(BasePacket responsePacket) {
+        updateTeamEntities(responsePacket, current -> finishTeamUpdate(responsePacket, current));
+    }
+
+    // Roster lifecycle seam; production keeps the normal property/health/transport completion.
+    void updateTeamEntities(BasePacket responsePacket, java.util.function.Consumer<EntityAvatar> completion) {
 
         if (this.getCurrentTeamInfo().getAvatars().size() <= 0) {
             return;
@@ -485,6 +491,7 @@ public final class TeamManager extends BasePlayerDataManager {
         }
 
         for (var entity : existingAvatars.values()) {
+            TpsWeaponSystem.retireWeaponEntities(entity);
             if (entity == currentEntity) {
                 entity.getAvatar().save();
                 continue;
@@ -499,7 +506,10 @@ public final class TeamManager extends BasePlayerDataManager {
                 Math.min(this.currentCharacterIndex, this.getActiveTeam().size() - 1);
         }
         this.currentCharacterIndex = prevSelectedAvatarIndex;
+        completion.accept(currentEntity);
+    }
 
+    private void finishTeamUpdate(BasePacket responsePacket, EntityAvatar currentEntity) {
         this.updateTeamProperties();
 
         try {
@@ -695,6 +705,9 @@ public final class TeamManager extends BasePlayerDataManager {
         // addAvatarToTrialTeam put the trial avatars into the current team; take them out again.
         this.removeUnownedAvatarsFromTeams();
 
+        this.getActiveTeam().stream()
+            .filter(entity -> isTeam || trialAvatarIds.contains(entity.getAvatar().getTrialAvatarId()))
+            .forEach(TpsWeaponSystem::retireWeaponEntities);
         this.getActiveTeam()
             .forEach(
                 avatarEntity ->
@@ -865,7 +878,8 @@ public final class TeamManager extends BasePlayerDataManager {
             }
         }
 
-        if (index < 0 || newEntity == oldEntity) {
+        if (index < 0 || newEntity == oldEntity
+                || !(newEntity.getFightProperty(FightProperty.FIGHT_PROP_CUR_HP) > 0f)) {
             return;
         }
         if (newEntity.getFightProperty(FightProperty.FIGHT_PROP_CUR_HP) <= 0) {
@@ -875,11 +889,18 @@ public final class TeamManager extends BasePlayerDataManager {
             return;
         }
 
+        var scene = this.getPlayer().getScene();
         var event =
             new PlayerSwitchAvatarEvent(this.getPlayer(), oldEntity.getAvatar(), newEntity.getAvatar());
         if (!event.call()) return;
 
+        // A plugin may reenter switching or transfer scenes while the monitor is held.
+        if (this.getCurrentAvatarEntity() != oldEntity || this.getPlayer().getScene() != scene) return;
+        if (event.getNewAvatar() == null) return;
         newEntity = event.getNewAvatarEntity();
+        index = this.getActiveTeam().indexOf(newEntity);
+        if (index < 0 || newEntity == oldEntity
+                || !(newEntity.getFightProperty(FightProperty.FIGHT_PROP_CUR_HP) > 0f)) return;
 
         this.setCurrentCharacterIndex(index);
 
@@ -889,7 +910,7 @@ public final class TeamManager extends BasePlayerDataManager {
         // Re-sync elemental energy after VISION_REPLACE so client does not keep a
         // stale/predicted burst-ready state that disagrees with server props.
         syncAvatarEnergyToClient(newEntity);
-        this.getPlayer().sendPacket(new PacketChangeAvatarRsp(guid));
+        this.getPlayer().sendPacket(new PacketChangeAvatarRsp(newEntity.getAvatar().getGuid()));
     }
 
     private void syncAvatarEnergyToClient(EntityAvatar entity) {
@@ -1172,6 +1193,21 @@ public final class TeamManager extends BasePlayerDataManager {
         // HandlerWorldPlayerReviveReq sends the one WorldPlayerReviveRsp after this returns.
     }
 
+    private void restoreTeamForRespawn() {
+        for (EntityAvatar entity : this.getActiveTeam()) {
+            if (!entity.isAlive() || entity.getFightProperty(FightProperty.FIGHT_PROP_CUR_HP) <= 0f) {
+                entity.reviveToRatio(.4f);
+            } else {
+                entity.setFightProperty(FightProperty.FIGHT_PROP_CUR_HP,
+                        entity.getFightProperty(FightProperty.FIGHT_PROP_MAX_HP) * .4f);
+            }
+            this.getPlayer().getSatiationManager().removeSatiationDirectly(entity.getAvatar(), 15000);
+            this.getPlayer().sendPacket(new PacketAvatarFightPropUpdateNotify(
+                    entity.getAvatar(), FightProperty.FIGHT_PROP_CUR_HP));
+            this.getPlayer().sendPacket(new PacketAvatarLifeStateChangeNotify(entity.getAvatar()));
+        }
+    }
+
     public Position getRespawnPosition() {
         // Prefer nearest unlocked teleport waypoint (TransPointNormal / SceneTransPoint).
         // Old filter only accepted exact "SceneTransPoint", which matches nothing in 7.0
@@ -1186,10 +1222,9 @@ public final class TeamManager extends BasePlayerDataManager {
     }
 
     public void saveAvatars() {
-
-        for (EntityAvatar entity : this.getActiveTeam()) {
-            entity.getAvatar().save();
-        }
+        var saves = List.copyOf(this.getActiveTeam()).stream()
+                .map(entity -> (Runnable) () -> entity.getAvatar().save()).toArray(Runnable[]::new);
+        new emu.grasscutter.server.ShutdownSequence().run(saves);
     }
 
     public void onPlayerLogin() {

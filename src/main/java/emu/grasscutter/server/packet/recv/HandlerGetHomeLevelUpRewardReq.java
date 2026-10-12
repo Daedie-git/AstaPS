@@ -19,15 +19,32 @@ public class HandlerGetHomeLevelUpRewardReq extends PacketHandler {
         synchronized (pl) {
             GetHomeLevelUpRewardReq req = GetHomeLevelUpRewardReq.parseFrom(payload);
             int level = req.getLevel();
+            var row = GameData.getHomeWorldLevelDataMap().get(level);
+            if (level <= 0 || pl.getHome() == null || pl.getRealmList() == null
+                    || pl.getRealmList().isEmpty() || level > pl.getHome().getLevel()
+                    || row == null || row.getRewardId() <= 0
+                    || GameData.getRewardDataMap().get(row.getRewardId()) == null) {
+                session.send(new PacketGetHomeLevelUpRewardRsp(level, 0));
+                return;
+            }
             Set<Integer> homeRewardedLevels = session.getPlayer().getHomeRewardedLevels();
+            if (homeRewardedLevels == null) homeRewardedLevels = new HashSet<>();
             if (!homeRewardedLevels.contains(level)) { // No duplicated reward
                 int rewardId = GameData.getHomeWorldLevelDataMap().get(level).getRewardId();
                 if (rewardId != 0) {
                     List<ItemParamData> rewardItems =
                             GameData.getRewardDataMap().get(rewardId).getRewardItemList();
-                    pl.getInventory().addItemParamDatas(rewardItems, ActionReason.GetHomeLevelupReward);
+                    var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(pl, "home-rank:" + level);
+                    if (claim == null) return;
+                    if (rewardItems == null || rewardItems.isEmpty()
+                            || !emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrantParams(pl.getInventory(), rewardItems, ActionReason.GetHomeLevelupReward)) {
+                        claim.release();
+                        session.send(new PacketGetHomeLevelUpRewardRsp(level, 0));
+                        return;
+                    }
                     homeRewardedLevels.add(level);
                     pl.setHomeRewardedLevels(homeRewardedLevels);
+                    claim.release();
                     pl.save();
                     pl.getHome().onClaimReward(pl);
                     session.send(new PacketGetHomeLevelUpRewardRsp(level, rewardId));

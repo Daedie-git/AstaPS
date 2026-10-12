@@ -6,7 +6,9 @@ import emu.grasscutter.data.common.FightPropData;
 import emu.grasscutter.data.excels.EquipAffixData;
 import emu.grasscutter.data.excels.tps.*;
 import emu.grasscutter.game.avatar.Avatar;
+import emu.grasscutter.game.entity.EntityAvatar;
 import emu.grasscutter.game.entity.EntityWeapon;
+import emu.grasscutter.game.entity.EntityRuntimeStateCleanup;
 import emu.grasscutter.game.inventory.*;
 import emu.grasscutter.game.player.Player;
 import emu.grasscutter.game.world.Scene;
@@ -125,6 +127,7 @@ public final class TpsWeaponSystem {
         var entity = item.getWeaponEntity();
         if (entity != null && entity.getScene() == scene) return;
 
+        dropWeaponEntity(item);
         entity = new EntityWeapon(scene, item.getItemData().getGadgetId());
         item.setWeaponEntity(entity);
         scene.getWeaponEntities().put(entity.getId(), entity);
@@ -144,12 +147,99 @@ public final class TpsWeaponSystem {
         var avatarEntity = avatar.getAsEntity();
         var scene = avatarEntity != null ? avatarEntity.getScene() : null;
         for (GameItem item : getWornWeapons(avatar)) {
-            var old = item.getWeaponEntity();
-            if (old != null && old.getScene() != null) {
-                old.getScene().getWeaponEntities().remove(old.getId());
-            }
-            item.setWeaponEntity(null);
+            dropWeaponEntity(item);
             ensureWeaponEntity(item, scene);
+        }
+    }
+
+    private static void dropWeaponEntity(GameItem item) {
+        var old = item.getWeaponEntity();
+        if (old != null) {
+            EntityRuntimeStateCleanup.clear(old);
+            if (old.getScene() != null) old.getScene().getWeaponEntities().remove(old.getId(), old);
+        }
+        item.setWeaponEntity(null);
+    }
+
+    /** Retire a discarded avatar's guns, never a replacement avatar's scene or permanent choices. */
+    public static void retireWeaponEntities(EntityAvatar departing) {
+        var avatar = departing.getAvatar();
+        var current = avatar.getAsEntity();
+        if (current != null && current != departing) return;
+        for (var item : getWornWeapons(avatar)) {
+            var weapon = item.getWeaponEntity();
+            if (weapon != null && weapon.getScene() == departing.getScene()) dropWeaponEntity(item);
+        }
+    }
+
+    /** Accessory acquisition permanently unions unlocks, including command-granted IDs. */
+    public static void refreshAccessoryUnlocks(Player player) {
+        unlockAccessories(player, false);
+    }
+
+    /** Unlock every configured accessory without requiring materials, as the command promises. */
+    public static int unlockAllAccessories(Player player) {
+        return unlockAccessories(player, true);
+    }
+
+    private static int unlockAccessories(Player player, boolean all) {
+        var changed = new HashSet<Integer>();
+        var updates = new ArrayList<BasePacket>();
+        // Serialize lookup, union and saves with insertion/removal. Do not extend this critical
+        // section to scene/stat/transport callbacks; batch callers retain their existing monitor.
+        synchronized (player.getInventory()) {
+            var weapons = new LinkedHashSet<GameItem>();
+            for (var accessory : GameData.getTpsWeaponAccessoryDataMap().values()) {
+                if (!all) {
+                    var material = player.getInventory().getItemById(accessory.getUnlockMaterialId());
+                    if (material == null || material.getCount() <= 0) continue;
+                }
+                var weapon = findOwnedWeapon(player, accessory.getTpsWeaponId());
+                if (weapon == null || weapon.getTpsAccessoryIds().contains(accessory.getId())) continue;
+                weapon.getTpsAccessoryIds().add(accessory.getId());
+                weapons.add(weapon);
+                changed.add(weapon.getItemId());
+            }
+            for (var weapon : weapons) {
+                weapon.save();
+                if (all || player.hasSentLoginPackets()) {
+                    updates.add(new emu.grasscutter.server.packet.send.PacketStoreItemChangeNotify(weapon));
+                }
+            }
+        }
+        updates.forEach(player::sendPacket);
+        if (!changed.isEmpty()) {
+            for (var avatar : getTpsWearers(player)) {
+                if (avatar.getTpsWeaponIds().stream().noneMatch(changed::contains)) continue;
+                avatar.recalcStats();
+                sendEquipChange(avatar);
+            }
+        }
+        return changed.size();
+    }
+
+    /** Reconcile only after the entire bag has loaded, not while individual rows are arriving. */
+    public static void onInventoryLoaded(Player player) {
+        if (player.getTpsLoadout().removeIf(id -> findOwnedWeapon(player, id) == null)) player.save();
+        for (var avatar : getTpsWearers(player)) {
+            if (!avatar.getTpsWeaponIds().removeIf(id -> findOwnedWeapon(player, id) == null)) continue;
+            if (avatar.getTrialAvatarId() == 0) avatar.save();
+            avatar.recalcStats();
+            sendEquipChange(avatar);
+        }
+        refreshAccessoryUnlocks(player);
+    }
+
+    /** Called after the final inventory count is removed; trial avatars are never persisted. */
+    public static void onWeaponRemoved(Player player, GameItem item) {
+        if (!isTpsWeapon(item)) return;
+        dropWeaponEntity(item);
+        if (player.getTpsLoadout().removeIf(id -> id == item.getItemId())) player.save();
+        for (var avatar : getTpsWearers(player)) {
+            if (!avatar.getTpsWeaponIds().removeIf(id -> id == item.getItemId())) continue;
+            if (avatar.getTrialAvatarId() == 0) avatar.save();
+            avatar.recalcStats();
+            sendEquipChange(avatar);
         }
     }
 
@@ -251,31 +341,50 @@ public final class TpsWeaponSystem {
             itemIds.add(item.getItemId());
         }
 
-        // Nothing to change: answer, but do not resend weapons the client already shows.
-        if (itemIds.equals(avatar.getTpsWeaponIds())) return Retcode.RET_SUCC_VALUE;
+        assignWearer(avatar, itemIds, true);
+        return Retcode.RET_SUCC_VALUE;
+    }
 
-        for (Avatar other : player.getAvatars()) {
+    /** Also used before a new trial avatar's first stat calculation and team insertion. */
+    static void assignWearer(Avatar avatar, List<Integer> itemIds, boolean notify) {
+        var player = avatar.getPlayer();
+        var previous = new ArrayList<>(avatar.getTpsWeaponIds());
+        for (Avatar other : getTpsWearers(player)) {
             if (other == avatar || !other.getTpsWeaponIds().removeIf(itemIds::contains)) continue;
-            other.save();
+            for (int itemId : itemIds) {
+                var moved = findOwnedWeapon(player, itemId);
+                if (moved != null && !previous.contains(itemId)) dropWeaponEntity(moved);
+            }
+            if (other.getTrialAvatarId() == 0) other.save();
             other.recalcStats();
             sendEquipChange(other);
         }
 
         var loadout = player.getTpsLoadout();
         if (TpsAvatarSystem.isTpsAvatar(avatar)) {
-            loadout.clear();
-            loadout.addAll(itemIds);
-            player.save();
+            if (!loadout.equals(itemIds)) {
+                loadout.clear();
+                loadout.addAll(itemIds);
+                player.save();
+            }
         } else if (loadout.removeIf(itemIds::contains)) {
             player.save();
         }
 
+        // Reconcile competing wearers even for an unchanged request, without resending its guns.
+        if (notify && itemIds.equals(previous)) return;
+        for (int itemId : previous) {
+            if (itemIds.contains(itemId)) continue;
+            var removed = findOwnedWeapon(player, itemId);
+            if (removed != null) dropWeaponEntity(removed);
+        }
         avatar.getTpsWeaponIds().clear();
         avatar.getTpsWeaponIds().addAll(itemIds);
         if (avatar.getTrialAvatarId() == 0) avatar.save();
-        avatar.recalcStats();
-        sendEquipChange(avatar);
-        return Retcode.RET_SUCC_VALUE;
+        if (notify) {
+            avatar.recalcStats();
+            sendEquipChange(avatar);
+        }
     }
 
     /** An owned avatar, or one of the trial avatars in the current team. */

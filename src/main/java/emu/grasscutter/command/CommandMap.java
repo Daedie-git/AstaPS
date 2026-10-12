@@ -282,15 +282,19 @@ public final class CommandMap {
         cli.setSubcommandsCaseInsensitive(true);
         cli.setParameterExceptionHandler(
                 (exception, argv) -> {
-                    parameterErrorMessages(exception)
-                            .forEach(message -> CommandOutput.sendMessage(sender, message));
+                    if (CommandLog.sensitive(handler)) {
+                        CommandOutput.sendMessage(sender, "Invalid command arguments.");
+                        CommandOutput.sendMessage(sender, exception.getCommandLine().getUsageMessage().stripTrailing());
+                    } else {
+                        parameterErrorMessages(exception)
+                                .forEach(message -> CommandOutput.sendMessage(sender, message));
+                    }
                     return exception.getCommandLine().getCommandSpec().exitCodeOnInvalidInput();
                 });
         cli.setExecutionExceptionHandler(
                 (exception, commandLine, parseResult) -> {
-                    LOGGER
-                            .error("Failed to execute command " + handler.getLabel() + ".", exception);
-                    String message = exception.getMessage();
+                    LOGGER.error("Failed to execute command {} ({})", handler.getLabel(), exception.getClass().getSimpleName());
+                    String message = CommandLog.sensitive(handler) ? null : exception.getMessage();
                     CommandOutput.sendMessage(
                             sender,
                             message == null || message.isBlank()
@@ -610,9 +614,9 @@ public final class CommandMap {
                                         + " (Player UID: "
                                         + player.getUid()
                                         + ")]: "
-                                        + rawMessage);
+                                        + CommandLog.describe(rawMessage));
             } else {
-                LOGGER.info("Command used by server console: " + rawMessage);
+                LOGGER.info("Command used by server console: " + CommandLog.describe(rawMessage));
             }
         }
 
@@ -626,7 +630,7 @@ public final class CommandMap {
         try {
             tokens = parseCommandTokens(rawMessage);
         } catch (SyntaxError error) {
-            CommandOutput.sendMessage(player, error.getMessage());
+            CommandOutput.sendMessage(player, "Invalid command syntax.");
             return;
         }
         if (tokens.isEmpty()) return;
@@ -743,7 +747,7 @@ public final class CommandMap {
                 // Picocli handles command.run() failures, but model construction itself
                 // is outside its error handler. Keep those exceptions off the game loop.
                 LOGGER.error(
-                        "Failed to construct or run command " + handler.getLabel() + ".", exception);
+                        "Failed to construct or run command {} ({})", handler.getLabel(), exception.getClass().getSimpleName());
                 CommandOutput.sendMessage(sender, "Command execution failed.");
             }
         };
@@ -752,7 +756,7 @@ public final class CommandMap {
             executeCommand(runnable, annotation.threading(), Grasscutter.getThreadPool());
         } catch (java.util.concurrent.RejectedExecutionException exception) {
             LOGGER.warn(
-                    "Command executor rejected " + handler.getLabel() + ".", exception);
+                    "Command executor rejected {} ({})", handler.getLabel(), exception.getClass().getSimpleName());
             CommandOutput.sendMessage(sender, "Command executor is unavailable.");
         }
     }
@@ -768,18 +772,18 @@ public final class CommandMap {
                 if (object instanceof CommandHandler handler) {
                     handlers.add(handler);
                 } else {
-                    LOGGER
-                            .error("Class " + annotated.getName() + " is not a CommandHandler!");
+                    LOGGER.error("Class " + annotated.getName() + " is not a CommandHandler!");
                 }
             } catch (Exception exception) {
-                LOGGER
-                        .error(
-                                "Failed to instantiate command handler for "
-                                        + annotated.getSimpleName(),
-                                exception);
+                LOGGER.error("Failed to instantiate command handler for " + annotated.getSimpleName(), exception);
             }
         }
-
+        if (handlers.stream().noneMatch(handler -> handler.getLabel().equals("catalog"))) {
+            handlers.add(new emu.grasscutter.command.commands.CatalogCommand());
+        }
+        if (handlers.stream().noneMatch(handler -> handler.getLabel().equals("finishquest"))) {
+            handlers.add(new emu.grasscutter.command.commands.FinishQuestCommand());
+        }
         this.registerCommands(handlers);
     }
 }

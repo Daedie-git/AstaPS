@@ -81,13 +81,18 @@ public class CombineManger extends BaseGameSystem {
             return null;
         }
 
-        if (!player.getUnlockedCombines().contains(cid)) {
-            player.getUnlockedCombines().add(cid);
+        int resultCount;
+        try {
+            resultCount = Math.multiplyExact(combineData.getResultItemCount(), count);
+        } catch (ArithmeticException overflow) {
+            player.sendPacket(new PacketCombineRsp(Retcode.RET_COMBINE_COUNT_TOO_LARGE_VALUE));
+            return null;
         }
-
+        if (GameData.getItemDataMap().get(combineData.getResultItemId()) == null) return null;
+        var output = new GameItem(combineData.getResultItemId(), resultCount);
+        output.setCount(resultCount);
         List<ItemParamData> material = buildMaterialCost(combineData);
-
-        if (!player.getInventory().payItems(material, count, ActionReason.Combine)) {
+        if (!player.getInventory().tryPayAndAddItems(material, count, List.of(output), ActionReason.Combine)) {
             player.sendPacket(new PacketCombineRsp(Retcode.RET_ITEM_COMBINE_COUNT_NOT_ENOUGH_VALUE));
             return null;
         }
@@ -96,8 +101,7 @@ public class CombineManger extends BaseGameSystem {
             player.sendPacket(new PacketPlayerPropNotify(player, PlayerProperty.PROP_PLAYER_SCOIN));
         }
 
-        int resultCount = combineData.getResultItemCount() * count;
-        player.getInventory().addItem(combineData.getResultItemId(), resultCount, ActionReason.Combine);
+        player.getUnlockedCombines().add(cid);
 
         Grasscutter.getLogger()
                 .debug(
@@ -140,32 +144,41 @@ public class CombineManger extends BaseGameSystem {
             return;
         }
 
-        if (input.size() != count * 3) {
+        if (count <= 0 || (long) count * 3 != input.size()
+                || new HashSet<>(input).size() != input.size() || possibleDrops.isEmpty()) {
             player.sendPacket(
                     new PacketReliquaryDecomposeRsp(Retcode.RET_RELIQUARY_DECOMPOSE_PARAM_ERROR));
             return;
         }
 
         for (long guid : input) {
-            if (player.getInventory().getItemByGuid(guid) == null) {
+            var item = player.getInventory().getItemByGuid(guid);
+            if (item == null || item.getItemType() != emu.grasscutter.game.inventory.ItemType.ITEM_RELIQUARY
+                    || item.getItemData().getRankLevel() != 5 || item.isLocked() || item.isEquipped()) {
                 player.sendPacket(
                         new PacketReliquaryDecomposeRsp(Retcode.RET_RELIQUARY_DECOMPOSE_PARAM_ERROR));
                 return;
             }
         }
 
+        var relics = player.getInventory().getInventoryTab(emu.grasscutter.game.inventory.ItemType.ITEM_RELIQUARY);
+        if ((long) relics.getSize() - input.size() + count > relics.getMaxCapacity()) {
+            player.sendPacket(new PacketReliquaryDecomposeRsp(Retcode.RET_PACK_EXCEED_MAX_WEIGHT));
+            return;
+        }
+        List<GameItem> outputs = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            var output = new GameItem(Utils.drawRandomListElement(possibleDrops), 1);
+            if (output.getItemData() == null || output.getItemType() != emu.grasscutter.game.inventory.ItemType.ITEM_RELIQUARY) return;
+            outputs.add(output);
+        }
         for (long guid : input) {
-            player.getInventory().removeItem(guid);
+            if (!player.getInventory().removeItem(guid)) return;
         }
 
         List<Long> resultItems = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            int itemId = Utils.drawRandomListElement(possibleDrops);
-            GameItem newReliquary = new GameItem(itemId, 1);
-
-            player.getInventory().addItem(newReliquary);
-            resultItems.add(newReliquary.getGuid());
-        }
+        if (!player.getInventory().tryAddItems(outputs, ActionReason.Combine)) return;
+        for (var output : outputs) resultItems.add(output.getGuid());
 
         player.sendPacket(new PacketReliquaryDecomposeRsp(resultItems));
     }

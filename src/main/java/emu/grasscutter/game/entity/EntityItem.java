@@ -109,7 +109,7 @@ public class EntityItem extends EntityBaseGadget {
             return;
         }
 
-        player.onGadgetInteracted(getGadgetId());
+        creditInteraction(player);
         this.getScene().removeEntity(this);
 
         if (!this.isShare()) { // not shared drop
@@ -119,6 +119,10 @@ public class EntityItem extends EntityBaseGadget {
                     .broadcastPacket(
                             new PacketGadgetInteractRsp(this, InteractType.InteractType_INTERACT_PICK_ITEM));
         }
+    }
+
+    protected void creditInteraction(Player player) {
+        player.onGadgetInteracted(getGadgetId());
     }
 
     @Override

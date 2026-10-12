@@ -111,7 +111,15 @@ public class TrialAvatarActivityHandler extends ActivityHandler {
         this.setSelectedTrialAvatarIndex(0);
     }
 
+    static boolean canClaimReward(TrialAvatarPlayerData.RewardInfoItem reward) {
+        return reward != null && reward.isPassedDungeon() && !reward.isReceivedReward();
+    }
+
     public boolean getReward(Player player, int trialAvatarIndexId) {
+        synchronized (player) { return getRewardLocked(player, trialAvatarIndexId); }
+    }
+
+    private boolean getRewardLocked(Player player, int trialAvatarIndexId) {
         val playerActivityData =
                 player
                         .getActivityManager()
@@ -125,30 +133,38 @@ public class TrialAvatarActivityHandler extends ActivityHandler {
                 getTrialAvatarPlayerData(playerActivityData.get());
         TrialAvatarPlayerData.RewardInfoItem rewardInfo =
                 trialAvatarPlayerData.getRewardInfo(trialAvatarIndexId);
-        if (rewardInfo == null) return false;
+        if (!canClaimReward(rewardInfo)) return false;
 
         RewardData rewardParam = GameData.getRewardDataMap().get(rewardInfo.getRewardId());
         if (rewardParam == null) return false;
 
-        player
-                .getInventory()
-                .addItemParamDatas(
-                        rewardParam.getRewardItemList(), ActionReason.TrialAvatarActivityFirstPassReward);
-        rewardInfo.setReceivedReward(true);
-        playerActivityData.get().setDetail(trialAvatarPlayerData);
+        var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(player, "trial:" + playerActivityData.get().getActivityId() + ":" + trialAvatarIndexId);
+        if (claim == null) return false;
+        if (rewardParam.getRewardItemList() == null || rewardParam.getRewardItemList().isEmpty()
+                || !emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrantParams(player.getInventory(), rewardParam.getRewardItemList(),
+                        ActionReason.TrialAvatarActivityFirstPassReward)) { claim.release(); return false; }
+        synchronized (playerActivityData.get()) {
+            // Delivery callbacks may have committed another trial or pass update.
+            var current = getTrialAvatarPlayerData(playerActivityData.get());
+            current.getRewardInfo(trialAvatarIndexId).setReceivedReward(true);
+            playerActivityData.get().setDetail(current);
+        }
+        claim.release();
         playerActivityData.get().save();
         return true;
     }
 
     public void setPassDungeon(PlayerActivityData playerActivityData) {
-        TrialAvatarPlayerData trialAvatarPlayerData = getTrialAvatarPlayerData(playerActivityData);
-        TrialAvatarPlayerData.RewardInfoItem rewardInfo =
-                trialAvatarPlayerData.getRewardInfo(getSelectedTrialAvatarIndex());
-        if (rewardInfo == null) return;
+        synchronized (playerActivityData) {
+            TrialAvatarPlayerData trialAvatarPlayerData = getTrialAvatarPlayerData(playerActivityData);
+            TrialAvatarPlayerData.RewardInfoItem rewardInfo =
+                    trialAvatarPlayerData.getRewardInfo(getSelectedTrialAvatarIndex());
+            if (rewardInfo == null) return;
 
-        rewardInfo.setPassedDungeon(true);
-        playerActivityData.setDetail(trialAvatarPlayerData);
-        playerActivityData.save();
+            rewardInfo.setPassedDungeon(true);
+            playerActivityData.setDetail(trialAvatarPlayerData);
+            playerActivityData.save();
+        }
         Player player = Grasscutter.getGameServer().getPlayerByUid(playerActivityData.getUid());
         player.sendPacket(
                 new PacketActivityInfoNotify(

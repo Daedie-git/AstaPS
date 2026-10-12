@@ -417,12 +417,15 @@ public class EnergyManager extends BasePlayerManager {
     public void handleMonsterEnergyDrop(
             EntityMonster monster, float hpBeforeDamage, float hpAfterDamage) {
 
+        if (!Float.isFinite(hpBeforeDamage) || !Float.isFinite(hpAfterDamage)
+                || hpBeforeDamage <= 0f || hpAfterDamage >= hpBeforeDamage) return;
         MonsterType type = monster.getMonsterData().getType();
         if (type != MonsterType.MONSTER_ORDINARY && type != MonsterType.MONSTER_BOSS) {
             return;
         }
 
         float maxHp = monster.getFightProperty(FightProperty.FIGHT_PROP_MAX_HP);
+        if (!Float.isFinite(maxHp) || maxHp <= 0f) return;
         float thresholdBefore = hpBeforeDamage / maxHp;
         float thresholdAfter = hpAfterDamage / maxHp;
 

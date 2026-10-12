@@ -48,6 +48,7 @@ public class Ability {
             applyConstellationSpecials(casterAvatar);
             applySkillSpecials(casterAvatar);
         }
+        AmberSupport.applyC6Special(this);
 
         hash = Utils.abilityHash(data.abilityName);
 

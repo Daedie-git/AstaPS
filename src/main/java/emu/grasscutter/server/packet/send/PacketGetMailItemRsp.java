@@ -24,7 +24,10 @@ public class PacketGetMailItemRsp extends BasePacket {
             boolean modified = false;
             for (int mailId : mailList) {
                 Mail message = player.getMail(mailId);
-                if (!message.isAttachmentGot) { // No duplicated item
+                if (message != null && !message.isAttachmentGot) {
+                    List<GameItem> grants = new ArrayList<>();
+                    List<EquipParamOuterClass.EquipParam> responseItems = new ArrayList<>();
+                    boolean valid = true;
                     for (Mail.MailItem mailItem : message.itemList) {
                         EquipParamOuterClass.EquipParam.Builder item =
                                 EquipParamOuterClass.EquipParam.newBuilder();
@@ -34,16 +37,22 @@ public class PacketGetMailItemRsp extends BasePacket {
                         item.setItemNum(mailItem.itemCount);
                         item.setItemLevel(mailItem.itemLevel);
                         item.setPromoteLevel(promoteLevel);
-                        claimedItems.add(item.build());
-
-                        GameItem gameItem = new GameItem(GameData.getItemDataMap().get(mailItem.itemId));
+                        responseItems.add(item.build());
+                        var itemData = GameData.getItemDataMap().get(mailItem.itemId);
+                        if (itemData == null || mailItem.itemCount <= 0) { valid = false; break; }
+                        GameItem gameItem = new GameItem(itemData);
                         gameItem.setCount(mailItem.itemCount);
                         gameItem.setLevel(mailItem.itemLevel);
                         gameItem.setPromoteLevel(promoteLevel);
-                        player.getInventory().addItem(gameItem, ActionReason.MailAttachment);
+                        grants.add(gameItem);
                     }
+                    var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(player, "mail:" + mailId);
+                    if (claim == null) continue;
+                    if (!valid || !emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(player.getInventory(), grants, ActionReason.MailAttachment)) { claim.release(); continue; }
+                    claimedItems.addAll(responseItems);
 
                     message.isAttachmentGot = true;
+                    claim.release();
                     claimedMessages.add(message);
 
                     player.replaceMailByIndex(mailId, message);

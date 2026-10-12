@@ -77,7 +77,7 @@ public final class TpsAvatarSystem {
     public static void onTrialAvatarCreated(Avatar avatar) {
         if (!isTpsAvatar(avatar) || avatar.getPlayer() == null) return;
         var player = avatar.getPlayer();
-        var loadout = player.getTpsLoadout();
+        var loadout = new ArrayList<>(player.getTpsLoadout());
 
         loadout.removeIf(itemId -> TpsWeaponSystem.findOwnedWeapon(player, itemId) == null);
         if (loadout.isEmpty()) {
@@ -89,7 +89,6 @@ public final class TpsAvatarSystem {
             }
         }
 
-        avatar.getTpsWeaponIds().clear();
-        avatar.getTpsWeaponIds().addAll(loadout);
+        TpsWeaponSystem.assignWearer(avatar, loadout, false);
     }
 }

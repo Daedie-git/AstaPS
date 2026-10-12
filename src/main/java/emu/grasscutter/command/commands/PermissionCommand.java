@@ -6,7 +6,6 @@ import emu.grasscutter.Grasscutter;
 import emu.grasscutter.command.Command;
 import emu.grasscutter.command.CommandHandler;
 import emu.grasscutter.command.CommandOutput;
-import emu.grasscutter.database.DatabaseHelper;
 import emu.grasscutter.game.Account;
 import emu.grasscutter.game.player.Player;
 import picocli.CommandLine;
@@ -77,8 +76,7 @@ public final class PermissionCommand implements CommandHandler {
         public void run() {
             Account account = account();
             if (account == null) return;
-            if (account.addPermission(permission)) {
-                DatabaseHelper.saveAccountFields(account, "permissions");
+            if (emu.grasscutter.database.DatabaseHelper.updateAccount(account, fresh -> fresh.addPermission(permission))) {
                 CommandOutput.sendMessage(sender, translate(sender, "commands.permission.add"));
             } else {
                 CommandOutput.sendMessage(sender, translate(sender, "commands.permission.has_error"));
@@ -99,8 +97,7 @@ public final class PermissionCommand implements CommandHandler {
         public void run() {
             Account account = account();
             if (account == null) return;
-            if (account.removePermission(permission)) {
-                DatabaseHelper.saveAccountFields(account, "permissions");
+            if (emu.grasscutter.database.DatabaseHelper.updateAccount(account, fresh -> fresh.removePermission(permission))) {
                 CommandOutput.sendMessage(sender, translate(sender, "commands.permission.remove"));
             } else {
                 CommandOutput.sendMessage(
@@ -119,8 +116,9 @@ public final class PermissionCommand implements CommandHandler {
         public void run() {
             Account account = account();
             if (account == null) return;
-            account.clearPermission();
-            DatabaseHelper.saveAccountFields(account, "permissions");
+            emu.grasscutter.database.DatabaseHelper.updateAccount(account, fresh -> {
+                fresh.clearPermission(); return null;
+            });
             CommandOutput.sendMessage(sender, translate(sender, "commands.permission.remove"));
         }
     }

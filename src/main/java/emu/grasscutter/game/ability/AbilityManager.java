@@ -182,8 +182,15 @@ public final class AbilityManager extends BasePlayerManager {
         this.scanTarget = scanTarget;
     }
 
+    private final Executor abilityExecutor;
+
     public AbilityManager(Player player) {
+        this(player, eventExecutor::submit);
+    }
+
+    AbilityManager(Player player, Executor abilityExecutor) {
         super(player);
+        this.abilityExecutor = abilityExecutor;
         removePendingEnergyClear();
     }
 
@@ -238,6 +245,7 @@ public final class AbilityManager extends BasePlayerManager {
                     this.player
                             .getEnergyManager()
                             .confirmBurstCast(entityAvatar.getAvatar(), confirmedSkillId);
+                    AmberSupport.onConfirmedBurst(this.player, entityAvatar, ability, confirmedSkillId);
                 }
             } catch (Throwable ignored) {
                 // Energy confirm must not break invulnerability arming.
@@ -280,26 +288,37 @@ public final class AbilityManager extends BasePlayerManager {
 
     public void executeAction(
         Ability ability, AbilityModifierAction action, ByteString abilityData, GameEntity target) {
-        try {
-            if (ability != null && target != null) ClorindeBoLUtil.onAbilityAction(ability, target);
-        } catch (Throwable ignored) {
-            // Character compatibility hooks are best-effort.
-        }
+        if (ability == null) return;
         var handler = actionHandlers.get(action.type);
-        if (handler == null || ability == null) {
-            if (DebugConstants.LOG_MISSING_ABILITY_HANDLERS) {
-                Grasscutter.getLogger()
-                    .debug("Missing ability action handler for {} (invoker: {}).", action.type, ability);
+        final QueuedAbilityWork work;
+        try {
+            work = new QueuedAbilityWork(this.player, ability, target);
+            try {
+                // This fired-shot hook must run immediately even when the generic action has no handler.
+                var name = ability.getData() == null ? null : ability.getData().abilityName;
+                if (target != null && name != null && name.contains("GunShot") && work.isCurrent()) {
+                    ClorindeBoLUtil.onAbilityAction(ability, target);
+                }
+            } catch (Throwable ignored) {
+                // Compatibility hook must not cancel the normal action.
             }
-
+        } catch (Throwable e) {
+            Grasscutter.getLogger().error("Ability action {} capture threw at {}.", action.type, ability, e);
             return;
         }
-
-        boolean ownerWasLive = isLive(ability.getOwner());
-        eventExecutor.submit(
+        if (handler == null) {
+            if (DebugConstants.LOG_MISSING_ABILITY_HANDLERS) {
+                Grasscutter.getLogger().debug("Missing ability action handler for {} (invoker: {}).", action.type, ability);
+            }
+            return;
+        }
+        abilityExecutor.execute(
             () -> {
                 try {
-                    if (ownerWasLive && !isLive(ability.getOwner())) return;
+                    if (!work.isCurrent()) {
+                        Grasscutter.getLogger().trace("Discarding retired queued action {} at {}", action.type, ability);
+                        return;
+                    }
                     if (!handler.execute(ability, action, abilityData, target)) {
                         Grasscutter.getLogger()
                             .debug("Ability execute action failed for {} at {}.", action.type, ability);
@@ -344,27 +363,35 @@ public final class AbilityManager extends BasePlayerManager {
 
     public void executeMixin(Ability ability, AbilityMixinData mixinData, ByteString abilityData) {
 
+        if (ability == null) return;
         var handler = mixinHandlers.get(mixinData.type);
         GameEntity target = ability.getOwner();
 
-        // This mixin has no handler; it only marks Clorinde and Arlecchino as converting heals to HP debt.
-        if (mixinData.type == AbilityMixinData.Type.SwitchHealToHPDebtsMixin
+        boolean hpDebtConversion = mixinData.type == AbilityMixinData.Type.SwitchHealToHPDebtsMixin
                 && target instanceof EntityAvatar avatar
-                && (avatar.getAvatar().getAvatarId() == 10000098 || avatar.getAvatar().getAvatarId() == 10000096)) {
-            target.setConvertToHpDebt(true);
-        }
-
-        if (handler == null) {
+                && (avatar.getAvatar().getAvatarId() == 10000098 || avatar.getAvatar().getAvatarId() == 10000096);
+        if (handler == null && !hpDebtConversion) {
             Grasscutter.getLogger()
                 .trace("Could not execute ability mixin {} at {}", mixinData.type, ability);
             return;
         }
 
-        boolean ownerWasLive = isLive(target);
-        eventExecutor.submit(
+        final QueuedAbilityWork work;
+        try {
+            work = new QueuedAbilityWork(this.player, ability, target);
+            if (hpDebtConversion && work.isCurrent()) target.setConvertToHpDebt(true);
+        } catch (Throwable e) {
+            Grasscutter.getLogger().error("Ability mixin {} capture threw at {}.", mixinData.type, ability, e);
+            return;
+        }
+        if (handler == null) return;
+        abilityExecutor.execute(
             () -> {
                 try {
-                    if (ownerWasLive && !isLive(target)) return;
+                    if (!work.isCurrent()) {
+                        Grasscutter.getLogger().trace("Discarding retired queued mixin {} at {}", mixinData.type, ability);
+                        return;
+                    }
                     if (!handler.execute(ability, mixinData, abilityData, target)) {
                         Grasscutter.getLogger()
                             .error("Ability execute action failed for {} at {}.", mixinData.type, ability);
@@ -374,17 +401,6 @@ public final class AbilityManager extends BasePlayerManager {
                         .error("Ability mixin {} threw at {}.", mixinData.type, ability, e);
                 }
             });
-    }
-
-    /** Queued work is dropped for an entity that has since left the player's scene or world. */
-    private boolean isLive(GameEntity entity) {
-        if (entity instanceof EntityAvatar a) {
-            return this.player.getWorld() != null && this.player.getTeamManager().getActiveTeam().contains(a);
-        }
-        // Scene identity, not entity-map membership: queued actions run on a pool in no fixed order,
-        // so a gadget's HealHP can run after its own KillSelf removed it, and that heal still counts.
-        var scene = this.player.getWorld() == null ? null : this.player.getScene();
-        return entity != null && scene != null && entity.getScene() == scene;
     }
 
     /**
@@ -467,13 +483,6 @@ public final class AbilityManager extends BasePlayerManager {
             Grasscutter.getLogger()
                 .trace("Target: " + this.player.getScene().getEntityById(invoke.getHead().getTargetId()));
         }
-        if (invoke.getArgumentType()
-                == AbilityInvokeArgument.AbilityInvokeArgument_ABILITY_MIXIN_CHANGE_SNEZHNAYA_FRIGID_VAR) {
-            this.logSnezhnayaFrigidInvoke(invoke);
-            emu.grasscutter.game.player.SnezhnayaFrigid.onInvoke(this.player, invoke);
-            return;
-        }
-
         if (invoke.getHead().getLocalId() != 0) {
             this.handleServerInvoke(invoke);
             return;
@@ -510,29 +519,6 @@ public final class AbilityManager extends BasePlayerManager {
                 }
             }
         }
-    }
-
-    /** Frigid invokes logged so far this session, capped so a long stay does not flood the log. */
-    private int snezhnayaFrigidInvokesLogged = 0;
-
-    /**
-     * Logs ABILITY_MIXIN_CHANGE_SNEZHNAYA_FRIGID_VAR invokes raw at debug level (start the server with
-     * -debug). Their payload has no named message in the 7.1 protocol, and it is what the server must act
-     * on to move the Frigid meter.
-     */
-    private void logSnezhnayaFrigidInvoke(AbilityInvokeEntry invoke) {
-        if (!Grasscutter.getLogger().isDebugEnabled() || this.snezhnayaFrigidInvokesLogged >= 200) return;
-        this.snezhnayaFrigidInvokesLogged++;
-        var head = invoke.getHead();
-        Grasscutter.getLogger()
-                .debug(
-                        "[SnezhnayaFrigid] invoke #{} entity={} ability={} modifier={} localId={} data={}",
-                        this.snezhnayaFrigidInvokesLogged,
-                        invoke.getEntityId(),
-                        head.getInstancedAbilityId(),
-                        head.getInstancedModifierId(),
-                        head.getLocalId(),
-                        java.util.HexFormat.of().formatHex(invoke.getAbilityData().toByteArray()));
     }
 
     private void handleClearGlobalFloatValue(AbilityInvokeEntry invoke)
@@ -838,6 +824,7 @@ public final class AbilityManager extends BasePlayerManager {
         var ability = entity.getInstancedAbilities().get(instancedAbilityIndex);
         if (ability == null) return;
         setAbilityOverrideValue(ability, valueChange);
+        AmberSupport.syncC6Special(entity, ability, head.getInstancedAbilityId(), false);
     }
 
     private void handleReinitOverrideMap(AbilityInvokeEntry invoke) throws Exception {
@@ -1000,6 +987,7 @@ public final class AbilityManager extends BasePlayerManager {
         if (finalAbility != null) {
             computedVarOverrides.forEach((k, v) -> finalAbility.getAbilitySpecials().put(k, v));
         }
+        AmberSupport.syncC6Special(entity, ability, head.getInstancedAbilityId(), true);
     }
 
     private void handleModifierChange(AbilityInvokeEntry invoke) throws Exception {
@@ -1233,10 +1221,6 @@ public final class AbilityManager extends BasePlayerManager {
         } else if (modChange.getAction() == ModifierAction.ModifierAction_REMOVED) {
             AbilityModifierController removed =
                     entity.getInstancedModifiers().remove(head.getInstancedModifierId());
-            if (removed != null) {
-                emu.grasscutter.game.quest.LiyueAmberQuestSupport.onModifierRemoved(
-                        this.player, entity, removed.getAbilityData(), removed.getModifierData());
-            }
             if (removed != null && isLightLockAbility(removed.getAbilityData())
                     && removed.getModifierData().onRemoved != null) {
                 for (var action : removed.getModifierData().onRemoved) {
@@ -1503,7 +1487,6 @@ public final class AbilityManager extends BasePlayerManager {
             var data = GameData.getAbilityData(name);
             avatar.getInstancedAbilities().add(data != null ? new Ability(data, avatar, player) : null);
         }
-        emu.grasscutter.game.icecreature.IceCreatureAbilities.addInstances(player, avatar);
     }
 
     private void invokeAction(
@@ -1582,6 +1565,7 @@ public final class AbilityManager extends BasePlayerManager {
         } else {
             abilities.add(newAbility);
         }
+        AmberSupport.syncC6Special(entity, newAbility, invoke.getHead().getInstancedAbilityId(), true);
 
         if (abilityName != null && entity instanceof EntityClientGadget clientGadget) {
             var talentVars = GameData.getAbilityTalentVarMap().get(abilityName);

@@ -65,10 +65,9 @@ public class CookingCompoundManager extends BasePlayerManager {
             var data =
                     CompoundQueueData.newBuilder()
                             .setCompoundId(item.getCompoundId())
-                            // field1=finished, field7=total in queue, field15=next output unix time
-                            .setWaitCount(item.getOutputCount(currentTime))
-                            .setOutputCount(item.getTotalCount())
-                            .setWaitCount(item.getOutputTime(currentTime))
+                            .setWaitCount(item.getWaitCount(currentTime))
+                            .setOutputCount(item.getOutputCount(currentTime))
+                            .setOutputTime(item.getOutputTime(currentTime))
                             .build();
             compoundQueueData.add(data);
         }
@@ -128,15 +127,29 @@ public class CookingCompoundManager extends BasePlayerManager {
 
         // check whether the compound is available
         // TODO:add other compounds,see my pr for detail
-        if (!unlocked.contains(id)) {
+        if (compound == null || count <= 0 || !unlocked.contains(id)) {
             player.sendPacket(new PacketPlayerCompoundMaterialRsp(Retcode.RET_FAIL_VALUE));
             return;
         }
         // check whether the queue is full
-        if (activeCompounds.containsKey(id)
-                && activeCompounds.get(id).getTotalCount() + count > compound.getQueueSize()) {
+        long existing = activeCompounds.containsKey(id) ? activeCompounds.get(id).getTotalCount() : 0L;
+        if (existing + count > compound.getQueueSize()
+                || (long) Utils.getCurrentSeconds() + (existing + count) * compound.getCostTime() > Integer.MAX_VALUE) {
             player.sendPacket(new PacketPlayerCompoundMaterialRsp(Retcode.RET_COMPOUND_QUEUE_FULL_VALUE));
             return;
+        }
+        if (compound.getCostTime() < 0 || compound.getOutputVec() == null
+                || compound.getOutputVec().isEmpty()) {
+            player.sendPacket(new PacketPlayerCompoundMaterialRsp(Retcode.RET_FAIL_VALUE));
+            return;
+        }
+        for (var output : compound.getOutputVec()) {
+            if (output.getId() == 0 && output.getCount() == 0) continue;
+            if (output.getCount() <= 0 || GameData.getItemDataMap().get(output.getId()) == null
+                    || (long) output.getCount() * (existing + count) > Integer.MAX_VALUE) {
+                player.sendPacket(new PacketPlayerCompoundMaterialRsp(Retcode.RET_FAIL_VALUE));
+                return;
+            }
         }
         // try to consume raw materials
         if (!player.getInventory().payItems(compound.getInputVec(), count)) {
@@ -157,9 +170,9 @@ public class CookingCompoundManager extends BasePlayerManager {
         var data =
                 CompoundQueueData.newBuilder()
                         .setCompoundId(id)
-                        .setWaitCount(c.getOutputCount(currentTime))
-                        .setOutputCount(c.getTotalCount())
-                        .setWaitCount(c.getOutputTime(currentTime))
+                        .setWaitCount(c.getWaitCount(currentTime))
+                        .setOutputCount(c.getOutputCount(currentTime))
+                        .setOutputTime(c.getOutputTime(currentTime))
                         .build();
         player.sendPacket(new PacketPlayerCompoundMaterialRsp(data));
         markQueueNotified(currentTime);
@@ -197,10 +210,10 @@ public class CookingCompoundManager extends BasePlayerManager {
                         targets,
                         activeCompounds.keySet());
 
+        List<Integer> readyQueues = new ArrayList<>();
         for (int id : targets) {
             if (!activeCompounds.containsKey(id)) continue;
-            int quantity = activeCompounds.get(id).takeCompound(now);
-            if (activeCompounds.get(id).getTotalCount() == 0) activeCompounds.remove(id);
+            int quantity = activeCompounds.get(id).getOutputCount(now);
             if (quantity == 0) continue;
             var compound = GameData.getCompoundDataMap().get(id);
             if (compound == null || compound.getOutputVec() == null) continue;
@@ -208,16 +221,28 @@ public class CookingCompoundManager extends BasePlayerManager {
                 if (i.getId() == 0) continue;
                 if (allRewards.containsKey(i.getId())) {
                     GameItem item = allRewards.get(i.getId());
-                    item.setCount(item.getCount() + i.getCount() * quantity);
+                    long total = (long) item.getCount() + (long) i.getCount() * quantity;
+                    if (total <= 0 || total > Integer.MAX_VALUE) return;
+                    item.setCount((int) total);
                 } else {
-                    allRewards.put(i.getId(), new GameItem(i.getId(), i.getCount() * quantity));
+                    long total = (long) i.getCount() * quantity;
+                    if (total <= 0 || total > Integer.MAX_VALUE) return;
+                    if (GameData.getItemDataMap().get(i.getId()) == null) return;
+                    var output = new GameItem(i.getId(), (int) total);
+                    output.setCount((int) total);
+                    allRewards.put(i.getId(), output);
                 }
             }
+            readyQueues.add(id);
             success = true;
         }
 
-        if (success) {
-            player.getInventory().addItems(allRewards.values(), ActionReason.Compound);
+        if (success && !allRewards.isEmpty()
+                && player.getInventory().tryAddItems(allRewards.values(), ActionReason.Compound)) {
+            for (int id : readyQueues) {
+                activeCompounds.get(id).takeCompound(now);
+                if (activeCompounds.get(id).getTotalCount() == 0) activeCompounds.remove(id);
+            }
             player.sendPacket(
                     new PackageTakeCompoundOutputRsp(
                             allRewards.values().stream()

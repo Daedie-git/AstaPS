@@ -9,6 +9,35 @@ import java.util.*;
 public final class ExpeditionHelper {
     private ExpeditionHelper() {}
 
+    public record Assignment(long avatarGuid, int expId, int hours) {}
+
+    public static boolean canStart(Player player, long guid, int expId, int hours) {
+        if (player == null || guid <= 0 || hours <= 0 || player.getAvatars() == null
+                || player.getAvatars().getAvatarByGuid(guid) == null
+                || player.getExpeditionInfo().containsKey(guid)
+                || player.getExpeditionInfo().size() >= player.getExpeditionLimit()) return false;
+        if (player.getAvatars().getAvatarByGuid(guid).getTrialAvatarId() > 0) return false;
+        if (player.getExpeditionInfo().values().stream().anyMatch(info -> info.getExpId() == expId)) return false;
+        var rows = player.getServer().getExpeditionSystem().getExpeditionRewardDataList().get(expId);
+        return rows != null && rows.stream().anyMatch(row -> row.getHourTime() == hours);
+    }
+
+    public static boolean startAll(Player player, List<Assignment> assignments, int now) {
+        synchronized (player) {
+            if (assignments.isEmpty() || (long) player.getExpeditionInfo().size() + assignments.size()
+                    > player.getExpeditionLimit()) return false;
+            Set<Long> avatars = new HashSet<>();
+            Set<Integer> locations = new HashSet<>();
+            for (var assignment : assignments) {
+                if (!avatars.add(assignment.avatarGuid()) || !locations.add(assignment.expId())
+                        || !canStart(player, assignment.avatarGuid(), assignment.expId(), assignment.hours())) return false;
+            }
+            for (var assignment : assignments) player.addExpeditionInfo(assignment.avatarGuid(), assignment.expId(), assignment.hours(), now);
+            player.save();
+            return true;
+        }
+    }
+
     /** Mark timed-out DOING expeditions as FINISH_WAIT_REWARD. */
     public static boolean refreshFinishedStates(Player player) {
         if (player == null || player.getExpeditionInfo() == null) {
@@ -18,7 +47,7 @@ public final class ExpeditionHelper {
         boolean changed = false;
         for (ExpeditionInfo info : player.getExpeditionInfo().values()) {
             if (info.getState() == 1
-                    && now - info.getStartTime() >= info.getHourTime() * 60 * 60) {
+                    && (long) now - info.getStartTime() >= (long) info.getHourTime() * 60 * 60) {
                 info.setState(2);
                 changed = true;
             }

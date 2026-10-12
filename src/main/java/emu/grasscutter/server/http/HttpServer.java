@@ -39,7 +39,7 @@ public final class HttpServer {
                     if (allowedOrigins.length > 0) {
                         if (Arrays.asList(allowedOrigins).contains("*"))
                             corsConfig.anyHost();
-                        else corsConfig.allowHost(Arrays.toString(allowedOrigins));
+                        else for (String origin : allowedOrigins) corsConfig.allowHost(origin);
                     } else corsConfig.anyHost();
                 }));
             }
