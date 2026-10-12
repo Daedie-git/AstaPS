@@ -45,18 +45,14 @@ public class GameSession implements GameSessionManager.KcpChannel {
 
     /** Whether this session has already reported a frame that would not decrypt. */
     private boolean reportedBadMagic;
-    private boolean logoutStarted;
+
+    /** Both shutdown and the transport's close callback close a session; only the first counts. */
+    private boolean closeHandled;
 
     /** Packet classes already reported as having no 7.0 CmdId, so each is said once. */
     private static final java.util.Set<String> missingCmdIdReported =
             java.util.concurrent.ConcurrentHashMap.newKeySet();
-    @Getter private volatile SessionState state;
-
-    public synchronized void setState(SessionState state) {
-        if (closing && state != SessionState.INACTIVE) return;
-        this.state = state;
-    }
-
+    @Getter @Setter private SessionState state;
     @Getter @Setter private emu.grasscutter.game.player.FallDamageSample fallDamageSample;
 
     @Getter private int clientTime;
@@ -365,157 +361,38 @@ public class GameSession implements GameSessionManager.KcpChannel {
     }
 
         @Override
-        public void handleClose() {
-            synchronized (this) {
-                if (logoutStarted) return;
-                logoutStarted = true;
-                closing = true;
-                setState(SessionState.INACTIVE);
-            }
+        public synchronized void handleClose() {
+            if (closeHandled) return;
+            closeHandled = true;
+            setState(SessionState.INACTIVE);
 
             Grasscutter.getLogger()
                     .info(translate("messages.game.disconnect", String.valueOf(this.getAddress())));
 
-            finishLogout();
             try {
-                send(new BasePacket(PacketOpcodes.ServerDisconnectClientNotify));
-            } catch (Throwable ignore) {
-                Grasscutter.getLogger().warn("closing {} error", getAddress().getAddress().getHostAddress());
-            }
-            releaseAccountLease();
-            tunnel = null;
-        }
-
-    private volatile AccountSessionLease.Lease accountLease;
-    private volatile boolean leaseLoaded;
-    private volatile boolean componentsReady;
-    private volatile boolean unsafeLoader;
-    private volatile boolean closing;
-    private boolean writeAdmissionClosed;
-    private final java.util.concurrent.CompletableFuture<Void> cleanupDone = new java.util.concurrent.CompletableFuture<>();
-    private final java.util.concurrent.atomic.AtomicBoolean cleanupStarted = new java.util.concurrent.atomic.AtomicBoolean();
-
-    /** Gameplay admission closes immediately; final cleanup writes keep their ownership. */
-    public boolean acceptsGameWork() { return !closing; }
-
-    public synchronized java.util.concurrent.CompletableFuture<Void> loginWorkCompletion() {
-        return loginWorkDone;
-    }
-    public void quarantineCleanupFailure() { unsafeLoader = true; }
-    public void quarantineUnstoppedLoader() { unsafeLoader = true; }
-    private int loginWorkers;
-    private java.util.concurrent.CompletableFuture<Void> loginWorkDone =
-            java.util.concurrent.CompletableFuture.completedFuture(null);
-
-    public synchronized boolean beginLoginWork() {
-        if (closing) return false;
-        if (loginWorkers++ == 0) loginWorkDone = new java.util.concurrent.CompletableFuture<>();
-        return true;
-    }
-
-    public void endLoginWork() {
-        java.util.concurrent.CompletableFuture<Void> completion = null;
-        synchronized (this) {
-            if (--loginWorkers == 0) completion = loginWorkDone;
-        }
-        // Logout can acquire scene/player monitors; never invoke it under the session monitor.
-        if (completion != null) completion.complete(null);
-    }
-
-    public void markComponentsReady() { componentsReady = true; }
-
-    public synchronized boolean claimAccountLease(String accountId) {
-        if (closing || leaseRetirement != null) return false;
-        if (accountLease != null) return ownsAccountLease();
-        accountLease = AccountSessionLease.claim(accountId, this, ACCOUNT.maxPlayer);
-        return accountLease != null;
-    }
-
-    public boolean ownsAccountLease() { return AccountSessionLease.owns(accountLease); }
-
-    public String getLeaseAccountId() {
-        var lease = accountLease;
-        return lease == null ? null : lease.accountId();
-    }
-
-    public long getAccountSessionGeneration() {
-        var lease = accountLease;
-        return lease == null ? 0 : lease.generation();
-    }
-
-    /** Final producers retain admission until completion; queued writes drain before lease release. */
-    public synchronized boolean canSubmitSessionWrite() {
-        return !writeAdmissionClosed && ownsAccountLease();
-    }
-
-    public void markLeaseLoaded() { leaseLoaded = true; }
-
-    private java.util.concurrent.CompletableFuture<Void> leaseRetirement;
-
-    public java.util.concurrent.CompletableFuture<Void> retireAccountLease() {
-        closing = true;
-        java.util.concurrent.CompletableFuture<Void> result;
-        synchronized (this) {
-            if (leaseRetirement == null) {
-                var lease = accountLease;
-                leaseRetirement = java.util.concurrent.CompletableFuture.allOf(cleanupDone, loginWorkDone)
-                        .thenCompose(ignored -> {
-                            synchronized (this) {
-                                writeAdmissionClosed = true;
-                                if (unsafeLoader) return java.util.concurrent.CompletableFuture.failedFuture(
-                                        new IllegalStateException("Unfinished loader or cleanup; account remains quarantined"));
-                                return leaseLoaded ? LoginPersistenceHandoff.flush()
-                                        : java.util.concurrent.CompletableFuture.completedFuture(null);
-                            }
-                        }).thenRun(() -> AccountSessionLease.release(lease));
-            }
-            result = leaseRetirement;
-        }
-        finishLogout();
-        return result;
-    }
-
-    public void releaseAccountLease() { retireAccountLease(); }
-
-    private void finishLogout() {
-        if (!cleanupStarted.compareAndSet(false, true)) return;
-        loginWorkCompletion().thenRun(() -> {
-            try {
-                if (componentsReady && getPlayer() != null) {
+                if (this.isLoggedIn()) {
                     getPlayer().onLogout();
-                    getPlayer().getScriptDepartureCompletion()
-                            .orTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
-                            .whenComplete((ignored, failure) -> {
-                                if (failure == null) cleanupDone.complete(null);
-                                else {
-                                    unsafeLoader = true;
-                                    cleanupDone.completeExceptionally(failure);
-                                    Grasscutter.getLogger().error("Final script save did not complete; account remains quarantined", failure);
-                                }
-                            });
-                } else cleanupDone.complete(null);
-            } catch (Throwable failure) {
-                unsafeLoader = true;
-                cleanupDone.completeExceptionally(failure);
-                Grasscutter.getLogger().error("Session logout failed; account remains quarantined", failure);
+                }
+            } finally {
+                try {
+                    send(new BasePacket(PacketOpcodes.ServerDisconnectClientNotify));
+                } catch (Throwable e) {
+                    Grasscutter.getLogger().warn("Disconnect notification failed for {}", getAddress(), e);
+                } finally {
+                    tunnel = null;
+                }
             }
-        });
-    }
+        }
 
     public void close() {
-        closing = true;
-        setState(SessionState.INACTIVE);
-        try {
-            finishLogout();
-            releaseAccountLease();
-        } finally {
-            var tunnel = this.tunnel;
-            if (tunnel != null) tunnel.close();
-        }
+        // Already disconnected (a second login from the same account closes the first
+        // session, which may have gone away on its own).
+        var tunnel = this.tunnel;
+        if (tunnel != null) tunnel.close();
     }
 
     public boolean isActive() {
-        return acceptsGameWork() && getState() == SessionState.ACTIVE;
+        return getState() == SessionState.ACTIVE;
     }
 
     /**

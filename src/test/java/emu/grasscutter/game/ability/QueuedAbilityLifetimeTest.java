@@ -108,16 +108,6 @@ final class QueuedAbilityLifetimeTest {
         assertEquals(1, f.entity.abilities.size());
     }
 
-    @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
-    void queuedActionRejectsRetiredDispatchHostWithCurrentGuest(boolean mixin) throws Exception {
-        var f = new Fixture();
-        if (mixin) f.manager.executeMixin(f.ability, clearMixin(), ByteString.EMPTY);
-        else f.queueClear();
-        f.host.getSession().close(); f.drain();
-        assertEquals(7f, f.entity.values.get("lease_mark"));
-    }
-
     @Test void queuedActionRejectsSceneTransferAndSameIdReplacement() throws Exception {
         var moved = new Fixture(); moved.queueClear();
         moved.owner.setScene(allocate(S.class)); moved.drain();
@@ -130,13 +120,6 @@ final class QueuedAbilityLifetimeTest {
     @Test void queuedActionCannotClearDepartedOwnersState() throws Exception {
         var f = new Fixture(); f.queueClear();
         f.owner.setWorld(null);
-        f.drain();
-        assertEquals(7f, f.entity.values.get("lease_mark"));
-    }
-
-    @Test void queuedActionCannotRunAfterSessionClose() throws Exception {
-        var f = new Fixture(); f.queueClear();
-        f.owner.getSession().close();
         f.drain();
         assertEquals(7f, f.entity.values.get("lease_mark"));
     }
@@ -219,18 +202,6 @@ final class QueuedAbilityLifetimeTest {
         assertEquals(1, current.entity.updates);
     }
 
-    @Test void queuedMixinRejectsClosedSessionAndUnregisteredRetirement() throws Exception {
-        var closed = new Fixture(); var retired = new Fixture();
-        retired.scene.entities.clear();
-        closed.manager.executeMixin(closed.ability, clearMixin(), ByteString.EMPTY);
-        retired.manager.executeMixin(retired.ability, clearMixin(), ByteString.EMPTY);
-        closed.owner.getSession().close(); EntityRuntimeStateCleanup.clear(retired.entity);
-        closed.queue.remove().run(); retired.queue.remove().run();
-        assertTrue(closed.queue.isEmpty()); assertTrue(retired.queue.isEmpty());
-        assertEquals(7f, closed.entity.values.get("lease_mark"));
-        assertEquals(7f, retired.entity.values.get("lease_mark"));
-    }
-
     @org.junit.jupiter.params.ParameterizedTest
     @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
     void dispatchHostSceneMovePreservesGuestActionAndMixin(boolean mixin) throws Exception {
@@ -250,7 +221,7 @@ final class QueuedAbilityLifetimeTest {
     }
 
     @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.ValueSource(strings = {"current", "world", "foreignWorld", "session", "replacement", "hostClose"})
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"current", "world", "foreignWorld", "replacement"})
     void realGuestTeamInitializationUsesGuestLifetimeNotHostAbilityOwner(String retirement) throws Exception {
         {
             try (var f = new TeamFixture()) {
@@ -262,9 +233,7 @@ final class QueuedAbilityLifetimeTest {
                 switch (retirement) {
                     case "world" -> f.base.owner.setWorld(null);
                     case "foreignWorld" -> f.base.owner.setWorld(allocate(W.class));
-                    case "session" -> f.base.owner.getSession().close();
                     case "replacement" -> f.base.owner.setSession(new GameSession(null));
-                    case "hostClose" -> f.base.host.getSession().close();
                 }
                 f.drain();
                 assertEquals(!retirement.equals("current"), team.getGlobalAbilityValues().containsKey("lease_mark"), retirement);
@@ -288,7 +257,7 @@ final class QueuedAbilityLifetimeTest {
     }
 
     @org.junit.jupiter.params.ParameterizedTest
-    @org.junit.jupiter.params.provider.ValueSource(strings = {"current", "foreign", "closed", "scene"})
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"current", "foreign", "scene"})
     void actualWorldEntityStartupBindsOnlyItsConstructingWorld(String admission) throws Exception {
         try (var f = new TeamFixture()) {
             f.drain();
@@ -297,10 +266,9 @@ final class QueuedAbilityLifetimeTest {
             entity.getGlobalAbilityValues().put("lease_mark", 7f);
             assertEquals(1, f.queue.size());
             f.base.host.setWorld(admission.equals("foreign") ? allocate(W.class) : f.base.world);
-            if (admission.equals("closed")) f.base.host.getSession().close();
             if (admission.equals("scene")) f.base.host.setScene(f.base.scene);
             f.drain();
-            assertEquals(admission.equals("foreign") || admission.equals("closed"),
+            assertEquals(admission.equals("foreign"),
                 entity.getGlobalAbilityValues().containsKey("lease_mark"));
         }
     }

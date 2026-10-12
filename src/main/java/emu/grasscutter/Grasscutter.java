@@ -78,8 +78,6 @@ public final class Grasscutter {
     @Getter @Setter private static PermissionHandler permissionHandler;
 
     private static LineReader consoleLineReader = null;
-    private static final emu.grasscutter.server.ShutdownSequence shutdown =
-            new emu.grasscutter.server.ShutdownSequence();
 
     @Getter
     private static final ExecutorService threadPool =
@@ -234,44 +232,36 @@ public final class Grasscutter {
 
     /** Server shutdown event. */
     private static void onShutdown() {
+        // Disable all plugins.
+        if (pluginManager != null) Utils.runAll("Plugin shutdown", pluginManager::disablePlugins);
+        // Shutdown the game server.
+        if (gameServer != null) Utils.runAll("Game server shutdown", gameServer::onServerShutdown);
+
+        // Held until the database writers have drained, so its waits are not cut short.
+        boolean interrupted = Thread.interrupted();
         try {
-            shutdown.run(
-                    () -> { if (pluginManager != null) pluginManager.disablePlugins(); },
-                    () -> { if (gameServer != null) gameServer.onServerShutdown(); },
-                    Grasscutter::shutdownLoaders,
-                    Grasscutter::drainDatabaseWriters);
-        } catch (RuntimeException failure) {
-            logger.error("Shutdown failed after attempting all cleanup stages.", failure);
+            // Wait for Grasscutter's thread pool to finish.
+            var executor = Grasscutter.getThreadPool();
+            executor.shutdown();
+            if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException ignored) {
+            // Still drain accepted database writes before restoring the shutdown hook's interrupt.
+            interrupted = true;
         }
-    }
 
-    private static void shutdownLoaders() {
-        new emu.grasscutter.server.ShutdownSequence().run(
-                () -> emu.grasscutter.server.packet.recv.HandlerGetPlayerTokenReq
-                        .shutdownLoginProducers(Duration.ofSeconds(5)),
-                () -> emu.grasscutter.server.game.LoginProducerLifecycle
-                        .stopExecutor(Grasscutter.getThreadPool(), Duration.ofSeconds(5)),
-                () -> {
-                    try { emu.grasscutter.scripts.SceneScriptManager.shutdownEventExecutor(5, TimeUnit.SECONDS); }
-                    catch (Exception failure) {
-                        if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
-                        throw new IllegalStateException("Script final-save producers did not stop", failure);
-                    }
-                });
-    }
-
-    private static void drainDatabaseWriters() {
         // Stop admission first, then drain every database writer against one shared deadline.
         var databaseShutdown = DatabaseHelper.shutdownWriters(Duration.ofSeconds(5));
         if (!databaseShutdown.completed()) {
             logger.error(
-                    "Database shutdown incomplete: {} active at timeout, {} accepted tasks never started, interrupted={}, writeFailed={}; pools={}",
+                    "Database shutdown incomplete: {} active at timeout, {} accepted tasks never started, interrupted={}; pools={}",
                     databaseShutdown.activeAtTimeoutTaskCount(),
                     databaseShutdown.notStartedTaskCount(),
                     databaseShutdown.interrupted(),
-                    databaseShutdown.writeFailed(),
                     databaseShutdown.pools());
         }
+        if (interrupted) Thread.currentThread().interrupt();
     }
 
     /** Utility method for starting the: - SDK server - Dispatch server */

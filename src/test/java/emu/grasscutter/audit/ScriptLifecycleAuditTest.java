@@ -157,64 +157,6 @@ public class ScriptLifecycleAuditTest {
         }
     }
 
-    @Test void boundedShutdownJoinsFinalSaveCallbackAndClosesAdmission() throws Exception {
-        var field = ScriptLoader.class.getDeclaredField("scriptLib"); field.setAccessible(true);
-        var original = field.get(null); field.set(null, new ScriptLib());
-        var scripts = scripts(BlockedScripts.class); scripts.events = null;
-        scripts.entered = new CountDownLatch(1); scripts.release = new CountDownLatch(1);
-        scripts.instance = new SceneGroupInstance(new SceneGroup(), allocate(Player.class));
-        scripts.instance.getCachedVariables().put("late", 1);
-        scripts.getCachedGroupInstances().put(1, scripts.instance);
-        var scene = allocate(BlockingFinalScene.class); scene.scripts = scripts; set(scripts, "scene", scene);
-        scene.saveEntered = new CountDownLatch(1); scene.saveRelease = new CountDownLatch(1);
-        var executor = Executors.newSingleThreadExecutor();
-        var dispatch = SceneScriptManager.class.getDeclaredMethod("realCallEvent", ScriptArgs.class);
-        dispatch.setAccessible(true);
-        var shutdown = SceneScriptManager.class.getDeclaredMethod(
-                "awaitEventExecutor", ExecutorService.class, long.class, TimeUnit.class);
-        shutdown.setAccessible(true);
-        var event = executor.submit(() -> {
-            try { dispatch.invoke(scripts, new ScriptArgs(1, EventType.EVENT_GROUP_LOAD)); }
-            catch (ReflectiveOperationException failure) { throw new AssertionError(failure); }
-        });
-        try {
-            assertTrue(scripts.entered.await(3, TimeUnit.SECONDS));
-            var completion = scripts.onDestroyAsync();
-            scripts.release.countDown();
-            assertTrue(scene.saveEntered.await(3, TimeUnit.SECONDS));
-            assertFalse(completion.isDone(), "Final save callback is still producing");
-            assertTimeoutPreemptively(java.time.Duration.ofMillis(300),
-                    () -> assertSame(completion, scripts.onDestroyAsync()),
-                    "Departure must not wait on a final callback under the manager monitor");
-            var timeout = assertThrows(java.lang.reflect.InvocationTargetException.class,
-                    () -> shutdown.invoke(null, executor, 30L, TimeUnit.MILLISECONDS));
-            assertInstanceOf(TimeoutException.class, timeout.getCause());
-            assertThrows(RejectedExecutionException.class, () -> executor.submit(() -> {}));
-            assertFalse(completion.isDone(), "Timeout must not acknowledge or cancel the producer");
-            scene.saveRelease.countDown();
-            event.get(3, TimeUnit.SECONDS);
-            shutdown.invoke(null, executor, 3L, TimeUnit.SECONDS);
-            completion.get(3, TimeUnit.SECONDS);
-            assertEquals(2, scene.savedValue);
-            assertTrue(scripts.getCachedGroupInstances().isEmpty());
-        } finally {
-            scripts.release.countDown(); scene.saveRelease.countDown();
-            executor.shutdown(); assertTrue(executor.awaitTermination(3, TimeUnit.SECONDS));
-            field.set(null, original);
-        }
-    }
-
-    public static class BlockingFinalScene extends SavingScene {
-        public BlockingFinalScene() { super(); }
-        CountDownLatch saveEntered, saveRelease;
-        @Override public void saveGroups() {
-            saveEntered.countDown();
-            try { assertTrue(saveRelease.await(3, TimeUnit.SECONDS)); }
-            catch (InterruptedException failure) { throw new AssertionError(failure); }
-            super.saveGroups();
-        }
-    }
-
     public static class FencedSavingScene extends SavingScene {
         public FencedSavingScene() { super(); }
         volatile boolean retired;

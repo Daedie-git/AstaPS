@@ -37,7 +37,6 @@ final class NativeCharacterSelectionTest {
     private GameOptions.NewAccountIntro previousIntro;
     private ServerRunMode previousRunModeOverride;
     private Object previousRegionCache;
-    private static final List<GameSession> admittedSessions = new ArrayList<>();
 
     @BeforeEach
     void useNativeSelectionWithoutStartingARegionServer() throws Exception {
@@ -53,8 +52,6 @@ final class NativeCharacterSelectionTest {
 
     @AfterEach
     void restoreConfiguration() throws Exception {
-        admittedSessions.forEach(GameSession::releaseAccountLease);
-        admittedSessions.clear();
         GAME_OPTIONS.newAccountIntro = previousIntro;
         Grasscutter.setRunModeOverride(previousRunModeOverride);
         field(PacketPlayerLoginRsp.class, "regionCache").set(null, previousRegionCache);
@@ -155,7 +152,7 @@ final class NativeCharacterSelectionTest {
     }
 
     private static RecordingSession session(int traveler) throws Exception {
-        var session = new RecordingSession();
+        var session = allocate(RecordingSession.class);
         var player = allocate(RecordingPlayer.class);
         player.avatars = new AvatarStorage(player);
         player.traveler = traveler;
@@ -164,9 +161,6 @@ final class NativeCharacterSelectionTest {
         if (traveler != 0) player.avatars.getAvatars().put(traveler, allocate(Avatar.class));
         session.player = player;
         session.account = allocate(Account.class);
-        session.account.setId("native-selection-" + java.util.UUID.randomUUID());
-        assertTrue(session.claimAccountLease(session.account.getId()));
-        admittedSessions.add(session);
         session.packets = new ArrayList<>();
         session.setState(SessionState.WAITING_FOR_LOGIN);
         return session;

@@ -55,7 +55,6 @@ public class Achievements {
         if (achievements == null) {
             achievements = create(player.getUid(), player);
         }
-        emu.grasscutter.game.player.SessionWriteFence.bind(achievements, player);
         achievements.setPlayer(player);
         return achievements;
     }
@@ -70,7 +69,6 @@ public class Achievements {
                         .finishedAchievementNum(0)
                         .takenGoalRewardIdList(Lists.newArrayList())
                         .build();
-        emu.grasscutter.game.player.SessionWriteFence.bind(newAchievement, player);
         newAchievement.setPlayer(player);
         newAchievement.save();
         return newAchievement;

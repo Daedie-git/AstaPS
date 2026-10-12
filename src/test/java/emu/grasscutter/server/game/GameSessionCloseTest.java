@@ -14,10 +14,7 @@ class GameSessionCloseTest {
         var session = new RecordingSession(player);
         session.onConnected(new FakeTunnel());
 
-        session.markComponentsReady();
-        assertDoesNotThrow(session::handleClose);
-        assertThrows(java.util.concurrent.CompletionException.class,
-                () -> session.retireAccountLease().join());
+        assertThrows(IllegalStateException.class, session::handleClose);
         assertEquals(1, session.sent);
         assertFalse(session.isConnected());
 

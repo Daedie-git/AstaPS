@@ -20,32 +20,16 @@ final class FriendsListTest {
 
     private TestPlayer asker, recipient;
     private Record mine, theirs;
-    private emu.grasscutter.database.FriendshipPersistenceFixture persistence;
 
     @BeforeEach
-    void setup() throws Exception {
-        persistence = new emu.grasscutter.database.FriendshipPersistenceFixture();
-        emu.grasscutter.server.game.GameServer.prepareLoginAdmission();
+    void setup() {
         var server = TestPlayers.server();
         asker = new TestPlayer(server, 100);
         recipient = new TestPlayer(server, 200);
-        assertTrue(asker.getSession().claimAccountLease("friends-main-asker-" + java.util.UUID.randomUUID()));
-        assertTrue(recipient.getSession().claimAccountLease("friends-main-recipient-" + java.util.UUID.randomUUID()));
         mine = new Record(recipient, asker, asker);
         theirs = new Record(asker, recipient, asker);
         recipient.getFriendsList().addPendingFriend(mine);
         asker.getFriendsList().addPendingFriend(theirs);
-    }
-
-    @AfterEach
-    void cleanup() throws Exception {
-        try { persistence.close(); }
-        finally {
-            for (var player : java.util.List.of(asker, recipient)) {
-                var lease = emu.grasscutter.server.game.AccountSessionLease.current(player.getSession().getLeaseAccountId());
-                emu.grasscutter.server.game.AccountSessionLease.release(lease);
-            }
-        }
     }
 
     @Test
@@ -60,14 +44,13 @@ final class FriendsListTest {
     }
 
     @Test
-    void declineClearsBothPendingLists() throws Exception {
+    void declineClearsBothPendingLists() {
         recipient.getFriendsList().handleFriendRequest(asker.getUid(), DECLINE);
 
         assertTrue(recipient.getFriendsList().getPendingFriends().isEmpty());
         assertTrue(asker.getFriendsList().getPendingFriends().isEmpty());
         assertEquals(1, mine.deletes);
-        persistence.awaitWrites();
-        assertEquals(1, persistence.deletes(theirs));
+        assertEquals(1, theirs.deletes);
     }
 
     @Test

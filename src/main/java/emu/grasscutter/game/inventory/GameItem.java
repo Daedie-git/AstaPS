@@ -185,7 +185,6 @@ public class GameItem {
     }
 
     public void setOwner(Player player) {
-        emu.grasscutter.game.player.SessionWriteFence.bind(this, player);
         this.ownerId = player.getUid();
         this.guid = player.getNextGameGuid();
     }

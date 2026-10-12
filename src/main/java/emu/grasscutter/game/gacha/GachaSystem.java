@@ -373,7 +373,6 @@ public class GachaSystem extends BaseGameSystem {
 
             // Write gacha record
             GachaRecord gachaRecord = new GachaRecord(itemId, player.getUid(), banner.getGachaType());
-            emu.grasscutter.game.player.SessionWriteFence.bind(gachaRecord, player);
             DatabaseHelper.saveGachaRecord(gachaRecord);
 
             // Create gacha item

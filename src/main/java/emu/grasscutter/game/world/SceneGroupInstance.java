@@ -37,7 +37,6 @@ public final class SceneGroupInstance {
 
     SceneGroupInstance(SceneGroup group, Player owner,
             java.util.function.Consumer<SceneGroupInstance> persistence) {
-        emu.grasscutter.game.player.SessionWriteFence.bind(this, owner);
         this.persistence = Objects.requireNonNull(persistence);
         this.luaGroup = group;
         this.groupId = group.id;

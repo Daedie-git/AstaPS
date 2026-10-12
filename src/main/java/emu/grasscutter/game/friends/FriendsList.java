@@ -60,7 +60,6 @@ public class FriendsList extends BasePlayerManager {
     }
 
     public synchronized void handleFriendRequest(int targetUid, DealAddFriendResultType result) {
-        if (!getPlayer().canSubmitSessionWrite()) return;
         // Check if player has sent friend request
         Friendship myFriendship = this.getPendingFriendById(targetUid);
         if (myFriendship == null) {
@@ -82,7 +81,7 @@ public class FriendsList extends BasePlayerManager {
         if (target.isOnline()) {
             theirFriendship = target.getFriendsList().getFriendshipById(this.getPlayer().getUid());
         } else {
-            theirFriendship = getReverseFriendship(myFriendship);
+            theirFriendship = DatabaseHelper.getReverseFriendship(myFriendship);
         }
 
         if (theirFriendship == null) {
@@ -109,7 +108,7 @@ public class FriendsList extends BasePlayerManager {
             }
 
             myFriendship.save();
-            DatabaseHelper.saveFriendship(theirFriendship, getPlayer());
+            theirFriendship.save();
         } else { // Request declined
             // Delete from my pending friends
             this.getPendingFriends().remove(myFriendship.getFriendId());
@@ -117,19 +116,14 @@ public class FriendsList extends BasePlayerManager {
             if (target.isOnline()) {
                 target.getFriendsList().getPendingFriends().remove(this.getPlayer().getUid());
             }
-            DatabaseHelper.deleteFriendship(theirFriendship, getPlayer());
+            theirFriendship.delete();
         }
 
         // Packet
         this.getPlayer().sendPacket(new PacketDealAddFriendRsp(targetUid, result));
     }
 
-    protected Friendship getReverseFriendship(Friendship friendship) {
-        return DatabaseHelper.getReverseFriendship(friendship);
-    }
-
     public synchronized void deleteFriend(int targetUid) {
-        if (!getPlayer().canSubmitSessionWrite()) return;
         Friendship myFriendship = this.getFriendById(targetUid);
         if (myFriendship == null) {
             return;
@@ -145,14 +139,14 @@ public class FriendsList extends BasePlayerManager {
             theirFriendship = friend.getFriendsList().getFriendById(this.getPlayer().getUid());
             if (theirFriendship != null) {
                 friend.getFriendsList().getFriends().remove(theirFriendship.getFriendId());
-                DatabaseHelper.deleteFriendship(theirFriendship, getPlayer());
+                theirFriendship.delete();
                 friend.sendPacket(new PacketDeleteFriendNotify(theirFriendship.getFriendId()));
             }
         } else {
             // Friend offline
             theirFriendship = DatabaseHelper.getReverseFriendship(myFriendship);
             if (theirFriendship != null) {
-                DatabaseHelper.deleteFriendship(theirFriendship, getPlayer());
+                theirFriendship.delete();
             }
         }
 
@@ -161,7 +155,6 @@ public class FriendsList extends BasePlayerManager {
     }
 
     public synchronized void sendFriendRequest(int targetUid) {
-        if (!getPlayer().canSubmitSessionWrite()) return;
         Player target = getPlayer().getSession().getServer().getPlayerByUid(targetUid, true);
 
         if (target == null || target == this.getPlayer()) {
@@ -188,7 +181,7 @@ public class FriendsList extends BasePlayerManager {
 
         // Save
         myFriendship.save();
-        DatabaseHelper.saveFriendship(theirFriendship, getPlayer());
+        theirFriendship.save();
 
         // Packets
         this.getPlayer().sendPacket(new PacketAskAddFriendRsp(targetUid));
@@ -251,12 +244,11 @@ public class FriendsList extends BasePlayerManager {
     }
 
     public void save() {
-        if (!getPlayer().canSubmitSessionWrite()) return;
         // Update all our friends
         List<Friendship> friendships = DatabaseHelper.getReverseFriends(getPlayer());
         for (Friendship friend : friendships) {
             friend.setFriendProfile(this.getPlayer());
-            DatabaseHelper.saveFriendship(friend, getPlayer());
+            friend.save();
         }
     }
 }

@@ -75,29 +75,6 @@ public class SceneScriptManager {
     private static final Int2ObjectMap<List<Grid>> groupGridsCache =
             Int2ObjectMaps.synchronize(new Int2ObjectOpenHashMap<>()); // scenes init on their own threads
     public static final ExecutorService eventExecutor;
-    private static final java.util.concurrent.atomic.AtomicReference<Throwable> finalizationFailure =
-            new java.util.concurrent.atomic.AtomicReference<>();
-
-    /**
-     * Stop script-event admission and join executing events, including their final-save callbacks.
-     * Call only after login/scene producers have stopped, outside scene and logic monitors.
-     * Failure or timeout must prevent a successful persistence drain acknowledgement.
-     */
-    public static void shutdownEventExecutor(long timeout, TimeUnit unit)
-            throws InterruptedException, TimeoutException, ExecutionException {
-        awaitEventExecutor(eventExecutor, timeout, unit);
-        var failure = finalizationFailure.get();
-        if (failure != null) throw new ExecutionException(failure);
-    }
-
-    static void awaitEventExecutor(ExecutorService executor, long timeout, TimeUnit unit)
-            throws InterruptedException, TimeoutException {
-        if (timeout < 0) throw new IllegalArgumentException("Negative script shutdown timeout");
-        executor.shutdown();
-        if (!executor.awaitTermination(timeout, unit)) {
-            throw new TimeoutException("Script producers did not stop before persistence drain");
-        }
-    }
 
     static {
         eventExecutor =
@@ -1551,7 +1528,6 @@ public class SceneScriptManager {
         try {
             onDestroy();
         } catch (Throwable failure) {
-            finalizationFailure.compareAndSet(null, failure);
             destructionCompletion.completeExceptionally(failure);
         }
         return destructionCompletion;
@@ -1632,7 +1608,6 @@ public class SceneScriptManager {
             variables.clear();
             destructionCompletion.complete(null);
         } catch (Throwable failure) {
-            finalizationFailure.compareAndSet(null, failure);
             destructionCompletion.completeExceptionally(failure);
         }
     }

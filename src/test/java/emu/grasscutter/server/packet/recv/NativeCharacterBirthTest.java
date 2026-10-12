@@ -66,8 +66,6 @@ final class NativeCharacterBirthTest {
     void restoreResourcesAndRemoveOnlyTestBootstraps() throws Exception {
         for (var session : sessions) {
             bootstraps().remove(session.player.getUid());
-            emu.grasscutter.server.game.AccountSessionLease.release(
-                    emu.grasscutter.server.game.AccountSessionLease.current(session.getLeaseAccountId()));
             for (var avatar : session.player.avatars) AvatarStatePersist.afterRecalc(avatar);
         }
         for (var backup : originalResources.entrySet()) {
@@ -200,7 +198,7 @@ final class NativeCharacterBirthTest {
     }
 
     private RecordingSession session() throws Exception {
-        var session = new RecordingSession();
+        var session = allocate(RecordingSession.class);
         var player = allocate(RecordingPlayer.class);
         player.uid = NEXT_UID.incrementAndGet();
         player.nickname = "Unborn";
@@ -209,8 +207,6 @@ final class NativeCharacterBirthTest {
         player.teams.getCurrentSinglePlayerTeamInfo().getAvatars().add(10000002);
         player.mails = new ArrayList<>();
         session.player = player;
-        player.setSession(session);
-        assertTrue(session.claimAccountLease("native-birth-" + player.getUid()));
         session.packets = new ArrayList<>();
         session.setState(SessionState.PICKING_CHARACTER);
         sessions.add(session);

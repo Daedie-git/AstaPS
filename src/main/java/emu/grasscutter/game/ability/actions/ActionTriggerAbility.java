@@ -26,9 +26,7 @@ public final class ActionTriggerAbility extends AbilityActionHandler {
         }
 
         var world = player.getWorld();
-        var session = player.getSession();
         if (world == null || world.getHost() == null
-                || (session != null && !session.acceptsGameWork())
                 || (target.getScene() != null && target.getScene().getWorld() != world)) {
             return false;
         }

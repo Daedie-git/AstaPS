@@ -56,7 +56,6 @@ import org.jetbrains.annotations.*;
 @Getter
 public final class GameServer extends KcpServer implements Iterable<Player> {
     // Game server base
-    private final GameLoopLifecycle loopLifecycle = new GameLoopLifecycle();
     private final InetSocketAddress address;
     private ChannelConfig channelConfig;
     private final GameServerPacketHandler packetHandler;
@@ -68,6 +67,7 @@ public final class GameServer extends KcpServer implements Iterable<Player> {
     private volatile long lastTickCompletedNanos;
     private volatile long lastTickDurationMillis;
     private volatile long maxTickDurationMillis;
+    private Timer gameLoop;
 
     @Setter private DispatchClient dispatchClient;
 
@@ -446,18 +446,7 @@ public final class GameServer extends KcpServer implements Iterable<Player> {
         }
     }
 
-    /** Installs the production persistence acknowledgement before the socket accepts sessions. */
-    public static void prepareLoginAdmission() {
-        emu.grasscutter.database.PersistenceWriteFence.install(
-                emu.grasscutter.game.player.SessionWriteFence::mayExecute,
-                (object, owner) -> emu.grasscutter.game.player.SessionWriteFence.bind(
-                        object, (Player) owner),
-                emu.grasscutter.game.player.SessionWriteFence::submit);
-        LoginPersistenceHandoff.install(emu.grasscutter.database.DatabaseHelper::flushForLoginHandoff);
-    }
-
     public void start() {
-        prepareLoginAdmission();
         this.init(GameSessionManager.getListener(), this.channelConfig, this.address);
 
         if (Grasscutter.getRunMode() == ServerRunMode.GAME_ONLY) {
@@ -471,14 +460,22 @@ public final class GameServer extends KcpServer implements Iterable<Player> {
         this.announceTowerRotation();
 
         // Schedule game loop.
-        loopLifecycle.start(
-                () -> {
-                    try {
-                        onTick();
-                    } catch (Throwable e) {
-                        Grasscutter.getLogger().error(translate("messages.game.game_update_error"), e);
+        gameLoop = new Timer();
+        gameLoop.scheduleAtFixedRate(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        try {
+                            onTick();
+                        } catch (Throwable e) {
+                            // A Timer thread dies on anything it does not catch, and it is the only
+                            // thing driving the world - so the game would simply stop, quietly.
+                            Grasscutter.getLogger().error(translate("messages.game.game_update_error"), e);
+                        }
                     }
-                }, GAME_INFO.tickRateMs);
+                },
+                new Date(),
+                Math.max(1, GAME_INFO.tickRateMs));
         Grasscutter.getLogger().info(translate("messages.status.free_software"));
         Grasscutter.getLogger()
                 .info(translate("messages.game.address_bind", GAME_INFO.accessAddress, address.getPort()));
@@ -503,45 +500,50 @@ public final class GameServer extends KcpServer implements Iterable<Player> {
         }
     }
 
+    /** Saves every player and world before the transport stops. Leaves any interrupt set. */
     public void onServerShutdown() {
-        loopLifecycle.stop(this::shutdownOnce);
-    }
-
-    private void shutdownOnce() {
-        var stages = new ArrayList<Runnable>();
-        // Close gameplay admission without tearing down transport or its callback producers.
-        stages.add(GameSessionManager::closeAdmission);
-        stages.add(() -> new ServerStopEvent(ServerEvent.Type.GAME, OffsetDateTime.now()).call());
-        var sessions = this.getPlayers().values().stream().map(Player::getSession).toList();
-        stages.add(() -> GameSessionManager.awaitLogout(sessions));
-        this.getWorlds().forEach(world -> stages.add(world::save));
-        stages.add(() -> {
-            try {
-                java.util.concurrent.CompletableFuture.allOf(sessions.stream()
-                        .map(GameSession::retireAccountLease).toArray(java.util.concurrent.CompletableFuture[]::new))
-                        .get(30, TimeUnit.SECONDS);
-            } catch (Exception failure) {
-                sessions.forEach(GameSession::quarantineUnstoppedLoader);
-                if (failure instanceof InterruptedException) Thread.currentThread().interrupt();
-                throw new IllegalStateException("Player final-save retirement did not complete", failure);
-            }
-        });
-        stages.add(this::stop);
-        stages.add(this::shutdownLogic);
-        new emu.grasscutter.server.ShutdownSequence().run(stages.toArray(Runnable[]::new));
-    }
-
-    private void shutdownLogic() {
-        var threadPool = GameSessionManager.getLogicThread();
-        threadPool.shutdownGracefully();
-        try {
-            if (!threadPool.awaitTermination(5, TimeUnit.SECONDS)) {
-                throw new IllegalStateException("Logic thread did not terminate");
-            }
-        } catch (InterruptedException interrupted) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while stopping logic thread", interrupted);
+        GameSessionManager.closeAdmission();
+        if (gameLoop != null) {
+            gameLoop.cancel();
+            synchronized (this) {} // Waits for a running tick; onTick is synchronized.
         }
+        Utils.runAll(
+                "Server stop event",
+                () -> new ServerStopEvent(ServerEvent.Type.GAME, OffsetDateTime.now()).call());
+
+        // Log players out on the logic thread, which owns their state; the writer drain saves them.
+        boolean interrupted = false;
+        var logicThread = GameSessionManager.getLogicThread();
+        try {
+            logicThread
+                    .submit(
+                            () -> {
+                                var sessions =
+                                        this.getPlayers().values().stream()
+                                                .map(Player::getSession)
+                                                .filter(Objects::nonNull)
+                                                .toList();
+                                sessions.forEach(
+                                        session -> Utils.runAll("Logout", session::close, session::handleClose));
+                            })
+                    .get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            interrupted = true;
+        } catch (ExecutionException | TimeoutException e) {
+            Grasscutter.getLogger().error("Not every player was logged out before shutdown.", e);
+        }
+        this.getWorlds().forEach(world -> Utils.runAll("World save", world::save));
+
+        this.stop(); // Stop the server.
+        logicThread.shutdownGracefully();
+        try {
+            if (!logicThread.awaitTermination(5, TimeUnit.SECONDS)) {
+                Grasscutter.getLogger().error("Logic thread did not terminate!");
+            }
+        } catch (InterruptedException e) {
+            interrupted = true;
+        }
+        if (interrupted) Thread.currentThread().interrupt();
     }
 
     @NotNull @Override

@@ -60,7 +60,6 @@ public final class BornIntroGate {
 
     /** Begins the native 7.1 post-born intro gate after SetPlayerBornData succeeds. */
     public static void armNativeIntro(GameSession session) {
-        if (session == null || !session.acceptsGameWork() || !session.ownsAccountLease()) return;
         int uid = uidOf(session);
         if (uid <= 0) return;
         FRESH_PLAYER_BOOTSTRAPS.put(uid, new State(Mode.NATIVE_INTRO, session));
@@ -76,7 +75,6 @@ public final class BornIntroGate {
      * gated until the first PostEnterSceneRsp has reached the client.
      */
     public static void armSceneReady(GameSession session) {
-        if (session == null || !session.acceptsGameWork() || !session.ownsAccountLease()) return;
         int uid = uidOf(session);
         if (uid <= 0) return;
 
@@ -87,7 +85,6 @@ public final class BornIntroGate {
 
     /** Marks Player.onLogin complete and resumes an early EnterSceneReady request if necessary. */
     public static void markWorldLoginComplete(GameSession session) {
-        if (session == null || !session.acceptsGameWork() || !session.ownsAccountLease()) return;
         State state = stateFor(session);
         if (state == null) return;
 
@@ -132,7 +129,6 @@ public final class BornIntroGate {
      * this state machine.
      */
     public static void notePause(GameSession session, boolean paused) {
-        if (session == null || !session.acceptsGameWork() || !session.ownsAccountLease()) return;
         if (session == null) return;
 
         State state = stateFor(session);
@@ -159,7 +155,6 @@ public final class BornIntroGate {
     }
 
     private static void enterWorldAfterNativeIntro(GameSession session) {
-        if (session == null || !session.acceptsGameWork() || !session.ownsAccountLease()) return;
         var player = session.getPlayer();
         if (player == null) {
             remove(session);
@@ -177,8 +172,7 @@ public final class BornIntroGate {
             }
 
             // Cold first login can be slow. Keep packet handling alive while the world is built.
-            if (!emu.grasscutter.server.packet.recv.HandlerGetPlayerTokenReq.submitNativeLogin(
-                    session, () -> completeNativeWorldLogin(session, player))) session.close();
+            Grasscutter.getThreadPool().submit(() -> completeNativeWorldLogin(session, player));
         } catch (Throwable t) {
             synchronized (state) {
                 state.cutoverStarted = false;
@@ -193,7 +187,6 @@ public final class BornIntroGate {
 
     private static void completeNativeWorldLogin(
             GameSession session, emu.grasscutter.game.player.Player player) {
-        if (session == null || !session.acceptsGameWork() || !session.ownsAccountLease()) return;
         State state = stateFor(session);
         if (state == null || state.mode != Mode.NATIVE_INTRO) return;
 
@@ -228,7 +221,6 @@ public final class BornIntroGate {
     }
 
     private static void resumeSceneReady(GameSession session) {
-        if (session == null || !session.acceptsGameWork() || !session.ownsAccountLease()) return;
         if (session == null) return;
         var player = session.getPlayer();
         if (player == null || player.getWorld() == null) return;
@@ -239,7 +231,6 @@ public final class BornIntroGate {
 
     /** Starts the fresh-player quest lifecycle exactly once after PostEnterSceneRsp. */
     public static void finishOnSceneReady(GameSession session) {
-        if (session == null || !session.acceptsGameWork() || !session.ownsAccountLease()) return;
         if (session == null) return;
 
         State state = stateFor(session);

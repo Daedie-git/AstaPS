@@ -34,7 +34,6 @@ public class PlayerActivityData {
         var data = DatabaseHelper.getPlayerActivityData(player.getUid(), activityId);
         if (data != null) {
             data.setPlayer(player);
-            emu.grasscutter.game.player.SessionWriteFence.bind(data, player);
         }
         return data;
     }

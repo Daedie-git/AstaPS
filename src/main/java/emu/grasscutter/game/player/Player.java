@@ -1327,13 +1327,13 @@ public class Player implements PlayerHook, FieldFetch {
             .build();
     }
 
-    public synchronized void loadBattlePassManager() {
+    public void loadBattlePassManager() {
         if (this.battlePassManager != null) return;
         this.battlePassManager = DatabaseHelper.loadBattlePass(this);
         this.battlePassManager.getMissions().values().removeIf(mission -> mission.getData() == null);
     }
 
-    public synchronized void loadDailyTaskManager() {
+    public void loadDailyTaskManager() {
         if (this.dailyTaskManager != null) return;
         this.dailyTaskManager = DatabaseHelper.loadDailyTaskManager(this);
     }
@@ -1516,22 +1516,8 @@ public class Player implements PlayerHook, FieldFetch {
         return this.tpsAmmunition;
     }
 
-    /** Offline maintenance objects have no session and do not participate in login fencing. */
-    public boolean canSubmitSessionWrite() {
-        return this.session == null || this.session.canSubmitSessionWrite();
-    }
-
-    /** Writer execution fence: remains true while this generation's final writes drain. */
-    public boolean isSessionGenerationCurrent() {
-        return this.session == null || this.session.ownsAccountLease();
-    }
-
-    public long getSessionGeneration() {
-        return this.session == null ? 0 : this.session.getAccountSessionGeneration();
-    }
-
     public void save() {
-        if (this.canSubmitSessionWrite()) DatabaseHelper.savePlayer(this);
+        DatabaseHelper.savePlayer(this);
     }
 
     public void loadFromDatabase() {
@@ -1546,22 +1532,49 @@ public class Player implements PlayerHook, FieldFetch {
             this.getProfile().syncWithCharacter(this);
         }
 
-        LoginLoadGroup.load(Grasscutter.getThreadPool(), java.time.Duration.ofSeconds(30),
-                () -> this.achievements = Achievements.getByPlayer(this),
-                () -> {
-                    this.getAvatars().loadFromDatabase();
-                    this.getInventory().loadFromDatabase();
-                },
-                this.getFriendsList()::loadFromDatabase,
-                this.getMailHandler()::loadFromDatabase,
-                this.getQuestManager()::loadFromDatabase,
-                this::loadBattlePassManager,
-                this::loadDailyTaskManager);
+        var runner = Grasscutter.getThreadPool();
+        runner.submit(() -> this.achievements = Achievements.getByPlayer(this));
+
+        var avatarsLoad = runner.submit(this.getAvatars()::loadFromDatabase);
+        var inventoryLoad = runner.submit(this.getInventory()::loadFromDatabase);
+
+        runner.submit(this.getFriendsList()::loadFromDatabase);
+        runner.submit(this.getMailHandler()::loadFromDatabase);
+        runner.submit(this.getQuestManager()::loadFromDatabase);
+
+        runner.submit(this::loadBattlePassManager);
+        runner.submit(this::loadDailyTaskManager);
+
+        // With asyncLogin off this runs on the one thread that handles every player's packets.
+        // Waiting on the loaded flags forever meant a loader that threw - its exception swallowed
+        // by the pool - or a pool full of stuck tasks froze the whole server. Fail this one login
+        // instead.
+        awaitLoad("avatars", avatarsLoad);
+        awaitLoad("inventory", inventoryLoad);
+
         this.getPlayerProgress().setPlayer(this);
     }
 
+    private static final long LOAD_TIMEOUT_SECONDS = 30;
+
+    private void awaitLoad(String what, java.util.concurrent.Future<?> load) {
+        try {
+            load.get(LOAD_TIMEOUT_SECONDS, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (java.util.concurrent.ExecutionException e) {
+            throw new IllegalStateException(
+                    "Loading " + what + " for uid " + this.getUid() + " failed.", e.getCause());
+        } catch (java.util.concurrent.TimeoutException e) {
+            load.cancel(true);
+            throw new IllegalStateException(
+                    "Loading " + what + " for uid " + this.getUid() + " took over "
+                            + LOAD_TIMEOUT_SECONDS + "s; the load pool may be stuck.");
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted loading " + what + " for uid " + this.getUid());
+        }
+    }
+
     public void onLogin() {
-        if (!session.acceptsGameWork() || !session.ownsAccountLease()) { session.close(); return; }
         // A trial avatar saved into a team (e.g. logging out inside a trial dungeon) has no avatar
         // to build an entity from.
         this.getTeamManager().removeUnownedAvatarsFromTeams();
@@ -1651,7 +1664,8 @@ public class Player implements PlayerHook, FieldFetch {
         this.cookingCompoundManager.onPlayerLogin();
         this.teamManager.onPlayerLogin();
 
-        // Also supports trusted callers outside the token-login component group.
+        // Idempotent, and not merely a null check: the load is submitted to the pool and nothing
+        // waits on it, so skipping here would silently cost the player a day of commissions.
         this.loadDailyTaskManager();
         this.dailyTaskManager.onPlayerLogin();
 
@@ -1689,15 +1703,9 @@ public class Player implements PlayerHook, FieldFetch {
             return;
         }
 
-        if (!session.acceptsGameWork() || !session.ownsAccountLease() || !session.isConnected()) {
-            session.close();
-            return;
-        }
         getServer().registerPlayer(this);
     }
 
-    @Transient private final transient java.util.concurrent.atomic.AtomicBoolean logoutStarted =
-            new java.util.concurrent.atomic.AtomicBoolean();
     @Transient private transient CompletableFuture<Void> scriptDepartureCompletion;
 
     /** Scene departure registers final-save producers without waiting under scene/world monitors. */
@@ -1716,8 +1724,6 @@ public class Player implements PlayerHook, FieldFetch {
     }
 
     public void onLogout() {
-        if (!logoutStarted.compareAndSet(false, true)) return;
-        Throwable failure = null;
         try {
 
             this.getServer().getChatSystem().clearHistoryOnLogout(this);
@@ -1749,27 +1755,15 @@ public class Player implements PlayerHook, FieldFetch {
             PlayerQuitEvent event = new PlayerQuitEvent(this);
             event.call();
         } catch (Throwable e) {
-            failure = e;
+            Grasscutter.getLogger().warn("Player (UID {}) save failure", getUid(), e);
         } finally {
-            try {
-                saveLogoutState();
-            } catch (Throwable saveFailure) {
-                if (failure == null) failure = saveFailure;
-                else if (failure != saveFailure) failure.addSuppressed(saveFailure);
-            } finally {
-                removeFromServer();
-            }
+            Utils.runAll(
+                    "Player (UID " + getUid() + ") logout save",
+                    this::save,
+                    () -> this.getTeamManager().saveAvatars(),
+                    () -> this.getFriendsList().save());
+            removeFromServer();
         }
-        if (failure != null) {
-            if (this.session != null) this.session.quarantineCleanupFailure();
-            Grasscutter.getLogger().warn("Player (UID {}) logout failure", getUid(), failure);
-            throw new IllegalStateException("Player logout persistence did not complete", failure);
-        }
-    }
-
-    protected void saveLogoutState() {
-        new emu.grasscutter.server.ShutdownSequence().run(
-                this::save, () -> this.getTeamManager().saveAvatars(), () -> this.getFriendsList().save());
     }
 
     public void removeFromServer() {

@@ -1222,9 +1222,10 @@ public final class TeamManager extends BasePlayerDataManager {
     }
 
     public void saveAvatars() {
-        var saves = List.copyOf(this.getActiveTeam()).stream()
-                .map(entity -> (Runnable) () -> entity.getAvatar().save()).toArray(Runnable[]::new);
-        new emu.grasscutter.server.ShutdownSequence().run(saves);
+
+        for (EntityAvatar entity : this.getActiveTeam()) {
+            entity.getAvatar().save();
+        }
     }
 
     public void onPlayerLogin() {

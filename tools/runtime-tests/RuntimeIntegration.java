@@ -37,7 +37,9 @@ public final class RuntimeIntegration {
         final List<BasePacket> sent = new CopyOnWriteArrayList<>();
         Sink() { super(Grasscutter.getGameServer()); }
         @Override public void send(BasePacket packet) { sent.add(packet); }
-        @Override public boolean isConnected() { return acceptsGameWork(); }
+        volatile boolean open = true;
+        @Override public boolean isConnected() { return open; }
+        @Override public void close() { open = false; super.close(); }
         @Override public InetSocketAddress getAddress() { return new InetSocketAddress("127.0.0.1", 45000); }
     }
 
@@ -120,7 +122,15 @@ public final class RuntimeIntegration {
             throw timeout;
         }
     }
-    static void flush() throws Exception { DatabaseHelper.flushForLoginHandoff().get(30, TimeUnit.SECONDS); }
+    /** Waits for every accepted database write by taking, then releasing, the writer barrier. */
+    static void flush() throws Exception {
+        var getter = DatabaseHelper.class.getDeclaredMethod("getWriterManager");
+        getter.setAccessible(true);
+        var manager = getter.invoke(null);
+        var acquire = manager.getClass().getDeclaredMethod("acquireBarrier", java.time.Duration.class);
+        acquire.setAccessible(true);
+        ((AutoCloseable) acquire.invoke(manager, java.time.Duration.ofSeconds(30))).close();
+    }
     static void await(java.util.function.BooleanSupplier condition, String message) throws Exception {
         long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(40);
         while (!condition.getAsBoolean()) {
@@ -134,8 +144,8 @@ public final class RuntimeIntegration {
         Sink target = new Sink();
         byte[] body = GetPlayerTokenReq.newBuilder().setAccountUid(account.getId()).setAccountToken(TOKEN).build().toByteArray();
         route(target, PacketOpcodes.GetPlayerTokenReq, body);
-        await(() -> target.getState() == GameSession.SessionState.WAITING_FOR_LOGIN || !target.acceptsGameWork(), "Token login timed out");
-        check(target.acceptsGameWork(), "Token login rejected fixture");
+        await(() -> target.getState() == GameSession.SessionState.WAITING_FOR_LOGIN || !target.open, "Token login timed out");
+        check(target.open, "Token login rejected fixture");
         if (!phase.equals("fresh")) {
             if (target.getPlayer().getAvatars().getAvatarCount() == 0) {
                 logic(() -> {
@@ -162,9 +172,8 @@ public final class RuntimeIntegration {
         return target;
     }
     static void close(Sink target) throws Exception {
-        logic(target::close);
-        target.retireAccountLease().get(40, TimeUnit.SECONDS);
-        check(!target.ownsAccountLease(), "Lease not retired");
+        logic(() -> { target.close(); target.handleClose(); });
+        flush();
         check(!Grasscutter.getGameServer().getPlayers().containsValue(target.getPlayer()), "Closed player retained in roster");
     }
     static TakePlayerLevelRewardRsp claim(int rank) throws Exception {
@@ -204,15 +213,14 @@ public final class RuntimeIntegration {
         Account account = DatabaseHelper.createAccountWithPassword(USER, "disposable-fixture-password");
         check(account != null, "Fixture account creation failed");
         test("credential rotation survives actual BSON round-trip", () -> {
-            account.setToken(TOKEN); DatabaseHelper.updateAccountCredential(account, "token", TOKEN);
+            account.setToken(TOKEN); account.save(); flush();
             check(TOKEN.equals(DatabaseHelper.getAccountById(account.getId()).getToken()), "Token not persisted");
-            check(Objects.equals(account.getPersistenceVersion(), DatabaseHelper.getAccountById(account.getId()).getPersistenceVersion()), "CAS version not persisted");
         });
         test("invalid token cannot admit or create a player", () -> {
             Sink bad = new Sink();
             route(bad, PacketOpcodes.GetPlayerTokenReq, GetPlayerTokenReq.newBuilder().setAccountUid(account.getId()).setAccountToken("wrong").build().toByteArray());
-            await(() -> !bad.acceptsGameWork(), "Bad token not rejected");
-            check(bad.getPlayer() == null && !bad.ownsAccountLease(), "Invalid token acquired player/ownership");
+            await(() -> !bad.open, "Bad token not rejected");
+            check(bad.getPlayer() == null, "Invalid token acquired a player");
             check(DatabaseHelper.getPlayerByAccount(account.getId()) == null, "Invalid token wrote a player");
         });
         test("existing-save fixture token and world login load real components", () -> {
@@ -319,23 +327,15 @@ public final class RuntimeIntegration {
                 check(stored.stream().noneMatch(i -> i.getItemId() == row.getUnlockMaterialId()), "Consumed accessory resurrected");
             }
         });
-        test("duplicate active login joins saves before replacing ownership", () -> {
+        test("relogin after logout loads persisted state", () -> {
             logic(() -> { player.setNickname("PersistedFixture"); player.getQuestGlobalVariables().put(991234, 77); player.save(); });
-            Sink old = session; long generation = old.getAccountSessionGeneration();
+            close(session);
             session = login(DatabaseHelper.getAccountById(account.getId())); player = session.getPlayer();
-            check(!old.acceptsGameWork() && !old.ownsAccountLease(), "Previous owner retained");
-            check(session.getAccountSessionGeneration() > generation, "Generation did not advance");
-            check(player.getNickname().equals("PersistedFixture") && player.getQuestGlobalVariables().get(991234) == 77, "Replacement loaded stale player");
+            check(player.getNickname().equals("PersistedFixture") && player.getQuestGlobalVariables().get(991234) == 77, "Relogin loaded stale player");
             check(Grasscutter.getGameServer().getPlayers().size() == 1, "Duplicate online player");
-            check(player.getRewardedLevels().containsAll(Set.of(2, 4)), "Replacement lost reward markers");
+            check(player.getRewardedLevels().containsAll(Set.of(2, 4)), "Relogin lost reward markers");
             check(!player.getAvatars().getAvatarById(10000007).getTpsWeaponIds().contains(999999)
                     && !player.getTpsLoadout().contains(999999), "Inventory load retained stale TPS equipment");
-        });
-        test("closed generation cannot overwrite acknowledged player state", () -> {
-            Sink old = session; Player retired = player; close(old);
-            retired.setNickname("LateWriteMustNotPersist"); retired.save(); flush();
-            check(DatabaseHelper.getPlayerByUid(retired.getUid()).getNickname().equals("PersistedFixture"), "Late retired write replaced stored player");
-            session = login(DatabaseHelper.getAccountById(account.getId())); player = session.getPlayer();
         });
         test("logout acknowledges final player and item state", () -> {
             checkpoint.put("uid", player.getUid()); checkpoint.put("inventory", inventory(player));
@@ -405,7 +405,7 @@ public final class RuntimeIntegration {
             if (phase.equals("fresh")) {
                 test("unseeded fresh account completes world login", () -> {
                     Account fresh = DatabaseHelper.createAccountWithPassword("fresh_fixture", "disposable-fixture-password");
-                    fresh.setToken(TOKEN); DatabaseHelper.updateAccountCredential(fresh, "token", TOKEN);
+                    fresh.setToken(TOKEN); fresh.save(); flush();
                     session = login(fresh);
                     var home = session.getPlayer().getHome();
                     String homeId = home.getId();

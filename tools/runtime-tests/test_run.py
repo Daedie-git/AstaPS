@@ -34,8 +34,7 @@ CONTRACTS = {
         'output stack overflow rejects exchange without payment',
         'fully consumed material is deleted and does not resurrect',
         'TPS accessories unlock in both acquisition orders and survive material removal',
-        'duplicate active login joins saves before replacing ownership',
-        'closed generation cannot overwrite acknowledged player state',
+        'relogin after logout loads persisted state',
         'logout acknowledges final player and item state'],
     'restart': [START, 'server and Mongo restart preserve player, items and quest variables',
         'TPS reload preserves unlocks and final removal persists clean equipment',
@@ -492,7 +491,7 @@ class ExecuteTests(unittest.TestCase):
     def test_complete_write_restart(self):
         manifest = self.execute(('write', 'restart'))
         self.assertTrue(manifest['mongoRestartVerified'])
-        self.assertEqual(20, manifest['tests'])
+        self.assertEqual(19, manifest['tests'])
 
     def test_actual_resource_manifest_retained(self):
         manifest = self.execute()

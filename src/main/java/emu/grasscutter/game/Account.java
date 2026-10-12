@@ -14,15 +14,6 @@ import org.bson.Document;
 @Entity(value = "accounts", useDiscriminator = false)
 public class Account {
     @Id private String id;
-    @Version private Long persistenceVersion;
-
-    public Long getPersistenceVersion() {
-        return persistenceVersion;
-    }
-
-    public void setPersistenceVersion(Long version) {
-        this.persistenceVersion = version;
-    }
 
     @Indexed(options = @IndexOptions(unique = true))
     @Collation(locale = "simple", caseLevel = true)
@@ -146,18 +137,16 @@ public class Account {
         this.sessionKey = sessionKey;
     }
 
-    public synchronized String generateSessionKey() {
-        String credential = Utils.bytesToHex(Crypto.createSessionKey(32));
-        DatabaseHelper.updateAccountCredential(this, "sessionKey", credential);
-        this.sessionKey = credential;
-        return credential;
+    public String generateSessionKey() {
+        this.sessionKey = Utils.bytesToHex(Crypto.createSessionKey(32));
+        this.save();
+        return this.sessionKey;
     }
 
-    public synchronized String generateV2SessionKey() {
-        String credential = "v2_" + Utils.bytesToHex(Crypto.createSessionKey(32));
-        DatabaseHelper.updateAccountCredential(this, "sessionKey", credential);
-        this.sessionKey = credential;
-        return credential;
+    public String generateV2SessionKey() {
+        this.sessionKey = "v2_" + Utils.bytesToHex(Crypto.createSessionKey(32));
+        this.save();
+        return this.sessionKey;
     }
     
     public boolean verifyPassword(String password) {
@@ -318,34 +307,14 @@ public class Account {
     }
 
     // TODO make unique
-    public synchronized String generateLoginToken() {
-        String credential = Utils.bytesToHex(Crypto.createSessionKey(32));
-        DatabaseHelper.updateAccountCredential(this, "token", credential);
-        this.token = credential;
-        return credential;
+    public String generateLoginToken() {
+        this.token = Utils.bytesToHex(Crypto.createSessionKey(32));
+        this.save();
+        return this.token;
     }
 
-    public synchronized void save() {
+    public void save() {
         DatabaseHelper.saveAccount(this);
-    }
-
-    /** Refresh the whole cached record after a successful scoped update, including credentials. */
-    public synchronized void refreshPersistedState(Account fresh) {
-        if (!Objects.equals(id, fresh.id)) throw new IllegalArgumentException("Account identity mismatch");
-        persistenceVersion = fresh.persistenceVersion;
-        username = fresh.username;
-        password = fresh.password;
-        reservedPlayerId = fresh.reservedPlayerId;
-        email = fresh.email;
-        token = fresh.token;
-        sessionKey = fresh.sessionKey;
-        permissions = fresh.permissions == null ? new ArrayList<>() : new ArrayList<>(fresh.permissions);
-        locale = fresh.locale;
-        banReason = fresh.banReason;
-        banEndTime = fresh.banEndTime;
-        banStartTime = fresh.banStartTime;
-        isBanned = fresh.isBanned;
-        bannedByIp = fresh.bannedByIp;
     }
 
     @PreLoad

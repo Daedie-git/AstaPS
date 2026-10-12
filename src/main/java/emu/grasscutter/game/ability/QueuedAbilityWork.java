@@ -48,8 +48,7 @@ final class QueuedAbilityWork {
         boolean isCurrent() {
             return player != null && world != null && player.getWorld() == world
                 && (scene == null || player.getScene() == scene)
-                && player.getSession() == session
-                && (session == null || session.acceptsGameWork());
+                && player.getSession() == session;
         }
     }
 

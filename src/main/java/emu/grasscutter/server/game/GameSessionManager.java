@@ -12,36 +12,13 @@ import lombok.Getter;
 public class GameSessionManager {
     @Getter private static final DefaultEventLoop logicThread = new DefaultEventLoop();
     private static final ConcurrentHashMap<Ukcp, GameSession> sessions = new ConcurrentHashMap<>();
-    private static volatile boolean stopping;
+    private static volatile boolean closed;
 
+    /** Turns away new connections, so none log in while the server shuts down. */
     public static void closeAdmission() {
-        synchronized (sessions) { stopping = true; }
+        closed = true;
     }
 
-    public static void awaitLogout(java.util.Collection<GameSession> playerSessions) {
-        var snapshot = new java.util.HashSet<>(playerSessions);
-        snapshot.addAll(sessions.values());
-        try {
-            logoutSessions(logicThread, snapshot).get(5, java.util.concurrent.TimeUnit.SECONDS);
-        } catch (InterruptedException interrupted) {
-            Thread.currentThread().interrupt();
-            throw new IllegalStateException("Interrupted while awaiting session logout", interrupted);
-        } catch (java.util.concurrent.ExecutionException | java.util.concurrent.TimeoutException failure) {
-            throw new IllegalStateException("Session logout did not complete", failure);
-        }
-    }
-
-    static java.util.concurrent.CompletableFuture<Void> logoutSessions(
-            java.util.concurrent.Executor executor, java.util.Collection<GameSession> snapshot) {
-        return java.util.concurrent.CompletableFuture.runAsync(() -> {
-            var stages = new java.util.ArrayList<Runnable>();
-            snapshot.forEach(session -> {
-                stages.add(session::close);
-                stages.add(session::handleClose);
-            });
-            new emu.grasscutter.server.ShutdownSequence().run(stages.toArray(Runnable[]::new));
-        }, executor);
-    }
     private static final KcpListener listener =
             new KcpListener() {
             @Override
@@ -64,12 +41,15 @@ public class GameSessionManager {
                     server = Grasscutter.getGameServer();
                 }
 
+                if (closed) {
+                    ukcp.close();
+                    return;
+                }
                 GameSession conversation = new GameSession(server);
 
-                synchronized (sessions) {
-                    if (stopping) { ukcp.close(); return; }
-                    sessions.put(ukcp, conversation);
-                    conversation.onConnected(
+                sessions.put(ukcp, conversation);
+
+                conversation.onConnected(
                         new KcpTunnel() {
                             @Override
                             public InetSocketAddress getAddress() {
@@ -93,18 +73,16 @@ public class GameSessionManager {
                                 return ukcp.srtt();
                             }
                         });
-                }
             }
 
                 @Override
                 public void handleReceive(ByteBuf buf, Ukcp kcp) {
-                    if (stopping) return;
                     var byteData = Utils.byteBufToArray(buf);
                     logicThread.execute(
                             () -> {
                                 try {
                                     var conversation = sessions.get(kcp);
-                                    if (conversation != null && !stopping) {
+                                    if (conversation != null) {
                                         conversation.handleReceive(byteData);
                                     }
                                 } catch (Exception e) {
@@ -120,13 +98,13 @@ public class GameSessionManager {
                 public void handleClose(Ukcp ukcp) {
                     GameSession conversation = sessions.get(ukcp);
                     if (conversation != null) {
+                        sessions.remove(ukcp);
+
                         logicThread.execute(() -> {
                             try {
                                 conversation.handleClose();
                             } catch (Exception e) {
                                 Grasscutter.getLogger().error("Error during session cleanup", e);
-                            } finally {
-                                sessions.remove(ukcp, conversation);
                             }
                         });
                     }

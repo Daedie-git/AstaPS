@@ -9,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -24,11 +23,7 @@ public final class DatabaseWriterManager {
             String name, boolean terminated, int activeAtTimeout, int notStartedTasks) {}
 
     public record ShutdownResult(
-            boolean completed, boolean interrupted, List<PoolShutdownStatus> pools, boolean writeFailed) {
-        public ShutdownResult(boolean completed, boolean interrupted, List<PoolShutdownStatus> pools) {
-            this(completed, interrupted, pools, false);
-        }
-
+            boolean completed, boolean interrupted, List<PoolShutdownStatus> pools) {
         public int activeAtTimeoutTaskCount() {
             return pools.stream().mapToInt(PoolShutdownStatus::activeAtTimeout).sum();
         }
@@ -49,9 +44,6 @@ public final class DatabaseWriterManager {
     /** Only queued successors count; heads go straight to their pool, which bounds them. */
     private int orderedOutstanding;
     private int synchronousActive;
-    private final LinkedHashSet<CompletableFuture<Void>> synchronousPending = new LinkedHashSet<>();
-    private Throwable firstWriteFailure;
-    private final Map<Object, Throwable> keyedWriteFailures = new HashMap<>();
     private boolean accepting = true;
     private boolean forceStopping;
     private boolean barrierPending;
@@ -139,13 +131,8 @@ public final class DatabaseWriterManager {
      * recursively without waiting for its own outer write to drain.
      */
     <T> T callSynchronous(Supplier<T> operation) {
-        return callSynchronous(null, operation);
-    }
-
-    <T> T callSynchronous(Object entityKey, Supplier<T> operation) {
         Objects.requireNonNull(operation, "operation");
         boolean nested;
-        var completion = new CompletableFuture<Void>();
         lifecycle.lock();
         try {
             if (forceStopping) {
@@ -155,7 +142,6 @@ public final class DatabaseWriterManager {
             if (!nested) {
                 requireAdmission();
                 synchronousActive++;
-                synchronousPending.add(completion);
             }
         } finally {
             lifecycle.unlock();
@@ -165,37 +151,12 @@ public final class DatabaseWriterManager {
         int previousDepth = writeDepth.get();
         writeDepth.set(previousDepth + 1);
         try {
-            var result = operation.get();
-            lifecycle.lock();
-            try {
-                if (entityKey != null) keyedWriteFailures.remove(entityKey);
-            } finally {
-                lifecycle.unlock();
-            }
-            completion.complete(null);
-            return result;
-        } catch (RuntimeException | Error failure) {
-            boolean conflict = failure instanceof dev.morphia.VersionMismatchException
-                    || failure instanceof AccountWriteConflictException;
-            lifecycle.lock();
-            try {
-                if (!conflict) {
-                    if (entityKey != null) keyedWriteFailures.put(entityKey, failure);
-                    else if (firstWriteFailure == null) firstWriteFailure = failure;
-                }
-            } finally {
-                lifecycle.unlock();
-            }
-            // A CAS rejection acknowledges that no write occurred; its caller still sees the conflict.
-            if (conflict) completion.complete(null);
-            else completion.completeExceptionally(failure);
-            throw failure;
+            return operation.get();
         } finally {
             restoreWriteDepth(previousDepth);
             lifecycle.lock();
             try {
                 synchronousActive--;
-                synchronousPending.remove(completion);
                 changed.signalAll();
             } finally {
                 lifecycle.unlock();
@@ -204,31 +165,11 @@ public final class DatabaseWriterManager {
     }
 
     void runSynchronous(Runnable operation) {
-        runSynchronous(null, operation);
-    }
-
-    void runSynchronous(Object entityKey, Runnable operation) {
-        callSynchronous(entityKey,
+        callSynchronous(
                 () -> {
                     operation.run();
                     return null;
                 });
-    }
-
-    /** Acknowledges the pre-call write set without closing admission to unrelated players. */
-    public CompletableFuture<Void> flush() {
-        lifecycle.lock();
-        try {
-            if (firstWriteFailure != null) return CompletableFuture.failedFuture(firstWriteFailure);
-            if (!keyedWriteFailures.isEmpty()) {
-                return CompletableFuture.failedFuture(keyedWriteFailures.values().iterator().next());
-            }
-            var completions = new ArrayList<CompletableFuture<Void>>(synchronousPending);
-            outstanding.forEach(task -> completions.add(task.completion));
-            return CompletableFuture.allOf(completions.toArray(CompletableFuture[]::new));
-        } finally {
-            lifecycle.unlock();
-        }
     }
 
     /** Freezes external admission and drains accepted writes against one deadline. */
@@ -380,7 +321,6 @@ public final class DatabaseWriterManager {
         private final Runnable operation;
         private boolean running;
         private boolean cancelled;
-        private final CompletableFuture<Void> completion = new CompletableFuture<>();
 
         private WriteTask(ExecutorService executor, Object entityKey, Runnable operation) {
             this.executor = executor;
@@ -409,12 +349,6 @@ public final class DatabaseWriterManager {
                 WriteTask next = null;
                 lifecycle.lock();
                 try {
-                    if (entityKey != null) {
-                        if (failure == null) keyedWriteFailures.remove(entityKey);
-                        else keyedWriteFailures.put(entityKey, failure);
-                    } else if (failure != null && firstWriteFailure == null) {
-                        firstWriteFailure = failure;
-                    }
                     outstanding.remove(this);
                     if (entityKey != null) {
                         var queue = ordered.get(entityKey);
@@ -436,10 +370,7 @@ public final class DatabaseWriterManager {
                     }
                 }
             }
-            if (failure == null) completion.complete(null);
-            else completion.completeExceptionally(failure);
-            // Async failures belong to the acknowledgement ledger, including caller-run writes.
-            if (failure instanceof Error error) throw error;
+            rethrow(failure);
         }
     }
 
@@ -447,9 +378,6 @@ public final class DatabaseWriterManager {
         if (task.running || task.cancelled) return null;
         WriteTask next = null;
         task.cancelled = true;
-        var failure = new RejectedExecutionException("Accepted database write cancelled during shutdown");
-        if (firstWriteFailure == null) firstWriteFailure = failure;
-        task.completion.completeExceptionally(failure);
         outstanding.remove(task);
         if (task.entityKey != null) {
             var queue = ordered.get(task.entityKey);
@@ -498,7 +426,7 @@ public final class DatabaseWriterManager {
                 }
                 if (shutdownResult != null) {
                     return interrupted && !shutdownResult.interrupted()
-                            ? new ShutdownResult(shutdownResult.completed(), true, shutdownResult.pools(), shutdownResult.writeFailed())
+                            ? new ShutdownResult(shutdownResult.completed(), true, shutdownResult.pools())
                             : shutdownResult;
                 }
                 shutdownInProgress = true;
@@ -554,7 +482,7 @@ public final class DatabaseWriterManager {
                                         status.activeAtTimeout(),
                                         status.notStartedTasks()));
                     }
-                    shutdownResult = new ShutdownResult(false, interrupted, List.copyOf(statuses), firstWriteFailure != null || !keyedWriteFailures.isEmpty());
+                    shutdownResult = new ShutdownResult(false, interrupted, List.copyOf(statuses));
                 } else {
                     shutdownResult = snapshot(true, false);
                 }
@@ -588,7 +516,7 @@ public final class DatabaseWriterManager {
         if (barrierOwner != null) {
             statuses.add(new PoolShutdownStatus("maintenance", false, 1, 0));
         }
-        return new ShutdownResult(completed && firstWriteFailure == null && keyedWriteFailures.isEmpty(), interrupted, List.copyOf(statuses), firstWriteFailure != null || !keyedWriteFailures.isEmpty());
+        return new ShutdownResult(completed, interrupted, List.copyOf(statuses));
     }
 
     private ShutdownResult unlockedShutdownFailure(boolean interrupted) {

@@ -32,7 +32,7 @@ class ItemPersistenceServiceTest {
             service.delete(item);
             assertFalse(deleted.await(100, TimeUnit.MILLISECONDS), "delete overtook serialized save");
             release.countDown();
-            manager.flush().get(2, TimeUnit.SECONDS);
+            assertTrue(manager.shutdown(Duration.ofSeconds(2)).completed());
             assertTrue(records.isEmpty(), "consumed item resurrected on reload");
         } finally {
             release.countDown();
@@ -61,7 +61,7 @@ class ItemPersistenceServiceTest {
             service.delete(item);
             assertSame(id, item.ensurePersistenceId());
             release.countDown();
-            manager.flush().get(2, TimeUnit.SECONDS);
+            assertTrue(manager.shutdown(Duration.ofSeconds(2)).completed());
             assertTrue(records.isEmpty());
         } finally {
             release.countDown();
