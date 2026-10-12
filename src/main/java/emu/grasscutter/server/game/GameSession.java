@@ -387,7 +387,7 @@ public class GameSession implements GameSessionManager.KcpChannel {
                     // Never registered: a login that did not finish. Its state is not the account's,
                     // so leave the world without saving.
                     detachPlayer();
-                    player.onLogout(false);
+                    player.retireUnfinished();
                 }
             } finally {
                 try {

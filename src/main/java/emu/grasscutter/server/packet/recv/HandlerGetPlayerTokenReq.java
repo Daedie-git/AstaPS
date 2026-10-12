@@ -173,7 +173,7 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
                 var player = this.session.getPlayer();
                 if (player != null && Grasscutter.getGameServer().getPlayers().get(player.getUid()) != player) {
                     this.session.detachPlayer();
-                    player.onLogout(false);
+                    player.retireUnfinished();
                 }
                 this.session.close();
             };

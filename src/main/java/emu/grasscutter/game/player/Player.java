@@ -1780,7 +1780,7 @@ public class Player implements PlayerHook, FieldFetch {
         }
         getServer().registerPlayer(this);
         // Torn down while registering: undo, so the account is never held by a closed player.
-        if (loggedOut.get()) getServer().getPlayers().remove(getUid(), this);
+        if (loggedOut.get() || retired) getServer().getPlayers().remove(getUid(), this);
     }
 
 
@@ -1797,6 +1797,27 @@ public class Player implements PlayerHook, FieldFetch {
         return this.retired;
     }
 
+    /** Held while a write is admitted and while retiring, so no write slips past the final snapshot. */
+    @Transient private final transient Object writeGate = new Object();
+
+    public Object writeGate() {
+        return this.writeGate;
+    }
+
+    /**
+     * Retires a player that never finished logging in and tears it down without saving. A native
+     * intro may still hold it on another thread; the teardown then waits for that on the logic
+     * thread instead of blocking it.
+     */
+    public void retireUnfinished() {
+        synchronized (this.writeGate) {
+            this.retired = true;
+        }
+        var background = this.backgroundLogin;
+        if (background.isDone()) onLogout(false);
+        else background.thenRunAsync(() -> onLogout(false), emu.grasscutter.server.game.GameSessionManager.getLogicThread());
+    }
+
     public void onLogout() {
         onLogout(true);
     }
@@ -1809,7 +1830,11 @@ public class Player implements PlayerHook, FieldFetch {
         // A kicked duplicate login is logged out by the new login, then again when its session
         // closes; a second run would save this stale object over the new session's progress.
         if (!loggedOut.compareAndSet(false, true)) return;
-        if (!save) this.retired = true;
+        if (!save) {
+            synchronized (this.writeGate) {
+                this.retired = true;
+            }
+        }
         try {
 
             this.getServer().getChatSystem().clearHistoryOnLogout(this);
@@ -1848,9 +1873,13 @@ public class Player implements PlayerHook, FieldFetch {
                     this::save,
                     () -> this.getTeamManager().saveAvatars(),
                     () -> this.getFriendsList().save(),
-                    () -> this.retired = true,
-                    () -> emu.grasscutter.server.game.PendingLogoutSaves.record(
-                            getAccountId(), DatabaseHelper.whenPlayerWritesDone(getUid())));
+                    () -> {
+                        synchronized (this.writeGate) {
+                            this.retired = true;
+                            emu.grasscutter.server.game.PendingLogoutSaves.record(
+                                    getAccountId(), DatabaseHelper.whenPlayerWritesDone(getUid()));
+                        }
+                    });
             removeFromServer();
         }
     }

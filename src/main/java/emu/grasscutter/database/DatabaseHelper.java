@@ -304,20 +304,37 @@ public final class DatabaseHelper {
                 }
             };
 
+    /** The player object a document belongs to, or null. A shared home is no one player's. */
+    static Player owningPlayer(Object object) {
+        if (object == null || object instanceof GameHome) return null;
+        if (object instanceof Player self) return self;
+        var field = PLAYER_FIELDS.get(object.getClass());
+        try {
+            return field == null ? null : (Player) field.get(object);
+        } catch (IllegalAccessException e) {
+            return null;
+        }
+    }
+
     /** Whether this belongs to a player object that has logged out; its writes are stale. */
     static boolean fromRetiredPlayer(Object object) {
-        if (object == null) return false;
-        Player player = object instanceof Player self ? self : null;
-        var field = player == null ? PLAYER_FIELDS.get(object.getClass()) : null;
-        try {
-            if (field != null) player = (Player) field.get(object);
-        } catch (IllegalAccessException e) {
-            return false;
-        }
+        var player = owningPlayer(object);
         if (player == null || !player.isRetired()) return false;
         Grasscutter.getLogger().debug("Dropped a write of {} from logged-out uid {}.",
                 object.getClass().getSimpleName(), player.getUid());
         return true;
+    }
+
+    /** Runs the submission unless the owner has retired, atomically with its retirement. */
+    private static void admit(Object object, Runnable submit) {
+        var player = owningPlayer(object);
+        if (player == null) {
+            submit.run();
+            return;
+        }
+        synchronized (player.writeGate()) {
+            if (!fromRetiredPlayer(object)) submit.run();
+        }
     }
 
     static PlayerOwner ownerOf(Object object) {
@@ -517,7 +534,11 @@ public final class DatabaseHelper {
      * @param object The object to save.
      */
     public static void saveGameAsync(Object object) {
-        if (object == null || fromRetiredPlayer(object)) return;
+        if (object == null) return;
+        admit(object, () -> submitGameSave(object));
+    }
+
+    private static void submitGameSave(Object object) {
 
         // The three types are unrelated, so the order of these tests carries no meaning.
         if (object instanceof GameItem gameItem) {
@@ -894,7 +915,7 @@ public final class DatabaseHelper {
     }
 
     public static void deleteItem(GameItem item) {
-        if (!fromRetiredPlayer(item)) itemWrites.delete(item);
+        admit(item, () -> itemWrites.delete(item));
     }
 
     /**
@@ -932,9 +953,8 @@ public final class DatabaseHelper {
     }
 
     public static void deleteFriendship(Friendship friendship) {
-        if (fromRetiredPlayer(friendship)) return;
-        databaseWriters.submitOwned(
-                eventExecutor, ownerOf(friendship), () -> DatabaseManager.getGameDatastore().delete(friendship));
+        admit(friendship, () -> databaseWriters.submitOwned(
+                eventExecutor, ownerOf(friendship), () -> DatabaseManager.getGameDatastore().delete(friendship)));
     }
 
     public static Friendship getReverseFriendship(Friendship friendship) {
@@ -1011,9 +1031,8 @@ public final class DatabaseHelper {
     }
 
     public static void deleteQuest(GameMainQuest quest) {
-        if (fromRetiredPlayer(quest)) return;
-        databaseWriters.submitOwned(
-                eventExecutor, ownerOf(quest), () -> DatabaseManager.getGameDatastore().delete(quest));
+        admit(quest, () -> databaseWriters.submitOwned(
+                eventExecutor, ownerOf(quest), () -> DatabaseManager.getGameDatastore().delete(quest)));
     }
 
     public static GameHome getHomeByUid(int id) {
@@ -1045,8 +1064,7 @@ public final class DatabaseHelper {
     }
 
     public static void saveDailyTaskManager(emu.grasscutter.game.dailytask.DailyTaskManager manager) {
-        if (fromRetiredPlayer(manager)) return;
-        runSynchronousDatabaseWrite(() -> DatabaseManager.getGameDatastore().save(manager));
+        admit(manager, () -> runSynchronousDatabaseWrite(() -> DatabaseManager.getGameDatastore().save(manager)));
     }
 
     public static BattlePassManager loadBattlePass(Player player) {
