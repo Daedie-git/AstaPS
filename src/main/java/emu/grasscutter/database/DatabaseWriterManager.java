@@ -9,6 +9,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -321,6 +322,8 @@ public final class DatabaseWriterManager {
         private final Runnable operation;
         private boolean running;
         private boolean cancelled;
+        /** Completes when this write has run (successfully or not) or was cancelled. */
+        final CompletableFuture<Void> done = new CompletableFuture<>();
 
         private WriteTask(ExecutorService executor, Object entityKey, Runnable operation) {
             this.executor = executor;
@@ -361,6 +364,7 @@ public final class DatabaseWriterManager {
                 } finally {
                     lifecycle.unlock();
                 }
+                done.complete(null);
                 if (next != null) {
                     try {
                         dispatch(next);
@@ -379,6 +383,7 @@ public final class DatabaseWriterManager {
         WriteTask next = null;
         task.cancelled = true;
         outstanding.remove(task);
+        task.done.complete(null);
         if (task.entityKey != null) {
             var queue = ordered.get(task.entityKey);
             if (queue.size() > 1) orderedOutstanding--;
@@ -389,6 +394,16 @@ public final class DatabaseWriterManager {
         }
         changed.signalAll();
         return next;
+    }
+
+    /** Completes once every write accepted so far has run or been cancelled; later writes are not included. */
+    CompletableFuture<Void> whenSubmittedDone() {
+        lifecycle.lock();
+        try {
+            return CompletableFuture.allOf(outstanding.stream().map(task -> task.done).toArray(CompletableFuture[]::new));
+        } finally {
+            lifecycle.unlock();
+        }
     }
 
     /** Stops admission and drains async, ordered, caller-run and synchronous writes. */

@@ -251,6 +251,11 @@ public final class DatabaseHelper {
         databaseWriters.submit(executor, task);
     }
 
+    /** Completes once every write submitted so far has run (successfully or not). */
+    public static java.util.concurrent.CompletableFuture<Void> whenSubmittedWritesDone() {
+        return databaseWriters.whenSubmittedDone();
+    }
+
     public static DatabaseWriterManager.ShutdownResult shutdownWriters(Duration timeout) {
         return databaseWriters.shutdown(timeout);
     }

@@ -17,6 +17,18 @@ class PlayerLogoutSaveTest {
         assertEquals(1, player.removals);
     }
 
+    @Test
+    void secondLogoutOfTheSamePlayerSavesNothing() {
+        var player = new FailingPlayer();
+
+        player.onLogout();
+        player.onLogout();
+
+        assertEquals(1, player.saves);
+        assertEquals(1, player.friends.saves);
+        assertEquals(1, player.removals);
+    }
+
     private static final class FailingPlayer extends Player {
         final RecordingFriends friends = new RecordingFriends(this);
         int saves;

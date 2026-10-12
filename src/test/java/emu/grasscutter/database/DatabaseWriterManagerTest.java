@@ -218,6 +218,43 @@ class DatabaseWriterManagerTest {
         }
     }
 
+    @Test
+    void submittedWritesFutureCoversEarlierWritesOnly() throws Exception {
+        var fixture = new Fixture();
+        var release = new CountDownLatch(1);
+        var later = new CountDownLatch(1);
+        try {
+            var pool = fixture.pools.get("default");
+            Runnable blocked = () -> {
+                try {
+                    release.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            };
+            fixture.manager.submitOrderedUncapped(pool, "key", blocked);
+            // A queued successor and a failing write count too.
+            fixture.manager.submitOrderedUncapped(pool, "key", () -> { throw new IllegalStateException("write failed"); });
+            var earlier = fixture.manager.whenSubmittedDone();
+            fixture.manager.submit(fixture.pools.get("item"), () -> {
+                try {
+                    later.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            });
+
+            assertFalse(earlier.isDone());
+            release.countDown();
+            earlier.get(2, TimeUnit.SECONDS);
+            assertFalse(fixture.manager.whenSubmittedDone().isDone(), "the later write is still running");
+        } finally {
+            release.countDown();
+            later.countDown();
+            fixture.close();
+        }
+    }
+
     private static final class Fixture implements AutoCloseable {
         final LinkedHashMap<String, ExecutorService> pools = new LinkedHashMap<>();
         final DatabaseWriterManager manager;

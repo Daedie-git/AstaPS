@@ -9,6 +9,7 @@ import emu.grasscutter.net.packet.*;
 import emu.grasscutter.server.event.game.PlayerCreationEvent;
 import emu.grasscutter.server.game.GameSession;
 import emu.grasscutter.server.game.GameSessionManager;
+import emu.grasscutter.server.game.PendingLogoutSaves;
 import emu.grasscutter.server.game.GameSession.SessionState;
 import emu.grasscutter.net.proto.GetPlayerTokenReqOuterClass.GetPlayerTokenReq;
 import emu.grasscutter.net.proto.RetcodeOuterClass.Retcode;
@@ -18,6 +19,7 @@ import emu.grasscutter.utils.helpers.ByteHelper;
 import java.nio.ByteBuffer;
 import java.security.Signature;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import javax.crypto.Cipher;
 
 @Opcodes(PacketOpcodes.GetPlayerTokenReq)
@@ -178,8 +180,31 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
         event.call();
 
         var playerClass = event.getPlayerClass();
-        login.offLogic(() -> findPlayer(login, playerClass));
+        // Read the player back only after their last logout's saves have landed, or a quick
+        // reconnect loads the state from before them.
+        var pending = PendingLogoutSaves.get(login.accountId());
+        if (pending == null || pending.isDone()) {
+            login.offLogic(() -> findPlayer(login, playerClass));
+            return;
+        }
+        pending.copy()
+                .orTimeout(LOGOUT_SAVE_WAIT_SECONDS, TimeUnit.SECONDS)
+                .whenCompleteAsync(
+                        (ignored, timedOut) -> {
+                            if (timedOut != null) {
+                                Grasscutter.getLogger()
+                                        .warn("Refused login for account '{}': its last logout is still saving.",
+                                                login.accountId());
+                                login.close();
+                                return;
+                            }
+                            login.offLogic(() -> findPlayer(login, playerClass));
+                        },
+                        GameSessionManager.getLogicThread());
     }
+
+    /** How long a login waits for the account's previous logout saves before refusing. */
+    private static final int LOGOUT_SAVE_WAIT_SECONDS = 15;
 
     /** Database: finds or creates the player and applies an IP ban. */
     private static void findPlayer(Login login, Class<? extends Player> playerClass) {

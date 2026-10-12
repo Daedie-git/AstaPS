@@ -1707,7 +1707,13 @@ public class Player implements PlayerHook, FieldFetch {
     }
 
 
+    @Transient private final transient java.util.concurrent.atomic.AtomicBoolean loggedOut =
+            new java.util.concurrent.atomic.AtomicBoolean();
+
     public void onLogout() {
+        // A kicked duplicate login is logged out by the new login, then again when its session
+        // closes; a second run would save this stale object over the new session's progress.
+        if (!loggedOut.compareAndSet(false, true)) return;
         try {
 
             this.getServer().getChatSystem().clearHistoryOnLogout(this);
@@ -1745,7 +1751,9 @@ public class Player implements PlayerHook, FieldFetch {
                     "Player (UID " + getUid() + ") logout save",
                     this::save,
                     () -> this.getTeamManager().saveAvatars(),
-                    () -> this.getFriendsList().save());
+                    () -> this.getFriendsList().save(),
+                    () -> emu.grasscutter.server.game.PendingLogoutSaves.record(
+                            getAccountId(), DatabaseHelper.whenSubmittedWritesDone()));
             removeFromServer();
         }
     }
