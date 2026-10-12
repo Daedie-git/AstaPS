@@ -22,7 +22,6 @@ public class BossChestInteractHandler implements ChestInteractHandler {
 
     public boolean onInteract(GadgetChest chest, Player player, boolean useCondensedResin) {
         var blossomManager = player.getScene().getBlossomManager();
-        boolean managedBlossom = blossomManager.hasRewardChest(chest.getGadget());
         var blossomRewards = blossomManager.onReward(player, chest.getGadget(), useCondensedResin);
         if (blossomRewards != null) {
             player.getInventory().addItems(blossomRewards, ActionReason.OpenWorldBossChest);
@@ -33,9 +32,6 @@ public class BossChestInteractHandler implements ChestInteractHandler {
         if (blossomManager.hasRewardChest(chest.getGadget())) {
             return false;
         }
-
-        // Failed ley-line payment/reward is not a request for a scripted boss reward.
-        if (managedBlossom) return false;
 
         var worldDataManager = chest.getGadget().getScene().getWorld().getServer().getWorldDataSystem();
         var monster =

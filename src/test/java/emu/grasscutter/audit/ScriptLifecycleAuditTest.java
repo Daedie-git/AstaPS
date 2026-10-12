@@ -115,59 +115,6 @@ public class ScriptLifecycleAuditTest {
         assertTrue(scripts.getCachedGroupInstances().isEmpty());
     }
 
-    @Test void departureBoundaryKeepsWriteAdmissionOpenUntilFinalSave() throws Exception {
-        var field = ScriptLoader.class.getDeclaredField("scriptLib"); field.setAccessible(true);
-        var original = field.get(null); field.set(null, new ScriptLib());
-        var scripts = scripts(BlockedScripts.class); scripts.events = null;
-        scripts.entered = new CountDownLatch(1); scripts.release = new CountDownLatch(1);
-        var scene = allocate(FencedSavingScene.class); scene.scripts = scripts; set(scripts, "scene", scene);
-        set(scene, "accepted", new CopyOnWriteArrayList<Integer>());
-        var player = allocate(SameSceneTransferAuditTest.QuietPlayer.class);
-        scripts.instance = new SceneGroupInstance(new SceneGroup(), player);
-        scripts.instance.getCachedVariables().put("late", 1);
-        scripts.getCachedGroupInstances().put(1, scripts.instance);
-        var team = allocate(emu.grasscutter.game.player.TeamManager.class);
-        set(team, "avatars", new ArrayList<>()); set(team, "gadgets", Set.of()); set(player, "teamManager", team);
-        var world = allocate(World.class); set(scene, "world", world);
-        var scenes = new it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap<Scene>();
-        scenes.put(3, scene); set(world, "scenes", scenes);
-        set(scene, "players", new ArrayList<>(List.of(player))); set(scene, "entities", new HashMap<>());
-        set(scene, "scriptManager", scripts); set(player, "scene", scene);
-        var gate = Class.forName("emu.grasscutter.game.world.ScenePlayerEntryGate").getDeclaredConstructor();
-        gate.setAccessible(true); set(scene, "playerEntryCallbacks", gate.newInstance());
-        var event = scripts.callEvent(new ScriptArgs(1, EventType.EVENT_GROUP_LOAD));
-        try {
-            assertTrue(scripts.entered.await(3, TimeUnit.SECONDS));
-            scene.saveGroups(); // Earlier writes can already be flushed while Lua is blocked.
-            CompletableFuture<Void> departure;
-            synchronized (scene) {
-                departure = scene.removePlayerWithCompletion(player);
-                assertFalse(departure.isDone(), "Removal must return while Lua is still blocked");
-            }
-            assertSame(departure, player.getScriptDepartureCompletion());
-            var retirement = departure.thenRun(() -> scene.retired = true);
-            assertFalse(retirement.isDone(), "Retirement must wait for the final script save submission");
-            scripts.release.countDown();
-            retirement.get(3, TimeUnit.SECONDS);
-            assertEquals(2, scene.accepted.getLast(), "Fake writer must accept the late snapshot before retirement");
-            assertEquals(1, scene.accepted.stream().filter(value -> value == 2).count());
-            assertTrue(scene.retired);
-        } finally {
-            scripts.release.countDown(); event.get(3, TimeUnit.SECONDS); field.set(null, original);
-        }
-    }
-
-    public static class FencedSavingScene extends SavingScene {
-        public FencedSavingScene() { super(); }
-        volatile boolean retired;
-        List<Integer> accepted;
-        @Override public int getId() { return 3; }
-        @Override public void saveGroups() {
-            if (!retired) scripts.getCachedGroupInstances().values().forEach(group ->
-                    accepted.add(group.getCachedVariables().getOrDefault("late", 0)));
-        }
-    }
-
     static TimerScripts scripts() { return scripts(TimerScripts.class); }
     static <T extends TimerScripts> T scripts(Class<T> type) {
         var scripts = allocate(type);

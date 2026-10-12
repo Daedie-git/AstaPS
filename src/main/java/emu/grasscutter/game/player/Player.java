@@ -1706,22 +1706,6 @@ public class Player implements PlayerHook, FieldFetch {
         getServer().registerPlayer(this);
     }
 
-    @Transient private transient CompletableFuture<Void> scriptDepartureCompletion;
-
-    /** Scene departure registers final-save producers without waiting under scene/world monitors. */
-    public synchronized void recordScriptDeparture(CompletableFuture<Void> completion) {
-        scriptDepartureCompletion = scriptDepartureCompletion == null
-                ? completion : CompletableFuture.allOf(scriptDepartureCompletion, completion);
-    }
-
-    /**
-     * Call after logout has removed the player from its scenes. Join outside scene/logic monitors
-     * before retiring owned write admission, then flush acknowledged persistence.
-     */
-    public synchronized CompletableFuture<Void> getScriptDepartureCompletion() {
-        return scriptDepartureCompletion == null
-                ? CompletableFuture.completedFuture(null) : scriptDepartureCompletion;
-    }
 
     public void onLogout() {
         try {

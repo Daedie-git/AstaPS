@@ -50,7 +50,6 @@ public class BlossomManager {
     public void recycleGadgetEntity(List<GameEntity> entities) {
         for (var entity : entities) {
             if (entity instanceof EntityGadget gadget) {
-                expireRewardChest(gadget);
                 createdEntity.remove(gadget);
             }
         }
@@ -220,15 +219,6 @@ public class BlossomManager {
 
     /** Called once the reward chest is fully claimed; ignores chests this manager doesn't own. */
     public void retireChest(EntityGadget chest) {
-        retireChest(chest, true);
-    }
-
-    /** Expiration removes reward backing without marking an unclaimed spawn consumed. */
-    public void expireRewardChest(EntityGadget chest) {
-        retireChest(chest, false);
-    }
-
-    private void retireChest(EntityGadget chest, boolean consumed) {
         synchronized (activeChests) {
             var it = activeChests.iterator();
             while (it.hasNext()) {
@@ -236,7 +226,7 @@ public class BlossomManager {
                 if (active.getChest() == chest) {
                     it.remove();
                     recycleGadgetEntity(List.of(active.getGadget()));
-                    if (consumed) blossomConsumed.add(active.getGadget().getSpawnEntry());
+                    blossomConsumed.add(active.getGadget().getSpawnEntry());
                     return;
                 }
             }

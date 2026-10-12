@@ -245,12 +245,6 @@ public class Scene {
         this.playerEntryCallbacks.enter(player.getUid());
     }
 
-    /** Nonblocking departure; completion covers all script final saves recorded for this player. */
-    public synchronized java.util.concurrent.CompletableFuture<Void> removePlayerWithCompletion(Player player) {
-        removePlayer(player);
-        return player.getScriptDepartureCompletion();
-    }
-
     public synchronized void removePlayer(Player player) {
 
         if (this.getChallenge() != null && this.getChallenge().inProgress()) {
@@ -274,7 +268,7 @@ public class Scene {
                 .forEach(entityVehicle -> this.removeEntity(entityVehicle, VisionType.VisionType_VISION_REMOVE));
 
         if (this.getPlayerCount() <= 0 && !this.dontDestroyWhenEmpty) {
-            player.recordScriptDeparture(this.getScriptManager().onDestroyAsync());
+            this.getScriptManager().onDestroy();
             this.getWorld().deregisterScene(this);
         }
 
@@ -1629,7 +1623,12 @@ public class Scene {
         }
     }
 
+    /**
+     * Group instances are stored per host and group and every scene loads them, so only open-world
+     * progress is saved; a dungeon's end state would come back on its next run.
+     */
     public void saveGroups() {
+        if (this.getSceneType() != SceneType.SCENE_WORLD) return;
         this.getScriptManager().getCachedGroupInstances().values().forEach(SceneGroupInstance::save);
     }
 }

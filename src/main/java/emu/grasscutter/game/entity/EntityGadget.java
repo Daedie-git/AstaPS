@@ -319,9 +319,7 @@ public class EntityGadget extends EntityBaseGadget {
         } catch (Throwable ignored) {
         }
 
-        var content = getContent();
-        if (content != null && !content.canInteract(player, interactReq)) return;
-        boolean shouldDelete = content != null && content.onInteract(player, interactReq);
+        boolean shouldDelete = this.getContent() != null && this.getContent().onInteract(player, interactReq);
         if (!(this.getContent() instanceof emu.grasscutter.game.entity.gadget.CreditsOwnInteraction)) {
             creditInteraction(player);
         }
@@ -337,7 +335,6 @@ public class EntityGadget extends EntityBaseGadget {
 
     @Override
     public void onCreate() {
-        if (getContent() != null) getContent().onCreate();
         try {
             emu.grasscutter.game.world.AndriusTrialStartHelper.onGadgetCreated(this);
         } catch (Throwable ignored) {
@@ -355,7 +352,6 @@ public class EntityGadget extends EntityBaseGadget {
 
     @Override
     public void onRemoved() {
-        getScene().getBlossomManager().expireRewardChest(this);
         super.onRemoved();
         if (!children.isEmpty()) {
             getScene().removeEntities(children, VisionTypeOuterClass.VisionType.VisionType_VISION_REMOVE);
