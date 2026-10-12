@@ -41,6 +41,13 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
     private static final java.util.Set<GameSession> LOGGING_IN =
             java.util.concurrent.ConcurrentHashMap.newKeySet();
 
+    /**
+     * Each account's newest login. A later login for the account supersedes an earlier one still
+     * under way, so two reconnects can never both load the account.
+     */
+    private static final java.util.Map<String, Login> CURRENT =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
     private static final java.util.concurrent.atomic.AtomicInteger LOGIN_THREADS =
             new java.util.concurrent.atomic.AtomicInteger();
 
@@ -96,6 +103,12 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
         /** Ends this login, letting the session start another. */
         void done() {
             LOGGING_IN.remove(this.session);
+            CURRENT.remove(this.accountId, this);
+        }
+
+        /** Whether a later login for the same account has not taken over from this one. */
+        boolean current() {
+            return CURRENT.get(this.accountId) == this;
         }
 
         void close() {
@@ -146,12 +159,25 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
             return;
         }
         var authenticated = account;
-        login.onLogic(() -> takeOver(login, authenticated));
+        login.onLogic(() -> takeOver(login, authenticated, false));
     }
 
-    /** Game state: replaces an earlier session of the same account and checks the player limit. */
-    private static void takeOver(Login login, emu.grasscutter.game.Account account) {
+    /**
+     * Game state: replaces an earlier session of the same account and checks the player limit.
+     * Runs again after waiting for the account's last logout saves, as the account may have
+     * changed hands meanwhile.
+     */
+    private static void takeOver(Login login, emu.grasscutter.game.Account account, boolean resumed) {
         var session = login.session();
+        if (resumed) {
+            if (!login.current()) {
+                login.close();
+                return;
+            }
+        } else {
+            var previous = CURRENT.put(login.accountId(), login);
+            if (previous != null && previous != login) previous.close();
+        }
         session.setAccount(account);
 
         boolean kicked = false;
@@ -159,8 +185,14 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
         if (exists != null) {
             var existsSession = exists.getSession();
             if (existsSession != session) {
-                exists.onLogout();
-                existsSession.close();
+                if (existsSession == null) {
+                    exists.onLogout();
+                } else {
+                    // Close fully now, not when the transport reports it: until then the old
+                    // session's queued packets would still change and save the old player.
+                    existsSession.close();
+                    existsSession.handleClose();
+                }
                 Grasscutter.getLogger()
                     .warn("Player {} was kicked due to duplicated login", account.getUsername());
                 kicked = true;
@@ -176,18 +208,11 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
             }
         }
 
-        var event = new PlayerCreationEvent(session, Player.class);
-        event.call();
-
-        var playerClass = event.getPlayerClass();
         // Read the player back only after their last logout's saves have landed, or a quick
         // reconnect loads the state from before them.
         var pending = PendingLogoutSaves.get(login.accountId());
-        if (pending == null || pending.isDone()) {
-            login.offLogic(() -> findPlayer(login, playerClass));
-            return;
-        }
-        pending.copy()
+        if (pending != null && !pending.isDone()) {
+            pending.copy()
                 .orTimeout(LOGOUT_SAVE_WAIT_SECONDS, TimeUnit.SECONDS)
                 .whenCompleteAsync(
                         (ignored, timedOut) -> {
@@ -198,9 +223,17 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
                                 login.close();
                                 return;
                             }
-                            login.offLogic(() -> findPlayer(login, playerClass));
+                            login.onLogic(() -> takeOver(login, account, true));
                         },
                         GameSessionManager.getLogicThread());
+            return;
+        }
+
+        var event = new PlayerCreationEvent(session, Player.class);
+        event.call();
+
+        var playerClass = event.getPlayerClass();
+        login.offLogic(() -> findPlayer(login, playerClass));
     }
 
     /** How long a login waits for the account's previous logout saves before refusing. */
@@ -208,6 +241,10 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
 
     /** Database: finds or creates the player and applies an IP ban. */
     private static void findPlayer(Login login, Class<? extends Player> playerClass) {
+        if (!login.current()) {
+            login.close();
+            return;
+        }
         var session = login.session();
         var player = DatabaseHelper.getPlayerByAccount(session.getAccount(), playerClass);
 
@@ -250,6 +287,10 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
 
     /** Game state: turns the login away if banned, full or overloaded, before loading anything. */
     private static void admit(Login login, Player player) {
+        if (!login.current()) {
+            login.close();
+            return;
+        }
         var session = login.session();
         session.setPlayer(player);
 
@@ -307,6 +348,10 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
 
     /** Database: loads the player's avatars, inventory and the rest. */
     private static void load(Login login, Player player) {
+        if (!login.current()) {
+            login.close();
+            return;
+        }
         try {
             player.loadFromDatabase();
         } catch (IllegalStateException e) {
@@ -320,6 +365,10 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
 
     /** Client: answers with the session key. */
     private static void respond(Login login) {
+        if (!login.current()) {
+            login.close();
+            return;
+        }
         var session = login.session();
         var keyId = login.keyId();
         var clientRandKey = login.clientRandKey();
