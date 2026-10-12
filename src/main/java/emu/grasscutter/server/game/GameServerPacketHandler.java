@@ -162,10 +162,6 @@ public final class GameServerPacketHandler {
                     handler.handle(session, header, event.getPacketData());
                 }
             } catch (Exception ex) {
-                if (opcode == PacketOpcodes.CombatInvocationsNotify
-                        || opcode == PacketOpcodes.UnionCmdNotify) {
-                    emu.grasscutter.game.player.CombatDamageBatch.invalidate(session);
-                }
                 ex.printStackTrace();
             }
             return;

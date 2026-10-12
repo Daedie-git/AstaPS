@@ -214,10 +214,8 @@ final class CharacterDamageTuningTest {
     }
 
     @ParameterizedTest
-    @CsvSource({"10000042,false", "10000031,false", "10000016,false",
-            "10000042,true", "10000031,true", "10000016,true"})
-    void actualHandlerForwardsAndAppliesTunedDamageOnceAtOutermostCompletion(
-            int avatarId, boolean nested) throws Exception {
+    @ValueSource(ints = {10000042, 10000031, 10000016})
+    void actualHandlerForwardsAndAppliesTunedDamageOnce(int avatarId) throws Exception {
         var actor = avatar(8, avatarId);
         var player = allocate(Player.class);
         var team = new TeamManager();
@@ -239,14 +237,10 @@ final class CharacterDamageTuningTest {
         var packet = CombatInvocationsNotify.newBuilder().addInvokeList(entry).build();
         float previous = GAME_OPTIONS.keqingElectroDamageMultiplier;
         float previousDiluc = GAME_OPTIONS.dilucDamageMultiplier;
-        try (var outer = nested ? emu.grasscutter.game.player.CombatDamageBatch.open(session) : null) {
+        try {
             GAME_OPTIONS.keqingElectroDamageMultiplier = 1.5f;
             GAME_OPTIONS.dilucDamageMultiplier = 1.25f;
             new HandlerCombatInvocationsNotify().handle(session, new byte[0], packet.toByteArray());
-            if (nested) {
-                assertEquals(0, monster.hits);
-                outer.complete();
-            }
         } finally {
             GAME_OPTIONS.keqingElectroDamageMultiplier = previous;
             GAME_OPTIONS.dilucDamageMultiplier = previousDiluc;

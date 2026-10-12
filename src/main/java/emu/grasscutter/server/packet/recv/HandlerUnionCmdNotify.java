@@ -12,6 +12,13 @@ import emu.grasscutter.server.game.GameSession;
 
 @Opcodes(PacketOpcodes.UnionCmdNotify)
 public class HandlerUnionCmdNotify extends PacketHandler {
+    private static final ThreadLocal<Boolean> HANDLING_BATCH = ThreadLocal.withInitial(() -> false);
+
+    /** Whether the current thread is inside a UnionCmdNotify, whose end applies queued hits. */
+    static boolean isHandlingBatch() {
+        return HANDLING_BATCH.get();
+    }
+
     @Override
     public void handle(GameSession session, byte[] header, byte[] payload) throws Exception {
         if (payload == null || payload.length > 1024 * 1024) {
@@ -30,14 +37,7 @@ public class HandlerUnionCmdNotify extends PacketHandler {
                 throw new IllegalArgumentException("Nested or oversized union");
             }
         }
-        // Protocol validation must precede scope entry and all child dispatch.
-        try (var damageBatch = emu.grasscutter.game.player.CombatDamageBatch.open(session)) {
-            handleCommands(session, header, req);
-            damageBatch.complete();
-        }
-    }
 
-    private void handleCommands(GameSession session, byte[] header, UnionCmdNotify req) throws Exception {
         // If this batch touches ReliquaryDust, log every messageId — missing sibling acks
         // can leave the reshape UI waiting forever while only 7273 is handled.
         boolean dustBatch = false;
@@ -61,6 +61,19 @@ public class HandlerUnionCmdNotify extends PacketHandler {
                             batch.toString().trim());
         }
 
+        HANDLING_BATCH.set(true);
+        try {
+            handleBatch(session, header, req);
+        } finally {
+            HANDLING_BATCH.set(false);
+        }
+
+        session.getPlayer().getCombatInvokeHandler().update(session.getPlayer());
+        session.getPlayer().getAbilityInvokeHandler().update(session.getPlayer());
+        HandlerCombatInvocationsNotify.applyQueuedAttacks(session.getPlayer());
+    }
+
+    private static void handleBatch(GameSession session, byte[] header, UnionCmdNotify req) throws Exception {
         for (UnionCmd cmd : req.getCmdListList()) {
             int cmdOpcode = cmd.getMessageId();
             byte[] cmdPayload = cmd.getBody().toByteArray();
@@ -77,8 +90,5 @@ public class HandlerUnionCmdNotify extends PacketHandler {
                     .getPacketHandler()
                     .handle(session, cmd.getMessageId(), header, cmd.getBody().toByteArray());
         }
-
-        session.getPlayer().getCombatInvokeHandler().update(session.getPlayer());
-        session.getPlayer().getAbilityInvokeHandler().update(session.getPlayer());
     }
 }
