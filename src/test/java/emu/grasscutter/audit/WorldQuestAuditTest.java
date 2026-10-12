@@ -29,7 +29,7 @@ public class WorldQuestAuditTest {
         world.changeTime(1440_000L);
         assertEquals(24, quest.getHoursSinceTimeVar(0));
         assertEquals(1, quest.getDaysSinceTimeVar(0));
-        assertEquals(1, quest.getHoursSinceTimeVar(2));
+        assertEquals(0, quest.getHoursSinceTimeVar(2)); // one minute elapsed, not an hour boundary
         assertEquals(0, quest.getHoursSinceTimeVar(1));
     }
 

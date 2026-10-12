@@ -51,7 +51,10 @@ public class HandlerTakePlayerLevelRewardReq extends PacketHandler {
             }
             List<ItemParamData> rewardItems = rewardData.getRewardItemList();
             var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(pl, "rank:" + level);
-            if (claim == null) return;
+            if (claim == null) {
+                session.send(new PacketTakePlayerLevelRewardRsp(level, 0));
+                return;
+            }
             if (!emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrantParams(pl.getInventory(), rewardItems, ActionReason.PlayerUpgradeReward)) {
                 claim.release();
                 session.send(new PacketTakePlayerLevelRewardRsp(level, 0));
