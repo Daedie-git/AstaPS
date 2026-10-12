@@ -193,16 +193,19 @@ class CombatFixesTest {
         GAME_OPTIONS.energyUsage = true;
         try {
             var f = fixture();
-            // Owner and target are registered during capture, gone at execution validation.
-            f.scene.retireAfterReads = 2;
+            // Live when queued, gone by the time the executor runs it.
+            var team = new LeavingTeam();
+            team.addAll(f.team.getActiveTeam());
+            set(f.team, TeamManager.class, "avatars", team);
             f.entity.setFightProperty(FightProperty.FIGHT_PROP_CUR_FIRE_ENERGY, 10);
             var action = new AbilityModifierAction();
             action.type = AbilityModifierAction.Type.ReviveElemEnergy;
             action.ratio = new DynamicFloat(3);
             f.player.getAbilityManager().executeAction(ability(f), action, ByteString.EMPTY, f.entity);
 
-            for (int i = 0; i < 200 && f.scene.entityReads < 3; i++) Thread.sleep(10);
-            assertTrue(f.scene.entityReads >= 3);
+            for (int i = 0; i < 200 && team.lookups < 2; i++) Thread.sleep(10);
+            Thread.sleep(100);
+            assertTrue(team.lookups >= 2);
             assertEquals(10, f.entity.getFightProperty(FightProperty.FIGHT_PROP_CUR_FIRE_ENERGY));
         } finally {
             GAME_OPTIONS.energyUsage = energyUsage;
@@ -369,12 +372,7 @@ class CombatFixesTest {
         TestScene() { super(null, null); }
         @Override public World getWorld() { return world; }
         @Override public List<Player> getPlayers() { return players; }
-        volatile int entityReads;
-        int retireAfterReads;
-        @Override public GameEntity getEntityById(int id) {
-            if (++entityReads > retireAfterReads && retireAfterReads > 0) entities.remove(id);
-            return entities.get(id);
-        }
+        @Override public GameEntity getEntityById(int id) { return entities.get(id); }
         @Override public Map<Integer, GameEntity> getEntities() { return entities; }
         @Override public synchronized void replaceEntity(EntityAvatar oldEntity, EntityAvatar newEntity) {}
         @Override public void broadcastPacket(BasePacket packet) { packets.add(packet); }

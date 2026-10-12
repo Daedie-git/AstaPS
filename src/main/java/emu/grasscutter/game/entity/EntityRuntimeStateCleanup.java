@@ -23,7 +23,6 @@ public final class EntityRuntimeStateCleanup {
         if (entity == null) {
             return;
         }
-        entity.invalidateQueuedAbilityWork();
         int entityId = entity.getId();
         AmberSupport.clearEntityState(entity);
         ArlecchinoBoLUtil.clearEntityState(entityId);

@@ -16,7 +16,6 @@ import emu.grasscutter.game.ability.Ability;
 import emu.grasscutter.game.ability.actions.ActionHealHP;
 import emu.grasscutter.game.avatar.Avatar;
 import emu.grasscutter.game.entity.*;
-import emu.grasscutter.game.player.CombatDamageBatch;
 import emu.grasscutter.game.player.TeamManager;
 import emu.grasscutter.game.props.*;
 import emu.grasscutter.net.packet.*;
@@ -255,92 +254,39 @@ class CombatAuditBoundaryTest {
         assertEquals(2600, hp(member));
     }
 
-    @Test void unionDamageWaitsForEndAndUsesEnqueueSceneAcrossTransition() throws Exception {
+    @Test void unionDamageWaitsForEndOfBatchButStandaloneAppliesAtOnce() throws Exception {
         var f = fixture();
-        var destination = fixture();
-        var original = f.scene;
         var dispatcher = dispatcher(f);
         var commands = new ArrayList<UnionCmd>();
         commands.add(combatCommand(f, 10));
         dispatcher.put(20001, new PacketHandler() {
             @Override public void handle(GameSession session, byte[] header, byte[] payload) {
                 assertEquals(100, hp(f.entity), "damage waits for batch completion");
-                f.player.scene = destination.scene;
             }
         });
         commands.add(UnionCmd.newBuilder().setMessageId(20001).build());
         new HandlerUnionCmdNotify().handle(f.session, new byte[0], UnionCmdNotify.newBuilder().addAllCmdList(commands).build().toByteArray());
         assertEquals(90, hp(f.entity));
-        assertEquals(1, original.attacks);
-        assertEquals(0, destination.scene.attacks);
-    }
-
-    @Test void mixedValidAndMalformedCombatUnionDiscardsQueuedDamageEvenWhenDispatcherCatches() throws Exception {
-        var f = fixture();
-        dispatcher(f);
-        var malformed = UnionCmd.newBuilder().setMessageId(PacketOpcodes.CombatInvocationsNotify)
-                .setBody(ByteString.copyFrom(new byte[]{(byte) 0x80}));
-        var union = UnionCmdNotify.newBuilder().addCmdList(combatCommand(f, 10)).addCmdList(malformed).build();
-        new HandlerUnionCmdNotify().handle(f.session, new byte[0], union.toByteArray());
-        assertEquals(100, hp(f.entity));
-        assertEquals(0, f.scene.attacks);
+        assertEquals(1, f.scene.attacks);
         hit(new HandlerCombatInvocationsNotify(), f, 10);
-        assertEquals(90, hp(f.entity), "failed batch leaves no stale queued work");
-        assertEquals(1, f.scene.attacks);
+        assertEquals(80, hp(f.entity), "standalone notify applies its hit immediately");
+        assertEquals(2, f.scene.attacks);
     }
 
-    @Test void receiveListenerFailureDiscardsUnionButCancellationDoesNot() throws Exception {
-        for (boolean throwing : new boolean[]{true, false}) {
-            var f = fixture();
-            dispatcher(f);
-            var field = Grasscutter.class.getDeclaredField("pluginManager");
-            field.setAccessible(true);
-            var old = field.get(null);
-            var plugins = allocate(PluginManager.class);
-            var handler = new EventHandler<>(emu.grasscutter.server.event.game.ReceivePacketEvent.class);
-            var callbacks = new HashMap<Class<? extends Event>, List<EventHandler<? extends Event>>>();
-            callbacks.put(emu.grasscutter.server.event.game.ReceivePacketEvent.class, List.of(handler));
-            set(plugins, PluginManager.class, "handlers", callbacks);
-            int[] children = {0};
-            handler.listener(event -> {
-                if (++children[0] == 2) {
-                    assertEquals(100, hp(f.entity));
-                    assertEquals(0, f.scene.attacks);
-                    if (throwing) throw new IllegalStateException("second combat child");
-                    event.cancel();
-                }
-            });
-            field.set(null, plugins);
-            try {
-                var union = UnionCmdNotify.newBuilder().addCmdList(combatCommand(f, 10))
-                        .addCmdList(combatCommand(f, 20)).build();
-                new HandlerUnionCmdNotify().handle(f.session, new byte[0], union.toByteArray());
-                assertEquals(throwing ? 100 : 90, hp(f.entity));
-                assertEquals(throwing ? 0 : 1, f.scene.attacks);
-                f.session.getServer().getPacketHandler().handle(f.session,
-                        PacketOpcodes.CombatInvocationsNotify, new byte[0], combatCommand(f, 10).getBody().toByteArray());
-                assertEquals(throwing ? 90 : 80, hp(f.entity));
-                assertEquals(throwing ? 1 : 2, f.scene.attacks);
-            } finally { field.set(null, old); }
-        }
-    }
-
-    @Test void outermostScopeDrainsOnceAndFailedOuterScopeDiscardsNewWork() throws Exception {
+    @Test void switchToDeadAvatarAnswersWithTheAvatarStillOnField() throws Exception {
         var f = fixture();
-        var outer = CombatDamageBatch.open(f.session);
-        try (outer) {
-            hit(new HandlerCombatInvocationsNotify(), f, 10);
-            assertEquals(100, hp(f.entity));
-            outer.complete();
-        }
-        outer.close();
-        assertEquals(90, hp(f.entity));
-        assertEquals(1, f.scene.attacks);
-        try (var failed = CombatDamageBatch.open(f.session)) {
-            hit(new HandlerCombatInvocationsNotify(), f, 10);
-        }
-        assertEquals(90, hp(f.entity));
-        assertEquals(1, f.scene.attacks);
+        var dead = second(f);
+        f.team.getActiveTeam().add(dead);
+        dead.setFightProperty(FightProperty.FIGHT_PROP_CUR_HP, 0);
+        f.scene.packets.clear();
+        f.team.changeAvatar(dead.getAvatar().getGuid());
+        assertEquals(0, f.team.getCurrentCharacterIndex());
+        assertEquals(0, f.scene.replacements);
+        var replies = f.scene.packets.stream()
+                .filter(p -> p.getOpcode() == PacketOpcodes.ChangeAvatarRsp).toList();
+        assertEquals(1, replies.size(), "the client must get its ChangeAvatarRsp");
+        assertEquals(f.entity.getAvatar().getGuid(),
+                emu.grasscutter.net.proto.ChangeAvatarRspOuterClass.ChangeAvatarRsp.parseFrom(replies.get(0).getData()).getCurGuid());
     }
 
     @Test void eventSelectedDeadForeignOrNullAvatarIsRejectedAndLivingReplacementIndexMatches() throws Exception {

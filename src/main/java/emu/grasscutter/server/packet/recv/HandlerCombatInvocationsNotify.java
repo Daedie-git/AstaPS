@@ -3,6 +3,7 @@ package emu.grasscutter.server.packet.recv;
 import static emu.grasscutter.config.Configuration.GAME_OPTIONS;
 
 import emu.grasscutter.Grasscutter;
+import emu.grasscutter.game.dps.DPSAttackContext;
 import emu.grasscutter.game.entity.CharacterDamageTuning;
 import emu.grasscutter.game.entity.EntityAvatar;
 import emu.grasscutter.game.entity.EntityClientGadget;
@@ -35,13 +36,6 @@ public class HandlerCombatInvocationsNotify extends PacketHandler {
 
     @Override
     public void handle(GameSession session, byte[] header, byte[] payload) throws Exception {
-        try (var damageBatch = emu.grasscutter.game.player.CombatDamageBatch.open(session)) {
-            handleInvocations(session, payload);
-            damageBatch.complete();
-        }
-    }
-
-    private void handleInvocations(GameSession session, byte[] payload) throws Exception {
         CombatInvocationsNotify notif = CombatInvocationsNotify.parseFrom(payload);
         for (CombatInvokeEntry entry : notif.getInvokeListList()) {
 
@@ -182,7 +176,7 @@ public class HandlerCombatInvocationsNotify extends PacketHandler {
                                 .build();
                     }
 
-                    emu.grasscutter.game.player.CombatDamageBatch.enqueue(session, player.getScene(), attackResult);
+                    player.getAttackResults().add(attackResult);
                     player.getEnergyManager().handleAttackHit(hitInfo);
                     try {
                         GameEntity atkEnt = player.getScene().getEntityById(attackResult.getAttackerId());
@@ -253,6 +247,23 @@ public class HandlerCombatInvocationsNotify extends PacketHandler {
         }
         // Flush even when this notify arrives outside UnionCmd (needed for MP motion/skill sync).
         session.getPlayer().getCombatInvokeHandler().update(session.getPlayer());
+
+        // A standalone notify has no UnionCmdNotify after it to apply its hits. Inside a batch they
+        // wait for the end of it, after the ability invokes (shields, modifiers) sent alongside.
+        if (!HandlerUnionCmdNotify.isHandlingBatch()) applyQueuedAttacks(session.getPlayer());
+    }
+
+    static void applyQueuedAttacks(emu.grasscutter.game.player.Player player) {
+        var attacks = player.getAttackResults();
+        for (var attack = attacks.poll(); attack != null; attack = attacks.poll()) {
+            // Lets the DPS dummy tell reaction damage from elemental damage inside damage().
+            DPSAttackContext.set(attack);
+            try {
+                player.getScene().handleAttack(attack);
+            } finally {
+                DPSAttackContext.clear();
+            }
+        }
     }
 
     private void handleLandingMovement(GameSession session, GameEntity entity, MotionInfo motion) {

@@ -290,21 +290,14 @@ public final class AbilityManager extends BasePlayerManager {
         Ability ability, AbilityModifierAction action, ByteString abilityData, GameEntity target) {
         if (ability == null) return;
         var handler = actionHandlers.get(action.type);
-        final QueuedAbilityWork work;
         try {
-            work = new QueuedAbilityWork(this.player, ability, target);
-            try {
-                // This fired-shot hook must run immediately even when the generic action has no handler.
-                var name = ability.getData() == null ? null : ability.getData().abilityName;
-                if (target != null && name != null && name.contains("GunShot") && work.isCurrent()) {
-                    ClorindeBoLUtil.onAbilityAction(ability, target);
-                }
-            } catch (Throwable ignored) {
-                // Compatibility hook must not cancel the normal action.
+            // This fired-shot hook must run immediately even when the generic action has no handler.
+            var name = ability.getData() == null ? null : ability.getData().abilityName;
+            if (target != null && name != null && name.contains("GunShot")) {
+                ClorindeBoLUtil.onAbilityAction(ability, target);
             }
-        } catch (Throwable e) {
-            Grasscutter.getLogger().error("Ability action {} capture threw at {}.", action.type, ability, e);
-            return;
+        } catch (Throwable ignored) {
+            // Compatibility hook must not cancel the normal action.
         }
         if (handler == null) {
             if (DebugConstants.LOG_MISSING_ABILITY_HANDLERS) {
@@ -312,13 +305,11 @@ public final class AbilityManager extends BasePlayerManager {
             }
             return;
         }
+        boolean ownerWasLive = isLive(ability.getOwner());
         abilityExecutor.execute(
             () -> {
                 try {
-                    if (!work.isCurrent()) {
-                        Grasscutter.getLogger().trace("Discarding retired queued action {} at {}", action.type, ability);
-                        return;
-                    }
+                    if (ownerWasLive && !isLive(ability.getOwner())) return;
                     if (!handler.execute(ability, action, abilityData, target)) {
                         Grasscutter.getLogger()
                             .debug("Ability execute action failed for {} at {}.", action.type, ability);
@@ -376,22 +367,13 @@ public final class AbilityManager extends BasePlayerManager {
             return;
         }
 
-        final QueuedAbilityWork work;
-        try {
-            work = new QueuedAbilityWork(this.player, ability, target);
-            if (hpDebtConversion && work.isCurrent()) target.setConvertToHpDebt(true);
-        } catch (Throwable e) {
-            Grasscutter.getLogger().error("Ability mixin {} capture threw at {}.", mixinData.type, ability, e);
-            return;
-        }
+        if (hpDebtConversion) target.setConvertToHpDebt(true);
         if (handler == null) return;
+        boolean ownerWasLive = isLive(target);
         abilityExecutor.execute(
             () -> {
                 try {
-                    if (!work.isCurrent()) {
-                        Grasscutter.getLogger().trace("Discarding retired queued mixin {} at {}", mixinData.type, ability);
-                        return;
-                    }
+                    if (ownerWasLive && !isLive(target)) return;
                     if (!handler.execute(ability, mixinData, abilityData, target)) {
                         Grasscutter.getLogger()
                             .error("Ability execute action failed for {} at {}.", mixinData.type, ability);
@@ -401,6 +383,17 @@ public final class AbilityManager extends BasePlayerManager {
                         .error("Ability mixin {} threw at {}.", mixinData.type, ability, e);
                 }
             });
+    }
+
+    /** Queued work is dropped for an entity that has since left the player's scene or world. */
+    private boolean isLive(GameEntity entity) {
+        if (entity instanceof EntityAvatar a) {
+            return this.player.getWorld() != null && this.player.getTeamManager().getActiveTeam().contains(a);
+        }
+        // Scene identity, not entity-map membership: queued actions run on a pool in no fixed order,
+        // so a gadget's HealHP can run after its own KillSelf removed it, and that heal still counts.
+        var scene = this.player.getWorld() == null ? null : this.player.getScene();
+        return entity != null && scene != null && entity.getScene() == scene;
     }
 
     /**

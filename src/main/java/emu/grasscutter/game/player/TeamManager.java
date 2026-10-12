@@ -878,8 +878,7 @@ public final class TeamManager extends BasePlayerDataManager {
             }
         }
 
-        if (index < 0 || newEntity == oldEntity
-                || !(newEntity.getFightProperty(FightProperty.FIGHT_PROP_CUR_HP) > 0f)) {
+        if (index < 0 || newEntity == oldEntity) {
             return;
         }
         if (newEntity.getFightProperty(FightProperty.FIGHT_PROP_CUR_HP) <= 0) {
