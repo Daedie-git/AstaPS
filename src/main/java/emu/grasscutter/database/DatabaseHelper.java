@@ -325,15 +325,22 @@ public final class DatabaseHelper {
         return true;
     }
 
-    /** Runs the submission unless the owner has retired, atomically with its retirement. */
+    /** Runs the submission unless the owner has retired; retirement waits for admitted ones. */
     private static void admit(Object object, Runnable submit) {
         var player = owningPlayer(object);
         if (player == null) {
             submit.run();
             return;
         }
-        synchronized (player.writeGate()) {
-            if (!fromRetiredPlayer(object)) submit.run();
+        var admitted = player.admitWrite();
+        if (admitted == null) {
+            fromRetiredPlayer(object); // Logs the dropped write.
+            return;
+        }
+        try {
+            submit.run();
+        } finally {
+            player.finishWrite(admitted);
         }
     }
 
