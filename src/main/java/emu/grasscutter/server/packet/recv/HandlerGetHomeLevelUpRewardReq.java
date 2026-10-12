@@ -29,27 +29,29 @@ public class HandlerGetHomeLevelUpRewardReq extends PacketHandler {
             }
             Set<Integer> homeRewardedLevels = session.getPlayer().getHomeRewardedLevels();
             if (homeRewardedLevels == null) homeRewardedLevels = new HashSet<>();
-            if (!homeRewardedLevels.contains(level)) { // No duplicated reward
-                int rewardId = GameData.getHomeWorldLevelDataMap().get(level).getRewardId();
-                if (rewardId != 0) {
-                    List<ItemParamData> rewardItems =
-                            GameData.getRewardDataMap().get(rewardId).getRewardItemList();
-                    var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(pl, "home-rank:" + level);
-                    if (claim == null) return;
-                    if (rewardItems == null || rewardItems.isEmpty()
-                            || !emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrantParams(pl.getInventory(), rewardItems, ActionReason.GetHomeLevelupReward)) {
-                        claim.release();
-                        session.send(new PacketGetHomeLevelUpRewardRsp(level, 0));
-                        return;
-                    }
-                    homeRewardedLevels.add(level);
-                    pl.setHomeRewardedLevels(homeRewardedLevels);
-                    claim.release();
-                    pl.save();
-                    pl.getHome().onClaimReward(pl);
-                    session.send(new PacketGetHomeLevelUpRewardRsp(level, rewardId));
-                }
+            int rewardId = row.getRewardId();
+            if (homeRewardedLevels.contains(level)) { // No duplicated reward
+                session.send(new PacketGetHomeLevelUpRewardRsp(level, rewardId));
+                return;
             }
+            List<ItemParamData> rewardItems = GameData.getRewardDataMap().get(rewardId).getRewardItemList();
+            var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(pl, "home-rank:" + level);
+            if (claim == null) {
+                session.send(new PacketGetHomeLevelUpRewardRsp(level, 0));
+                return;
+            }
+            if (rewardItems == null || rewardItems.isEmpty()
+                    || !emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrantParams(pl.getInventory(), rewardItems, ActionReason.GetHomeLevelupReward)) {
+                claim.release();
+                session.send(new PacketGetHomeLevelUpRewardRsp(level, 0));
+                return;
+            }
+            homeRewardedLevels.add(level);
+            pl.setHomeRewardedLevels(homeRewardedLevels);
+            claim.release();
+            pl.save();
+            pl.getHome().onClaimReward(pl);
+            session.send(new PacketGetHomeLevelUpRewardRsp(level, rewardId));
         }
     }
 }

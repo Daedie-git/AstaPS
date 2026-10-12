@@ -351,9 +351,13 @@ public class Achievements {
         }
 
         var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(this, ids.stream().map(id -> "achievement:" + id).toList());
-        if (claim == null) return;
+        if (claim == null) {
+            this.player.sendPacket(new PacketTakeAchievementRewardRsp());
+            return;
+        }
         if (rewards.isEmpty() || !emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(this.player.getInventory(), rewards, ActionReason.AchievementReward)) {
             claim.release();
+            this.player.sendPacket(new PacketTakeAchievementRewardRsp());
             return;
         }
         var claimedAchievements = new ArrayList<Achievement>(ids.size());
@@ -387,15 +391,24 @@ public class Achievements {
                 return;
             }
             var reward = GameData.getRewardDataMap().get(goal.getFinishRewardId());
-            if (reward == null || reward.getRewardItemList() == null) return;
+            if (reward == null || reward.getRewardItemList() == null) {
+                this.player.sendPacket(new PacketTakeAchievementGoalRewardRsp());
+                return;
+            }
             for (var entry : reward.getRewardItemList()) {
                 var item = GameData.getItemDataMap().get(entry.getId());
-                if (item == null || entry.getCount() <= 0) return;
+                if (item == null || entry.getCount() <= 0) {
+                    this.player.sendPacket(new PacketTakeAchievementGoalRewardRsp());
+                    return;
+                }
                 rewards.add(emu.grasscutter.game.inventory.ClaimRewardDelivery.declared(item, entry.getCount()));
             }
         }
         var claim = emu.grasscutter.game.inventory.ClaimBoundary.reserve(this, ids.stream().map(id -> "goal:" + id).toList());
-        if (claim == null) return;
+        if (claim == null) {
+            this.player.sendPacket(new PacketTakeAchievementGoalRewardRsp());
+            return;
+        }
         if (rewards.isEmpty() || !emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrant(this.player.getInventory(), rewards, ActionReason.AchievementGoalReward)) {
             claim.release();
             this.player.sendPacket(new PacketTakeAchievementGoalRewardRsp());

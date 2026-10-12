@@ -381,8 +381,8 @@ public final class InvestigationHandbookHelper {
         if (scaled.isEmpty()) {
             return false;
         }
-        player.getInventory().addItemParamDatas(scaled, reason);
-        return true;
+        return emu.grasscutter.game.inventory.ClaimRewardDelivery.tryGrantParams(
+                player.getInventory(), scaled, reason);
     }
 
     /** Recompute snapshot targets and push changed handbook packets. */
