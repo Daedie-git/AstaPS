@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -38,6 +40,8 @@ public final class DatabaseWriterManager {
     private final ReentrantLock lifecycle = new ReentrantLock(true);
     private final Condition changed = lifecycle.newCondition();
     private final LinkedHashSet<WriteTask> outstanding = new LinkedHashSet<>();
+    /** Outstanding writes by the player they belong to. */
+    private final Map<Object, Set<WriteTask>> byOwner = new HashMap<>();
     private final Map<Object, ArrayDeque<WriteTask>> ordered = new HashMap<>();
     private final int orderedCapacity;
     private final ThreadLocal<Integer> writeDepth = ThreadLocal.withInitial(() -> 0);
@@ -67,7 +71,12 @@ public final class DatabaseWriterManager {
 
     /** Saturation still runs on the caller; a closed admission gate rejects visibly. */
     void submit(ExecutorService executor, Runnable task) {
-        submit(executor, null, false, task);
+        submit(executor, null, null, false, task);
+    }
+
+    /** As {@link #submit(ExecutorService, Runnable)}, counted towards {@link #whenOwnerDone}. */
+    void submitOwned(ExecutorService executor, Object owner, Runnable task) {
+        submit(executor, null, owner, false, task);
     }
 
     /**
@@ -76,7 +85,11 @@ public final class DatabaseWriterManager {
      * the caller might hold an inventory or player monitor.
      */
     void submitOrdered(ExecutorService executor, Object entityKey, Runnable task) {
-        submit(executor, Objects.requireNonNull(entityKey, "entityKey"), true, task);
+        submitOrdered(executor, entityKey, null, task);
+    }
+
+    void submitOrdered(ExecutorService executor, Object entityKey, Object owner, Runnable task) {
+        submit(executor, Objects.requireNonNull(entityKey, "entityKey"), owner, true, task);
     }
 
     /**
@@ -85,11 +98,15 @@ public final class DatabaseWriterManager {
      * reorder writes.
      */
     void submitOrderedUncapped(ExecutorService executor, Object entityKey, Runnable task) {
-        submit(executor, Objects.requireNonNull(entityKey, "entityKey"), false, task);
+        submitOrderedUncapped(executor, entityKey, null, task);
+    }
+
+    void submitOrderedUncapped(ExecutorService executor, Object entityKey, Object owner, Runnable task) {
+        submit(executor, Objects.requireNonNull(entityKey, "entityKey"), owner, false, task);
     }
 
     private void submit(
-            ExecutorService executor, Object entityKey, boolean capped, Runnable runnable) {
+            ExecutorService executor, Object entityKey, Object owner, boolean capped, Runnable runnable) {
         Objects.requireNonNull(runnable, "task");
         WriteTask task;
         boolean dispatch;
@@ -102,8 +119,9 @@ public final class DatabaseWriterManager {
             if (capped && entityKey != null && ordered.containsKey(entityKey) && orderedOutstanding >= orderedCapacity) {
                 throw new RejectedExecutionException("Ordered database write capacity is full");
             }
-            task = new WriteTask(executor, entityKey, runnable);
+            task = new WriteTask(executor, entityKey, owner, runnable);
             outstanding.add(task);
+            if (owner != null) byOwner.computeIfAbsent(owner, ignored -> new HashSet<>()).add(task);
             if (entityKey == null) {
                 dispatch = true;
             } else {
@@ -319,15 +337,17 @@ public final class DatabaseWriterManager {
     private final class WriteTask implements Runnable {
         private final ExecutorService executor;
         private final Object entityKey;
+        private final Object owner;
         private final Runnable operation;
         private boolean running;
         private boolean cancelled;
         /** Completes when this write has run (successfully or not) or was cancelled. */
         final CompletableFuture<Void> done = new CompletableFuture<>();
 
-        private WriteTask(ExecutorService executor, Object entityKey, Runnable operation) {
+        private WriteTask(ExecutorService executor, Object entityKey, Object owner, Runnable operation) {
             this.executor = executor;
             this.entityKey = entityKey;
+            this.owner = owner;
             this.operation = operation;
         }
 
@@ -353,6 +373,7 @@ public final class DatabaseWriterManager {
                 lifecycle.lock();
                 try {
                     outstanding.remove(this);
+                    forgetOwner(this);
                     if (entityKey != null) {
                         var queue = ordered.get(entityKey);
                         if (queue.size() > 1) orderedOutstanding--;
@@ -383,6 +404,7 @@ public final class DatabaseWriterManager {
         WriteTask next = null;
         task.cancelled = true;
         outstanding.remove(task);
+        forgetOwner(task);
         task.done.complete(null);
         if (task.entityKey != null) {
             var queue = ordered.get(task.entityKey);
@@ -396,14 +418,22 @@ public final class DatabaseWriterManager {
         return next;
     }
 
-    /** Completes once every write accepted so far has run or been cancelled; later writes are not included. */
-    CompletableFuture<Void> whenSubmittedDone() {
+    /** Completes once this owner's writes accepted so far have run or been cancelled. */
+    CompletableFuture<Void> whenOwnerDone(Object owner) {
         lifecycle.lock();
         try {
-            return CompletableFuture.allOf(outstanding.stream().map(task -> task.done).toArray(CompletableFuture[]::new));
+            var tasks = byOwner.get(owner);
+            if (tasks == null) return CompletableFuture.completedFuture(null);
+            return CompletableFuture.allOf(tasks.stream().map(task -> task.done).toArray(CompletableFuture[]::new));
         } finally {
             lifecycle.unlock();
         }
+    }
+
+    private void forgetOwner(WriteTask task) {
+        if (task.owner == null) return;
+        var tasks = byOwner.get(task.owner);
+        if (tasks != null && tasks.remove(task) && tasks.isEmpty()) byOwner.remove(task.owner);
     }
 
     /** Stops admission and drains async, ordered, caller-run and synchronous writes. */

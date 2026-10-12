@@ -251,9 +251,45 @@ public final class DatabaseHelper {
         databaseWriters.submit(executor, task);
     }
 
-    /** Completes once every write submitted so far has run (successfully or not). */
-    public static java.util.concurrent.CompletableFuture<Void> whenSubmittedWritesDone() {
-        return databaseWriters.whenSubmittedDone();
+    /** Completes once this player's writes submitted so far have run (successfully or not). */
+    public static java.util.concurrent.CompletableFuture<Void> whenPlayerWritesDone(int uid) {
+        return databaseWriters.whenOwnerDone(new PlayerOwner(uid));
+    }
+
+    /** The player a write belongs to, so a login can wait for exactly that player's writes. */
+    record PlayerOwner(int uid) {}
+
+    /** Player documents carry their owner's UID in one of these fields. */
+    private static final ClassValue<java.lang.reflect.Field> OWNER_FIELDS =
+            new ClassValue<>() {
+                @Override
+                protected java.lang.reflect.Field computeValue(Class<?> type) {
+                    for (var name : List.of("ownerUid", "ownerId", "uid")) {
+                        for (var current = type; current != null; current = current.getSuperclass()) {
+                            try {
+                                var field = current.getDeclaredField(name);
+                                if (field.getType() != int.class && field.getType() != long.class) continue;
+                                field.setAccessible(true);
+                                return field;
+                            } catch (NoSuchFieldException ignored) {
+                                // Try the superclass, then the next name.
+                            }
+                        }
+                    }
+                    return null;
+                }
+            };
+
+    static PlayerOwner ownerOf(Object object) {
+        if (object instanceof Player player) return new PlayerOwner(player.getUid());
+        var field = OWNER_FIELDS.get(object.getClass());
+        if (field == null) return null;
+        try {
+            long uid = field.getLong(object);
+            return uid > 0 ? new PlayerOwner((int) uid) : null;
+        } catch (IllegalAccessException e) {
+            return null;
+        }
     }
 
     public static DatabaseWriterManager.ShutdownResult shutdownWriters(Duration timeout) {
@@ -480,6 +516,7 @@ public final class DatabaseHelper {
             databaseWriters.submitOrderedUncapped(
                     eventExecutor,
                     new SameObject(object),
+                    ownerOf(object),
                     () -> {
                         // Cleared before the write, not after: anything changed while this one runs
                         // has to be able to queue a write of its own.
@@ -501,6 +538,7 @@ public final class DatabaseHelper {
             databaseWriters.submitOrderedUncapped(
                     eventExecutorGroup,
                     new SameObject(groupInstance),
+                    ownerOf(groupInstance),
                     () -> {
                         pendingGroupSaves.remove(groupInstance);
                         saveWithRetry(groupInstance);
@@ -854,7 +892,8 @@ public final class DatabaseHelper {
     }
 
     public static void deleteFriendship(Friendship friendship) {
-        DatabaseHelper.asyncOperation(() -> DatabaseManager.getGameDatastore().delete(friendship));
+        databaseWriters.submitOwned(
+                eventExecutor, ownerOf(friendship), () -> DatabaseManager.getGameDatastore().delete(friendship));
     }
 
     public static Friendship getReverseFriendship(Friendship friendship) {
@@ -914,7 +953,8 @@ public final class DatabaseHelper {
     }
 
     public static void deleteMail(Mail mail) {
-        DatabaseHelper.asyncOperation(() -> DatabaseManager.getGameDatastore().delete(mail));
+        databaseWriters.submitOwned(
+                eventExecutor, ownerOf(mail), () -> DatabaseManager.getGameDatastore().delete(mail));
     }
 
     public static List<GameMainQuest> getAllQuests(Player player) {
@@ -930,7 +970,8 @@ public final class DatabaseHelper {
     }
 
     public static void deleteQuest(GameMainQuest quest) {
-        DatabaseHelper.asyncOperation(() -> DatabaseManager.getGameDatastore().delete(quest));
+        databaseWriters.submitOwned(
+                eventExecutor, ownerOf(quest), () -> DatabaseManager.getGameDatastore().delete(quest));
     }
 
     public static GameHome getHomeByUid(int id) {

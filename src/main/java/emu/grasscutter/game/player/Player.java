@@ -1753,7 +1753,7 @@ public class Player implements PlayerHook, FieldFetch {
                     () -> this.getTeamManager().saveAvatars(),
                     () -> this.getFriendsList().save(),
                     () -> emu.grasscutter.server.game.PendingLogoutSaves.record(
-                            getAccountId(), DatabaseHelper.whenSubmittedWritesDone()));
+                            getAccountId(), DatabaseHelper.whenPlayerWritesDone(getUid())));
             removeFromServer();
         }
     }

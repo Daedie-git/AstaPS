@@ -113,8 +113,17 @@ public class HandlerGetPlayerTokenReq extends PacketHandler {
 
         void close() {
             this.done();
-            if (this.async) GameSessionManager.getLogicThread().execute(this.session::close);
-            else this.session.close();
+            Runnable closing = () -> {
+                // A player that never finished logging in is not the account's real state;
+                // saving it on close would overwrite whatever logs in next.
+                var player = this.session.getPlayer();
+                if (player != null && Grasscutter.getGameServer().getPlayers().get(player.getUid()) != player) {
+                    this.session.detachPlayer();
+                }
+                this.session.close();
+            };
+            if (this.async) GameSessionManager.getLogicThread().execute(closing);
+            else closing.run();
         }
     }
 

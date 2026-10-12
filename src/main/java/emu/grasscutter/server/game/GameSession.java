@@ -90,6 +90,11 @@ public class GameSession implements GameSessionManager.KcpChannel {
         return this.getAccount().getId();
     }
 
+    /** Drops a player whose login did not finish, so closing this session never saves it. */
+    public synchronized void detachPlayer() {
+        this.player = null;
+    }
+
     public synchronized void setPlayer(Player player) {
         this.player = player;
         this.player.setSession(this);

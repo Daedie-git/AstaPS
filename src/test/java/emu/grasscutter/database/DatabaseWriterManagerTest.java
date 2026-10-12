@@ -219,39 +219,38 @@ class DatabaseWriterManagerTest {
     }
 
     @Test
-    void submittedWritesFutureCoversEarlierWritesOnly() throws Exception {
+    void ownerFutureCoversThatOwnersEarlierWritesOnly() throws Exception {
         var fixture = new Fixture();
         var release = new CountDownLatch(1);
+        var unrelated = new CountDownLatch(1);
         var later = new CountDownLatch(1);
         try {
             var pool = fixture.pools.get("default");
-            Runnable blocked = () -> {
-                try {
-                    release.await();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            };
-            fixture.manager.submitOrderedUncapped(pool, "key", blocked);
+            fixture.manager.submitOrderedUncapped(pool, "key", "player", () -> await(release));
             // A queued successor and a failing write count too.
-            fixture.manager.submitOrderedUncapped(pool, "key", () -> { throw new IllegalStateException("write failed"); });
-            var earlier = fixture.manager.whenSubmittedDone();
-            fixture.manager.submit(fixture.pools.get("item"), () -> {
-                try {
-                    later.await();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-            });
+            fixture.manager.submitOrderedUncapped(pool, "key", "player", () -> { throw new IllegalStateException("write failed"); });
+            fixture.manager.submitOwned(fixture.pools.get("group"), "someone else", () -> await(unrelated));
+            var earlier = fixture.manager.whenOwnerDone("player");
+            fixture.manager.submitOwned(fixture.pools.get("item"), "player", () -> await(later));
 
             assertFalse(earlier.isDone());
             release.countDown();
             earlier.get(2, TimeUnit.SECONDS);
-            assertFalse(fixture.manager.whenSubmittedDone().isDone(), "the later write is still running");
+            assertFalse(fixture.manager.whenOwnerDone("player").isDone(), "the later write is still running");
+            assertTrue(fixture.manager.whenOwnerDone("nobody").isDone());
         } finally {
             release.countDown();
+            unrelated.countDown();
             later.countDown();
             fixture.close();
+        }
+    }
+
+    private static void await(CountDownLatch latch) {
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
 

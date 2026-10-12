@@ -27,6 +27,7 @@ final class ItemPersistenceService {
         writers.submitOrdered(
                 executor,
                 id,
+                DatabaseHelper.ownerOf(item),
                 () -> {
                     // A pending save observes mutable item state. Never upsert a consumed item.
                     if (item.getCount() > 0 && item.getOwnerId() > 0) save.accept(item);
@@ -36,6 +37,6 @@ final class ItemPersistenceService {
 
     void delete(GameItem item) {
         var id = item.ensurePersistenceId();
-        writers.submitOrdered(executor, id, () -> delete.accept(item));
+        writers.submitOrdered(executor, id, DatabaseHelper.ownerOf(item), () -> delete.accept(item));
     }
 }
