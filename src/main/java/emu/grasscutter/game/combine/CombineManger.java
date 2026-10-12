@@ -205,7 +205,10 @@ public class CombineManger extends BaseGameSystem {
     private static void restoreInputs(Player player, List<GameItem> consumed) {
         for (var item : consumed) {
             item.setCount(1);
-            player.getInventory().addItem(item);
+            if (!player.getInventory().addItem(item)) {
+                Grasscutter.getLogger().error("Could not return decompose input {} (guid {}) to uid {}",
+                        item.getItemId(), item.getGuid(), player.getUid());
+            }
         }
     }
 }
