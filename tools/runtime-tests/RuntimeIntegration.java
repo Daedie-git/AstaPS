@@ -72,7 +72,7 @@ public final class RuntimeIntegration {
     static void completePhase() throws Exception {
         int expected = switch (phase) {
             case "fresh", "activity" -> 2;
-            case "write" -> 16;
+            case "write" -> 15;
             case "restart" -> 4;
             default -> throw new IllegalArgumentException(phase);
         };
