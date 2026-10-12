@@ -631,6 +631,6 @@ public class GameMainQuest {
             return 0;
         }
 
-        return owner.getWorld().getTotalGameTimeHours() - ConversionUtils.gameTimeToHours(varTime);
+        return ConversionUtils.gameTimeToHours(owner.getWorld().getTotalGameTimeMinutes() - varTime);
     }
 }
