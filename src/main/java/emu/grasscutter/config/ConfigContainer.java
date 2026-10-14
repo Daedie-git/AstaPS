@@ -38,9 +38,11 @@ public class ConfigContainer {
      * Version 14 - 'server.threadPools' was added for managed thread-pool sizing.
      * Version 15 - 'server.watchdog' was added for the database monitor and timed restart.
      * Version 16 - 'server.http.webConsole' was added for the password-protected web console.
+     * Version 17 - 'gameOptions.unlockAllOpenStatesOnLogin' controls optional login feature unlock.
+     * Version 18 - 'gameOptions.mapFogEnabled' controls exploration fog (enabled by default).
      */
     private static int version() {
-        return 16;
+        return 18;
     }
 
     /**
@@ -417,6 +419,13 @@ public class ConfigContainer {
 
         public boolean watchGachaConfig = false;
         public boolean enableShopItems = false;
+
+        /** Sandbox-only: unlock all supported OpenStates on login. Disabled by default. */
+        public boolean unlockAllOpenStatesOnLogin = false;
+
+        /** Show unexplored map fog until the corresponding Statue of the Seven unlocks an area. */
+        public boolean mapFogEnabled = true;
+
         public ArtifactShopOptions artifactShop = new ArtifactShopOptions();
         public boolean staminaUsage = true;
         public boolean energyUsage = true;
@@ -478,18 +487,17 @@ public class ConfigContainer {
          * Hands a brand new account to the client's own character creation - the twin stars, the
          * fight, and the choice of Traveler - instead of silently making one Lumine.
          *
-         * <p>Off by default because two of the three packets in that handshake have no known 7.0
-         * CmdId. They are both sent EMPTY, so only the numbers are missing: fill them in below and
-         * the flow completes. At 0 they are not sent at all, which is still worth trying first -
-         * the client may open creation on its own once the server stops pre-empting it.
+         * <p>Enabled by default for accounts without avatars. Existing accounts keep their chosen
+         * Traveler. Zero CmdId overrides use the built-in 7.1 protocol IDs; setting enabled to false
+         * retains automatic Traveler creation.
          */
         public static class NewAccountIntro {
-            public boolean enabled = false;
+            public boolean enabled = true;
             public int doSetPlayerBornDataNotify = 0;
             public int setPlayerBornDataRsp = 0;
 
-            /** Seconds to wait for creation before making the Traveler anyway. 0 waits forever. */
-            public int fallbackSeconds = 15;
+            /** Legacy config compatibility only; no timer automatically chooses a Traveler. */
+            public int fallbackSeconds = 0;
         }
 
         @SerializedName(value = "questing", alternate = "questOptions")

@@ -39,9 +39,27 @@ javac -version
 ./gradlew jar -PskipHandbook=1
 ```
 
-`grasscutter.jar` 会生成在项目根目录。去掉 `-PskipHandbook=1` 可一并编译游戏内的手册；该步骤需要 NodeJS，没有就会失败。
+`grasscutter-7.1.0.jar` 会生成在项目根目录。去掉 `-PskipHandbook=1` 可一并编译游戏内的手册；该步骤需要 NodeJS，没有就会失败。
 
 Windows 上用 `.\gradlew.bat`，或运行 `gradlew-jar.bat`。
+
+### 更快的本地编译
+
+Gradle Wrapper 使用 **Gradle 9.8.1**。`gradle.properties` 默认开启构建缓存和配置缓存；如果协议数据和源码没有变化，生成结果和编译结果可以在多次构建及不同 Git 工作目录间复用。
+
+仅编译、不打包 JAR：
+
+```sh
+./gradlew classes -PskipHandbook=1
+```
+
+本地测试时可以跳过 JAR 的 ZIP 压缩来缩短打包时间：
+
+```sh
+./gradlew jar -PskipHandbook=1 -PfastJar
+```
+
+Windows 下将 `./gradlew` 换为 `.\gradlew.bat`。两种方式都在项目根目录生成 `grasscutter-7.1.0.jar`。快速打包不会改变 JAR 内的文件，但体积较大（CI 测试中约 230 MB，普通压缩版约 85 MB）；发布时建议使用默认的压缩打包。
 
 ## 运行
 
@@ -55,21 +73,23 @@ Windows 上用 `.\gradlew.bat`，或运行 `gradlew-jar.bat`。
 
 没有注册页面。账号通过以下任一方式创建：
 
-- **从控制台。** `account create <username> [uid] [password]`
+- **从控制台。** `account create <username> [password] [@UID]`（密码与 UID 均可选，新账号仅使用配置中的默认权限，不自动获得 `*` 管理员权限）。
 - **在登录时。** 用一个没人占用的名字登录即注册该账号。开启 `account.useIntegrationPassword` 时，在用户名框中填 `name&&password`，密码框留空——当你要同时代理大量客户端、又不想为每个都建用户时很方便。
 
-密码以 BCrypt 哈希存储。控制台需要把 `server.game.enableConsole` 设为 `true`。
+设置的密码以 BCrypt 哈希存储。不指定密码时，账号暂不校验密码，可通过 `account resetpassword` 后续设置。控制台需要把 `server.game.enableConsole` 设为 `true`。
 
 ## 命令
 
-`help` 会列出全部命令。几个常用的：
+游戏内命令以 `/` 开头，服务器控制台不需要。输入 `help` 查看命令列表，`help <命令> [子命令...]` 查看语法和别名。控制台支持 Tab 补全，参数错误时会显示对应语法。
 
-| | |
-|---|---|
-| `give` | 发放角色、武器、圣遗物与材料。默认等级 100。 |
-| `account` | 创建 / 删除账号，重置密码。 |
-| `banip` / `unbanip` | 封禁某个 IP。封禁 IP 时，从该 IP 登录的账号也会一并被封。 |
-| `sysmail` | 向所有玩家发送系统邮件。 |
+玩家选择器支持 `@UID`、`username@` 和 `username@UID`。账号管理仅限服务器控制台。
+
+```text
+help teleport pos
+give 202 --amount 3 @10001
+```
+
+详细说明见 [CLI 迁移文档](docs/cli-picocli-migration.md)；插件开发参阅 [命令 API v5](docs/plugin-command-api-v5.md)。
 
 ## TPS 射击（7.1）
 
@@ -78,16 +98,22 @@ Windows 上用 `.\gradlew.bat`，或运行 `gradlew-jar.bat`。
 **1. 获取武器**
 
 ```
-/tps give          全部八把 TPS 武器（224001–224008），或指定一把：/tps give 224001
-/tps accessory     解锁你已拥有武器上的所有配件
+/tps give
+/tps give 224001
+/tps accessory
 ```
+
+第一条命令发放全部八把 TPS 武器（224001–224008）；第二条只发放 224001；第三条解锁已拥有武器的配件。
 
 **2. 游玩 TPS 秘境**
 
 ```
-/dungeon 10955                       靶场
-/dungeon 10953、10960 到 10964       涌出的灰色原野各阶段
+/dungeon 10955
+/dungeon 10953
+/dungeon 10960
 ```
+
+每行都是一条独立命令。10955 是靶场，10953 与 10960–10964 是涌出的灰色原野各阶段。
 
 进入后，你的队伍会被替换为 TPS 旅行者（与你使用的旅行者对应，等级 20），并带上你的 TPS 装备，首次则为 224001。在那里切换使用的武器会保留为你的装备配置。离开秘境后恢复你的队伍。
 
@@ -96,9 +122,11 @@ Windows 上用 `.\gradlew.bat`，或运行 `gradlew-jar.bat`。
 任何角色都可以装备 TPS 武器，方便试玩：
 
 ```
-/tps wear 224001 224004    大世界角色装备一把步枪和一枚手雷（至多 2 把枪 + 1 枚手雷）
-/tps refill                补满所有弹药
+/tps wear 224001 224004
+/tps refill
 ```
+
+第一条命令装备步枪和手雷（至多两把枪、一枚手雷），第二条补满弹药。
 
 弹药处理仍部分处于实验阶段。服务端做了什么、`/tps ammo` 的开关，以及尚未定论的部分，见 [docs/tps/README.md](docs/tps/README.md)。
 
@@ -106,7 +134,7 @@ Windows 上用 `.\gradlew.bat`，或运行 `gradlew-jar.bat`。
 
 以 **GNU General Public License v3.0** 发布。见 [`LICENSE`](LICENSE)。
 
-`LICENSE-ClassGraph.txt` 不是本项目的许可。ClassGraph 是一个 MIT 许可的依赖，其编译后的类随 `grasscutter.jar` 一同分发，MIT 只要求其声明随附其中。
+`LICENSE-ClassGraph.txt` 不是本项目的许可。ClassGraph 是一个 MIT 许可的依赖，其编译后的类随 `grasscutter-7.1.0.jar` 一同分发，MIT 只要求其声明随附其中。
 
 ## 致谢
 

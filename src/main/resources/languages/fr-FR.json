@@ -181,6 +181,12 @@
       "description": "Modifie les propriétés d'une entité existante",
       "not_found_error": "L'entité n'existe pas"
     },
+    "avatar": {
+      "description": "Gérer les personnages : liste, constellations, aptitudes, statistiques de combat, amitié, niveaux supplémentaires et amélioration maximale."
+    },
+    "battlepass": {
+      "description": "Gérer l'achat de niveaux et le statut premium du passe de combat."
+    },
     "give": {
       "usage_relic": "Utilisation: give <artifactID> [mainPropID] [<appendPropID>[,<times>]]... [lv<level 0-20>]",
       "illegal_relic": "L'ID de cet artéfact appartient a une liste blacklistée, ce n'est peut-être pas celui que vous désirez.",
@@ -224,7 +230,7 @@
       "language_not_found": "Actuellement, cette langue n'est pas supportée par le serveur.",
       "description": "Affiche ou change la langue du serveur"
     },
-    "list": {
+    "player": {
       "success": "Il y a %s joueur(s) connectés:",
       "description": "Liste tous les joueurs connectés"
     },
@@ -247,11 +253,6 @@
       "not_found": "NPC %s not found.",
       "none_near": "No NPC within %s m.",
       "group_sent": "Asked the client to load group %s suite %s; its NPCs appear where the script places them (you must be in that group's scene)."
-    },
-    "pierro": {
-      "description": "Toggle Il Pierro's support button from the Ronova fight",
-      "on": "Pierro's support button is on: his portrait appears on the team bar and strikes Ronova when pressed. It lasts until logout.",
-      "off": "Pierro's support button is off."
     },
     "support": {
       "description": "Toggle team-bar support buttons: Il Pierro (pierro), Valeriy (valeriy), support blast (blast)",
@@ -289,7 +290,10 @@
       "description": "Joue une cinématique"
     },
     "sound": {
-      "description": "Joue un son"
+      "description": "Play a scene sound. sound list [filter] [--page N] searches observed sound names."
+    },
+    "lookup": {
+      "description": "Search game content names and IDs; paginate with --page N."
     },
     "reload": {
       "reload_start": "Rechargement de la configuration.",
@@ -328,9 +332,13 @@
       "error": "ERREUR: Stade de construction invalide : %s. Vérifiez la console pour la pile d'appels.",
       "description": "Envoie un courrier à l'utilisateur spécifié. L'utilisation de la commande change en fonction du stade de la composition du message."
     },
-    "sendMessage": {
+    "say": {
       "success": "Message envoyé.",
-      "description": "Envoie un message au joueur spécifié en tant que Serveur"
+      "description": "Diffuse un message du serveur à tous les joueurs connectés."
+    },
+    "sayto": {
+      "success": "Message envoyé.",
+      "description": "Envoie un message du serveur à un joueur connecté."
     },
     "setConst": {
       "range_error": "Le niveau de constellation doit être compris entre 1 et 6.",
@@ -347,8 +355,11 @@
       "level_error": "Niveau d'affinité invalide.",
       "description": "Défini le niveau d'affinité de votre personnage actif"
     },
-    "setProp": {
-      "description": "Définit des propriétes pour votre compte. Des choses comme le godemode peuvent être activés avec cette commande, et le déblocage de l'abysse ainsi que l'avancement du PB.\n\tValues for <prop>: godmode | nostamina | unlimitedenergy | abyss | worldlevel | bplevel\n\t(cont.) see PlayerProperty enum for other possible values, of form PROP_MAX_SPRING_VOLUME -> max_spring_volume"
+    "openstate": {
+      "description": "Query or set OpenStates by name: openstate <name|id> [true|false]. Find names with openstate list [filter]."
+    },
+    "prop": {
+      "description": "Définit des propriétes pour votre compte. Des choses comme le godemode peuvent être activés avec cette commande, et le déblocage de l'abysse ainsi que l'avancement du PB. Use `unlock map` for map unlocks and `openstate` for OpenStates."
     },
     "setSceneTag": {
       "description": "Définit les balises de scène spécifiques au compte. Cela permet de contrôler des choses comme les rochers qui bloquent les portes, les bâtiments qui sont visibles, et d'autres choses (généralement liées aux quêtes) qui affectent ce qui est visible dans votre monde."
@@ -419,7 +430,7 @@
       "success": "%s a été téléporté à %s, %s, %s dans la scène %s.",
       "description": "Change la position du joueur"
     },
-    "trialAvatarActivity": {
+    "trial": {
       "description": "Manipuler les fonctionnalités de Trial Avatar Activity. Cela inclut le basculement des états de donjon et de récompense.",
       "not_found": "Les données du lecteur d'activité d'avatar d'essai sont introuvables. Peut-être que l'activité n'est pas activée.",
       "invalid_param": "Paramètre invalide.",
@@ -439,7 +450,7 @@
       "success": "Succès.",
       "failure": "Échec, joueur introuvable.",
       "invalid_time": "Impossible d'analyser le timestamp.",
-      "description": "Bannis un joueur"
+      "description": "Bannir un compte ou une adresse IPv4"
     },
     "unlockall": {
       "success": "Toutes les open states ont été débloqués pour %s.",

@@ -39,9 +39,27 @@ Then build with:
 ./gradlew jar -PskipHandbook=1
 ```
 
-`grasscutter.jar` lands in the project root. Drop `-PskipHandbook=1` to build the in-game handbook as well; that step needs NodeJS and fails without it.
+`grasscutter-7.1.0.jar` lands in the project root. Drop `-PskipHandbook=1` to build the in-game handbook as well; that step needs NodeJS and fails without it.
 
 On Windows use `.\gradlew.bat`, or run `gradlew-jar.bat`.
+
+### Faster local builds
+
+The wrapper uses **Gradle 9.8.1**. The build cache and configuration cache are enabled in `gradle.properties`; unchanged protocol generation and compilation outputs can be reused across builds and Git worktrees.
+
+To compile without packaging a JAR:
+
+```sh
+./gradlew classes -PskipHandbook=1
+```
+
+For a quicker **local-test** fat JAR, disable ZIP compression:
+
+```sh
+./gradlew jar -PskipHandbook=1 -PfastJar
+```
+
+On Windows, use `.\gradlew.bat` in place of `./gradlew`. Both modes produce `grasscutter-7.1.0.jar` in the project root. The fast mode keeps the same JAR entries but makes the file much larger (roughly 230 MB instead of 85 MB in CI); use the default compressed build for distribution.
 
 ## Running
 
@@ -55,10 +73,10 @@ On Windows use `.\gradlew.bat`, or run `gradlew-jar.bat`.
 
 There is no registration page. An account is created either way:
 
-- **From the console.** `account create <username> [uid] [password]`
+- **From the console.** `account create <username> [password] [@UID]` (password and UID optional).
 - **At sign-in.** Signing in with a name nobody holds registers it. With `account.useIntegrationPassword` on, put `name&&password` in the username box and leave the password box alone — useful when proxying a bunch of clients at once and you don't want to set up a user for each.
 
-Passwords are BCrypt-hashed. The console needs `server.game.enableConsole` set to `true`.
+Provided passwords are BCrypt-hashed. An account created without a password has no password check until one is set. New accounts receive only configured default permissions, never an automatic `*` administrator grant. The console needs `server.game.enableConsole` set to `true`.
 
 ### Web console (opt-in)
 
@@ -90,14 +108,16 @@ this command-execution interface directly to the public Internet.
 
 ## Commands
 
-`help` lists them. A few worth knowing:
+In-game commands use `/`; the server console omits it. Use `help` to list commands, or `help <command> [subcommand...]` for syntax and aliases. The console supports Tab completion; invalid arguments show usage.
 
-| | |
-|---|---|
-| `give` | Avatars, weapons, artifacts and materials. Level 100 by default. |
-| `account` | Create and delete accounts, reset passwords. |
-| `banip` / `unbanip` | Ban an address. Banning one also bans the account arriving from it. |
-| `sysmail` | Send system mail to every player. |
+Player selectors: `@UID`, `username@`, or `username@UID`. Account management is console-only.
+
+```text
+help teleport pos
+give 202 --amount 3 @10001
+```
+
+See the [CLI migration guide](docs/cli-picocli-migration.md) for details and the [command API v5 guide](docs/plugin-command-api-v5.md) for plugins.
 
 ## TPS shooting (7.1)
 
@@ -106,16 +126,22 @@ Snezhnaya's third-person shooter mode works: guns and grenades worn next to an a
 **1. Get the weapons**
 
 ```
-/tps give          all eight TPS weapons (224001–224008), or one: /tps give 224001
-/tps accessory     unlock every accessory on the weapons you own
+/tps give
+/tps give 224001
+/tps accessory
 ```
+
+The first command grants all eight TPS weapons (224001–224008); the second grants only weapon 224001. The third unlocks accessories for owned weapons.
 
 **2. Play a TPS domain**
 
 ```
-/dungeon 10955                       the shooting range
-/dungeon 10953, 10960 to 10964       the Emerged Grey Field stages
+/dungeon 10955
+/dungeon 10953
+/dungeon 10960
 ```
+
+Each line is a separate command. Dungeon 10955 is the shooting range; 10953 and 10960–10964 are Emerged Grey Field stages.
 
 Inside, your team is swapped for the TPS Traveler (matching your Traveler, level 20), wearing your TPS loadout, or 224001 the first time. Weapons you switch to there are kept as your loadout. Leaving the domain restores your team.
 
@@ -124,9 +150,11 @@ Inside, your team is swapped for the TPS Traveler (matching your Traveler, level
 Any avatar can wear TPS weapons, which is handy for trying them out:
 
 ```
-/tps wear 224001 224004    the field avatar wears a rifle and a grenade (at most 2 guns and 1 grenade)
-/tps refill                refill all ammunition
+/tps wear 224001 224004
+/tps refill
 ```
+
+The first command equips a rifle and a grenade (at most two guns and one grenade); the second refills ammunition.
 
 Ammunition handling is still partly experimental. See [docs/tps/README.md](docs/tps/README.md) for what the server does, the `/tps ammo` switches, and what is not settled yet.
 
@@ -134,7 +162,7 @@ Ammunition handling is still partly experimental. See [docs/tps/README.md](docs/
 
 Released under the **GNU General Public License v3.0**. See [`LICENSE`](LICENSE).
 
-`LICENSE-ClassGraph.txt` is not this project's licence. ClassGraph is an MIT-licensed dependency whose compiled classes ship inside `grasscutter.jar`, and MIT asks only that its notice travels with them.
+`LICENSE-ClassGraph.txt` is not this project's licence. ClassGraph is an MIT-licensed dependency whose compiled classes ship inside `grasscutter-7.1.0.jar`, and MIT asks only that its notice travels with them.
 
 ## Credits
 

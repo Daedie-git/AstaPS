@@ -6,6 +6,7 @@ import dev.morphia.annotations.*;
 import emu.grasscutter.Grasscutter;
 import emu.grasscutter.GameConstants;
 import emu.grasscutter.data.GameData;
+import emu.grasscutter.data.binout.ExtraTalents;
 import emu.grasscutter.data.binout.OpenConfigEntry;
 import emu.grasscutter.data.binout.OpenConfigEntry.SkillPointModifier;
 import emu.grasscutter.data.common.FightPropData;
@@ -730,6 +731,7 @@ public class Avatar {
         TpsWeaponSystem.applyAffixes(this);
 
         // Add proud skills and unlock them if needed
+        var talentOwners = new HashSet<String>();
         AvatarSkillDepotData skillDepot =
                 GameData.getAvatarSkillDepotDataMap().get(this.getSkillDepotId());
         this.getProudSkillList().clear();
@@ -767,6 +769,7 @@ public class Avatar {
 
             // Add any embryos from this proud skill
             this.addToExtraAbilityEmbryos(proudSkillData.getOpenConfig());
+            talentOwners.add(ExtraTalents.owner(proudSkillData.getOpenConfig()));
         }
 
         // Skill openConfigs (e.g. PlayerGirl_Ice_SkillUpgrade_1 AddAbility for
@@ -788,6 +791,7 @@ public class Avatar {
                                                 .get(skillCfg.getProudSkillGroupId() * 100 + level);
                                 if (skillProud != null) {
                                     this.addToExtraAbilityEmbryos(skillProud.getOpenConfig());
+                                    talentOwners.add(ExtraTalents.owner(skillProud.getOpenConfig()));
                                 }
                             });
         }
@@ -799,6 +803,13 @@ public class Avatar {
                 .filter(Objects::nonNull)
                 .map(AvatarTalentData::getOpenConfig)
                 .filter(Objects::nonNull)
+                .forEach(
+                        openConfig -> {
+                            this.addToExtraAbilityEmbryos(openConfig);
+                            talentOwners.add(ExtraTalents.owner(openConfig));
+                        });
+
+        ExtraTalents.forOwners(talentOwners, this.getAvatarData().getName())
                 .forEach(this::addToExtraAbilityEmbryos);
         // Add any skill strings from this constellation
 
@@ -1089,6 +1100,10 @@ public class Avatar {
     }
 
     public boolean unlockConstellation(int talentId, boolean skipPayment) {
+        return unlockConstellation(talentId, skipPayment, true);
+    }
+
+    private boolean unlockConstellation(int talentId, boolean skipPayment, boolean finalizeChange) {
         // Get talent
         AvatarTalentData talentData = GameData.getAvatarTalentDataMap().get(talentId);
         if (talentData == null) return false;
@@ -1113,25 +1128,31 @@ public class Avatar {
         // Proud skill bonus map (Extra skills)
         this.calcConstellation(GameData.getOpenConfigEntries().get(talentData.getOpenConfig()), true);
 
-        // Recalc + save avatar
-        this.recalcStats(true);
-        this.save();
+        // Ordinary unlocks commit immediately; GM bulk changes finalize once.
+        if (finalizeChange) {
+            this.recalcStats(true);
+            this.save();
+        }
         return true;
     }
 
     public void forceConstellationLevel(int level) {
         if (level > 6) return; // Sanity check
 
-        if (level < 0) { // Special case for resetConst to remove inactive depots too
+        if (level < 0) { // Reset also removes constellations from inactive depots.
             this.talentIdList.clear();
-            this.recalcStats();
-            this.save();
-            return;
+        } else {
+            this.talentIdList.removeAll(this.getTalentIdList());
+            for (int i = 0; i < level; i++) {
+                int nextLevel = this.getCoreProudSkillLevel();
+                if (this.skillDepot == null || nextLevel < 0
+                        || nextLevel >= this.skillDepot.getTalents().size()
+                        || !this.unlockConstellation(
+                                this.skillDepot.getTalents().get(nextLevel), true, false)) break;
+            }
         }
-        this.talentIdList.removeAll(
-                this.getTalentIdList()); // Only remove constellations from active depot
-        for (int i = 0; i < level; i++) this.unlockConstellation(true);
-        this.recalcStats();
+        this.recalcConstellations();
+        this.recalcStats(true);
         this.save();
     }
 

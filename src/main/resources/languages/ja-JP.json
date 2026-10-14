@@ -181,6 +181,12 @@
       "description": "🇺🇸Modify an existing entity's properties",
       "not_found_error": "🇺🇸Entity does not exist"
     },
+    "avatar": {
+      "description": "所持キャラクターの一覧、命ノ星座、天賦、戦闘ステータス、好感度、追加レベル、最大強化を管理します。"
+    },
+    "battlepass": {
+      "description": "紀行レベルの購入と有料報酬の状態を管理します。"
+    },
     "give": {
       "usage_relic": "使用方法: give <聖遺物ID> [メインステータスID] [<サブステータスID>[,<強化回数>]]... [lv<レベル 0-20>]",
       "illegal_relic": "この聖遺物IDはブラックリストに登録された範囲に属しています。必要な範囲ではない可能性があります。",
@@ -224,7 +230,7 @@
       "language_not_found": "現在、サーバーにはその言語がありません。",
       "description": "現在の言語を表示または変更します｡"
     },
-    "list": {
+    "player": {
       "success": "%s 人のプレイヤーがオンラインです:",
       "description": "オンラインのプレイヤーを取得します。"
     },
@@ -247,11 +253,6 @@
       "not_found": "NPC %s not found.",
       "none_near": "No NPC within %s m.",
       "group_sent": "Asked the client to load group %s suite %s; its NPCs appear where the script places them (you must be in that group's scene)."
-    },
-    "pierro": {
-      "description": "Toggle Il Pierro's support button from the Ronova fight",
-      "on": "Pierro's support button is on: his portrait appears on the team bar and strikes Ronova when pressed. It lasts until logout.",
-      "off": "Pierro's support button is off."
     },
     "support": {
       "description": "Toggle team-bar support buttons: Il Pierro (pierro), Valeriy (valeriy), support blast (blast)",
@@ -289,7 +290,10 @@
       "description": "カットシーンを再生します"
     },
     "sound": {
-      "description": "🇺🇸Plays a sound"
+      "description": "Play a scene sound. sound list [filter] [--page N] searches observed sound names."
+    },
+    "lookup": {
+      "description": "Search game content names and IDs; paginate with --page N."
     },
     "reload": {
       "reload_start": "設定を再読み込みしています。",
@@ -328,9 +332,13 @@
       "error": "エラー: 建設ステージ %s が無効です。 コンソールでスタック トレースを確認します。",
       "description": "指定したユーザーにメールを送信します。 このコマンドの使用法は、その合成状態に基づいて変化します"
     },
-    "sendMessage": {
+    "say": {
       "success": "メッセージを送信しました。",
-      "description": "サーバーとしてプレイヤーにメッセージを送信します。 ターゲットなしで使用すると、サーバー上のすべてのプレイヤーに送信されます。"
+      "description": "オンラインの全プレイヤーにサーバーメッセージを送信します。"
+    },
+    "sayto": {
+      "success": "メッセージを送信しました。",
+      "description": "指定したオンラインプレイヤーにサーバーメッセージを送信します。"
     },
     "setConst": {
       "range_error": "キャラの凸数は 0 から 6 までです。",
@@ -347,8 +355,11 @@
       "level_error": "好感度レベルが無効です。",
       "description": "現在アクティブなキャラの好感度レベルを設定します｡"
     },
-    "setProp": {
-      "description": "アカウント全体のプロパティを設定します。 godmodeのようなものはこの方法で有効にすることができ、アンロックされた深淵の床やバトル パスの進行状況などを変更することもできます。\n\t<prop> の値: godmode | nostamina | unlimitedenergy | abyss | worldlevel | bplevel\n\tmax_spring_volume の形式の他の設定可能な値についてはPlayerPropertyを参照してください｡"
+    "openstate": {
+      "description": "Query or set OpenStates by name: openstate <name|id> [true|false]. Find names with openstate list [filter]."
+    },
+    "prop": {
+      "description": "アカウント全体のプロパティを設定します。 godmodeのようなものはこの方法で有効にすることができ、アンロックされた深淵の床やバトル パスの進行状況などを変更することもできます。 Use `unlock map` for map unlocks and `openstate` for OpenStates."
     },
     "setSceneTag": {
       "description": "アカウント固有のシーンタグを設定します。これは岩がドアを塞いだり、建物が見えたり、その他（大抵はクエストに関連した）あなたのワールドで見えるものに影響を与えるものをコントロールします。"
@@ -419,7 +430,7 @@
       "success": "%1$s を シーン %5$s の %2$s, %3$s, %4$s にテレポートさせました。",
       "description": "プレイヤーの位置を変更します。"
     },
-    "trialAvatarActivity": {
+    "trial": {
       "description": "トライアル アバター アクティビティの機能を操作します。これには、ダンジョンと報酬の状態の切り替えが含まれます。",
       "not_found": "試用アバター アクティビティ プレーヤー データが見つかりません。アクティビティが有効になっていない可能性があります。",
       "invalid_param": "無効なパラメーター。",
@@ -439,7 +450,7 @@
       "success": "成功しました。",
       "failure": "失敗しました。プレイヤーが見つかりません。",
       "invalid_time": "タイムスタンプを解析できません。",
-      "description": "プレイヤーをBANします｡"
+      "description": "アカウントまたはIPv4アドレスをBANします。"
     },
     "unlockall": {
       "success": "%s のすべてのオープンなステータスのロックを解除しました。",

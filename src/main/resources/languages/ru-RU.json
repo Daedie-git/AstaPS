@@ -181,6 +181,12 @@
       "description": "Изменяет свойства выбранной сущности",
       "not_found_error": "Сущность не найдена"
     },
+    "avatar": {
+      "description": "Управление персонажами: список, созвездия, таланты, боевые характеристики, дружба, дополнительные уровни и максимальное развитие."
+    },
+    "battlepass": {
+      "description": "Управление покупкой уровней боевого пропуска и доступом к платным наградам."
+    },
     "give": {
       "usage_relic": "Применение: give <ID_артефакта> [ID_глав_хар-ки] [<ID доп_хар-ки>[,<раз>]]... [lv<уровень 0-20>]",
       "illegal_relic": "Данный ID_артефакта находится в черном списке. Возможно, это не то, что вы хотите получить.",
@@ -224,7 +230,7 @@
       "language_not_found": "На текущий момент, на сервере недоступен этот язык.",
       "description": "Отображает или изменяет текущий язык"
     },
-    "list": {
+    "player": {
       "success": "Сейчас в сети %s игрок(ов):",
       "description": "Отображает всех игроков, находящихся в сети"
     },
@@ -247,11 +253,6 @@
       "not_found": "NPC %s not found.",
       "none_near": "No NPC within %s m.",
       "group_sent": "Asked the client to load group %s suite %s; its NPCs appear where the script places them (you must be in that group's scene)."
-    },
-    "pierro": {
-      "description": "Toggle Il Pierro's support button from the Ronova fight",
-      "on": "Pierro's support button is on: his portrait appears on the team bar and strikes Ronova when pressed. It lasts until logout.",
-      "off": "Pierro's support button is off."
     },
     "support": {
       "description": "Toggle team-bar support buttons: Il Pierro (pierro), Valeriy (valeriy), support blast (blast)",
@@ -289,7 +290,10 @@
       "description": "Проигрывает кат-сцену"
     },
     "sound": {
-      "description": "Проигрывает звук"
+      "description": "Play a scene sound. sound list [filter] [--page N] searches observed sound names."
+    },
+    "lookup": {
+      "description": "Search game content names and IDs; paginate with --page N."
     },
     "reload": {
       "reload_start": "Перезагружаем файл конфигурации.",
@@ -328,9 +332,13 @@
       "error": "ОШИБКА: Некорректная стадия создания %s. Проверьте stacktrace в консоли.",
       "description": "Отправляет сообщение по почте указанному пользователю. Применение данной команды изменяется в зависимости от стадии написания письма"
     },
-    "sendMessage": {
+    "say": {
       "success": "Сообщение было отправлено.",
-      "description": "Отправляет сообщение выбранному игроку от имени сервера. При отсутствии конкретной цели, отправляет сообщение всем игрокам на сервере."
+      "description": "Отправляет сообщение сервера всем игрокам в сети."
+    },
+    "sayto": {
+      "success": "Сообщение было отправлено.",
+      "description": "Отправляет сообщение сервера выбранному игроку в сети."
     },
     "setConst": {
       "range_error": "Уровень созвездия должен быть в диапазоне от 0 до 6.",
@@ -347,8 +355,11 @@
       "level_error": "Некорректный уровень дружбы.",
       "description": "Задаёт уровень дружбы для активного персонажа"
     },
-    "setProp": {
-      "description": "Задаёт свойства аккаунта. С помощью данной команды может быть включен godmode, а также разблокированы этажи Коридора Бездны и изменён прогресс боевого пропуска.\n\tВозможные значения <св-во>: godmode | nostamina | unlimitedenergy | abyss | worldlevel | bplevel\n\t(прод.) см. перечисление (enum) PlayerProperty для остальных возможных значений, of form PROP_MAX_SPRING_VOLUME -> max_spring_volume"
+    "openstate": {
+      "description": "Query or set OpenStates by name: openstate <name|id> [true|false]. Find names with openstate list [filter]."
+    },
+    "prop": {
+      "description": "Задаёт свойства аккаунта. С помощью данной команды может быть включен godmode, а также разблокированы этажи Коридора Бездны и изменён прогресс боевого пропуска. Используйте `unlock map` для карты, а `openstate` для состояний."
     },
     "setSceneTag": {
       "description": "Устанавливает специфические для учетной записи теги сцены. Это позволяет управлять такими вещами, как камни, блокирующие двери, видимость зданий и другими (обычно связанными с квестами) вещами, которые влияют на видимость в вашем мире."
@@ -419,7 +430,7 @@
       "success": "Игрок %s был телепортирован по координатам %s, %s, %s в сцене %s.",
       "description": "Изменяет местоположение игрока"
     },
-    "trialAvatarActivity": {
+    "trial": {
       "description": "Управление функциями пробного аватара. Это включает в себя переключение состояний подземелий и наград.",
       "not_found": "Данные об активности пробного аватара игрока не найдены. Возможно, активность не включена.",
       "invalid_param": "Неверный параметр.",
@@ -439,7 +450,7 @@
       "success": "Успех.",
       "failure": "Неудача, игрок не найден.",
       "invalid_time": "Не удалось определить промежуток времени.",
-      "description": "Запрещает игроку присоединяться к серверу (\"банит\")"
+      "description": "Заблокировать аккаунт или IPv4-адрес"
     },
     "unlockall": {
       "success": "Разблокированы все состояния для %s.",

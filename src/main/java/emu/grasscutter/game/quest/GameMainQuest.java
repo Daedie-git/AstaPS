@@ -33,6 +33,9 @@ public class GameMainQuest {
     @Getter private long[] timeVar;
     @Getter private ParentQuestState state;
     @Getter private boolean isFinished;
+    // Completion evidence for MQ1000 rescue plot reports that arrive before acceptance.
+    @Getter @Setter(AccessLevel.PACKAGE) private boolean liyueRescuePlotReported;
+    @Getter @Setter(AccessLevel.PACKAGE) private int liyueAmberSuite;
     @Getter List<QuestGroupSuite> questGroupSuites;
 
     @Getter int[] suggestTrackMainQuestList;
@@ -241,6 +244,56 @@ public class GameMainQuest {
         return null;
     }
 
+    /** Resume reviewed parallel stages without replaying completed talks or resetting counters. */
+    public List<Position> resumeOnLogin() {
+        if (this.questManager == null) this.questManager = getOwner().getQuestManager();
+        if (QuestManager.isQuestingActive()) {
+            var jadePosition = LiyueJadeChamberRecovery.resumeOnLogin(this);
+            if (jadePosition != null) return jadePosition;
+        }
+        if (QuestManager.isQuestingActive() && LiyueGoldenHouseEntrySupport.resumeOnLogin(this))
+            return null;
+        if (QuestManager.isQuestingActive() && LiyueChargePotRecovery.resumeOnLogin(this))
+            return null;
+        if (QuestManager.isQuestingActive() && LiyueCloudDungeonEntryRecovery.resumeOnLogin(this))
+            return null;
+        if (QuestManager.isQuestingActive() && (LiyueCloudRecipeRecovery.resumeOnLogin(this)
+                || LiyueMountainQuestResume.resumeOnLogin(this))) return null;
+        if (QuestManager.isQuestingActive() && LiyueCityQuestResume.resumeOnLogin(this)) {
+            return null;
+        }
+        if (QuestManager.isQuestingActive() && LiyueWangshuItemRecovery.resumeOnLogin(this)) {
+            return null;
+        }
+        if (QuestManager.isQuestingActive() && LiyueRescuePlotRecovery.resumeOnLogin(this)) {
+            return null;
+        }
+        var recovery = QuestManager.isQuestingActive()
+                ? LiyueParallelQuestResume.selectPhase(this) : null;
+        if (recovery == null) return rewind();
+
+        for (var quest : recovery.quests()) {
+            if (quest.getState() == QuestState.QUEST_STATE_UNSTARTED) quest.start();
+        }
+
+        // Older order-based rewinds may have erased counters while keeping completed talks.
+        // Restore only their missing contribution, so repeated logins never add it twice.
+        int completedTalks = recovery.completedTalks();
+        for (int counterId : recovery.phase().counters()) {
+            int saved = Math.max(0,
+                    getOwner().getPlayerProgress().getCurrentProgress(String.valueOf(counterId)));
+            if (completedTalks > saved) {
+                getOwner().getProgressManager().addQuestProgress(counterId, completedTalks - saved);
+            }
+            // Recheck persisted counts even if no new talk event occurred this session.
+            getOwner().getQuestManager().queueEvent(
+                    QuestContent.QUEST_CONTENT_ADD_QUEST_PROGRESS, counterId);
+        }
+        var counter = getChildQuestById(recovery.phase().completedCounter());
+        if (counter.getState() == QuestState.QUEST_STATE_FINISHED) counter.triggerStateEvents();
+        return null; // Keep the saved login position.
+    }
+
     // Rewinds to the last finished/unfinished rewind quest, and returns the avatar rewind position
     // (if it exists)
     public List<Position> rewind() {
@@ -416,19 +469,20 @@ public class GameMainQuest {
         }
     }
 
+    /** Accept conditions determine how a quest starts, not whether it can finish. */
+    static boolean shouldHandleFinishEvent(GameQuest quest, QuestContent event) {
+        if (quest == null || event == null || quest.getState() != QuestState.QUEST_STATE_UNFINISHED
+                || quest.getQuestData() == null) return false;
+        var conditions = quest.getQuestData().getFinishCond();
+        return conditions != null && conditions.stream()
+                .anyMatch(condition -> condition != null && condition.getType() == event);
+    }
+
     public void tryFinishSubQuests(QuestContent condType, String paramStr, int... params) {
         try {
             List<GameQuest> subQuestsWithCond =
                     getChildQuests().values().stream()
-                            // There are subQuests with no acceptCond, but can be finished (example: 35104)
-                            .filter(
-                                    p ->
-                                            p.getState() == QuestState.QUEST_STATE_UNFINISHED
-                                                    && p.getQuestData().getAcceptCond() != null)
-                            .filter(
-                                    p ->
-                                            p.getQuestData().getFinishCond().stream()
-                                                    .anyMatch(q -> q.getType() == condType))
+                            .filter(p -> shouldHandleFinishEvent(p, condType))
                             .toList();
 
             for (GameQuest subQuestWithCond : subQuestsWithCond) {
@@ -577,6 +631,6 @@ public class GameMainQuest {
             return 0;
         }
 
-        return owner.getWorld().getTotalGameTimeDays() - ConversionUtils.gameTimeToDays(varTime);
+        return ConversionUtils.gameTimeToHours(owner.getWorld().getTotalGameTimeMinutes() - varTime);
     }
 }

@@ -6,9 +6,11 @@ import emu.grasscutter.GameConstants;
 import emu.grasscutter.Grasscutter;
 import emu.grasscutter.data.GameData;
 import emu.grasscutter.data.excels.dungeon.DungeonData;
+import emu.grasscutter.game.ability.NatsaurusVehicleHelper;
 import emu.grasscutter.game.entity.EntityTeam;
 import emu.grasscutter.game.entity.EntityWorld;
 import emu.grasscutter.game.player.Player;
+import emu.grasscutter.game.player.PhlogistonRegion;
 import emu.grasscutter.game.player.Player.SceneLoadState;
 import emu.grasscutter.game.props.EnterReason;
 import emu.grasscutter.game.props.EntityIdType;
@@ -343,7 +345,9 @@ public class World implements Iterable<Player> {
     }
 
     public void save() {
-        this.getScenes().values().forEach(Scene::saveGroups);
+        // Scene callbacks may acquire a scene monitor; do not hold the collection monitor.
+        WorldSceneSnapshot.forEachOutsideMonitor(
+                this.scenes, this.scenes::values, Scene::saveGroups);
     }
 
     public void queueTransferPlayerToScene(Player player, int sceneId, Position pos, int delayMs) {
@@ -414,6 +418,7 @@ public class World implements Iterable<Player> {
                         .enterType(EnterType.EnterType_ENTER_JUMP);
 
         val sceneData = GameData.getSceneDataMap().get(sceneId);
+        if (sceneData == null) return false;
         if (dungeonData != null) {
             teleportProps
                     .teleportTo(dungeonData.getStartPosition())
@@ -431,16 +436,6 @@ public class World implements Iterable<Player> {
     }
 
     public boolean transferPlayerToScene(Player player, TeleportProperties teleportProperties) {
-        // If a queued teleport already exists, cancel it. This prevents the player from
-        // becoming stranded in a dungeon due to quitting it by teleporting to a map waypoint.
-        synchronized (player) {
-            var queuedTeleport = player.getQueuedTeleport();
-            if (queuedTeleport != null) {
-                player.setQueuedTeleport(null);
-                queuedTeleport.cancel(true);
-            }
-        }
-
         // Check if the teleport properties are valid.
         if (teleportProperties.getTeleportTo() == null)
             teleportProperties.setTeleportTo(player.getPosition());
@@ -458,11 +453,44 @@ public class World implements Iterable<Player> {
             return false;
         }
 
+        // Being soul-attached is bound to the dragon's position in the world, and the client keeps
+        // steering that entity until it is told otherwise. Moving the character out from under the mount
+        // therefore teleports the avatar and leaves the camera, the inputs and the dragon behind at the
+        // old spot - unrecoverable short of a relog. The mount has to go with the rider: leaving it as a
+        // soul candle would only reappear in the scene this transfer is about to re-send, and the client
+        // would hang its camera back on it and play it as a killed dragon.
+        NatsaurusVehicleHelper.takeAway(player);
+
+        // If a queued teleport already exists, cancel it. This prevents the player from
+        // becoming stranded in a dungeon due to quitting it by teleporting to a map waypoint.
+        synchronized (player) {
+            var queuedTeleport = player.getQueuedTeleport();
+            if (queuedTeleport != null) {
+                player.setQueuedTeleport(null);
+                queuedTeleport.cancel(true);
+            }
+        }
+
         Scene oldScene = player.getScene();
         var newScene = this.getSceneById(teleportProperties.getSceneId());
+        // Re-entering the same dungeon starts a fresh instance instead of keeping the old chamber.
+        if (newScene == oldScene
+                && oldScene != null
+                && oldScene.getSceneType() == SceneType.SCENE_DUNGEON
+                && teleportProperties.getTeleportType() == TeleportType.DUNGEON) {
+            oldScene.setDontDestroyWhenEmpty(false);
+            oldScene.removePlayer(player);
+            newScene = this.getSceneById(teleportProperties.getSceneId());
+        }
 
         // Move directly in the same scene.
-        if (newScene == oldScene && teleportProperties.getTeleportType() == TeleportType.COMMAND) {
+        if (newScene == oldScene
+                && teleportProperties.getTeleportType() == TeleportType.COMMAND
+                && PhlogistonRegion.contains(newScene.getId(), teleportProperties.getTeleportTo())
+                        == player.isInNatlan()
+                && emu.grasscutter.game.player.SnezhnayaFrigid.contains(
+                                newScene.getId(), teleportProperties.getTeleportTo())
+                        == emu.grasscutter.game.player.SnezhnayaFrigid.isGranted(player)) {
             // Set player position and rotation
             if (teleportProperties.getTeleportTo() != null) {
                 player.getPosition().set(teleportProperties.getTeleportTo());
@@ -474,7 +502,7 @@ public class World implements Iterable<Player> {
             return true;
         }
 
-        if (oldScene != null) {
+        if (oldScene != null && player.getScene() == oldScene) {
             // Don't deregister scenes if the player is going to tp back into them
             if (oldScene == newScene) {
                 oldScene.setDontDestroyWhenEmpty(true);
@@ -485,18 +513,9 @@ public class World implements Iterable<Player> {
             oldScene.removePlayer(player);
         }
 
+        // Resolve the destination before rebuilding avatars and their region-dependent abilities.
+        // Both Mondstadt and Natlan are in scene 3, so the old position must not decide the HUD.
         if (newScene != null) {
-            newScene.addPlayer(player);
-
-            player.getTeamManager().applyAbilities(newScene);
-
-            // Dungeon
-            // Dungeon system is handling this already
-            // if(dungeonData!=null){
-            //     var dungeonManager = new DungeonManager(newScene, dungeonData);
-            //     dungeonManager.startDungeon();
-            // }
-
             SceneConfig config = newScene.getScriptManager().getConfig();
             if (teleportProperties.getTeleportTo() == null && config != null) {
                 if (config.born_pos != null) {
@@ -507,13 +526,19 @@ public class World implements Iterable<Player> {
                 }
             }
         }
-
-        // Set player position and rotation
         if (teleportProperties.getTeleportTo() != null) {
             player.getPosition().set(teleportProperties.getTeleportTo());
         }
         if (teleportProperties.getTeleportRot() != null) {
             player.getRotation().set(teleportProperties.getTeleportRot());
+        }
+
+        if (newScene != null) {
+            newScene.addPlayer(player);
+            // The hold only had to bridge the moment the player was out of the scene; left set, a
+            // disconnect would keep this scene registered and the next entry would reuse it.
+            if (newScene == oldScene) newScene.setDontDestroyWhenEmpty(false);
+            player.getTeamManager().applyAbilities(newScene);
         }
 
         if (oldScene != null && newScene != null && newScene != oldScene) {
@@ -588,7 +613,11 @@ public class World implements Iterable<Player> {
         }
         for (Scene scene : sceneSnapshot) {
             if (this.scenes.get(scene.getId()) == scene && scene.getPlayerCount() > 0) {
-                scene.onTick();
+                try {
+                    scene.onTick();
+                } catch (RuntimeException e) {
+                    Grasscutter.getLogger().error("Scene {} tick failed", scene.getId(), e);
+                }
             }
         }
 
@@ -715,6 +744,9 @@ public class World implements Iterable<Player> {
      */
     public void lockTime(boolean locked) {
         if (this.timeLocked != locked) {
+            // Bank the running time, and restart the clock so locked time is not counted later.
+            this.getWorldTime();
+            this.lastUpdateTime = System.currentTimeMillis();
             Grasscutter.getLogger()
                     .info(
                             "Game time for uid {} is now {}.",

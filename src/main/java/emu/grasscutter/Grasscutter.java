@@ -24,6 +24,7 @@ import emu.grasscutter.utils.*;
 import emu.grasscutter.utils.lang.Language;
 import io.netty.util.concurrent.FastThreadLocalThread;
 import java.io.*;
+import java.time.Duration;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Locale;
@@ -130,6 +131,10 @@ public final class Grasscutter {
         logger.info(translate("messages.status.game_version", GameConstants.VERSION));
         logger.info(translate("messages.status.version", GameConstants.VERSION, "Asta"));
 
+        // Server-owned reward rules are authoritative; never read the native point reward map.
+        emu.grasscutter.game.reward.TransPointRewardConfig.loadOrCreate(
+                java.nio.file.Path.of("config", "rewards", "trans-point-rewards.toml"));
+
         // Initialize database.
         DatabaseManager.initialize();
 
@@ -232,10 +237,12 @@ public final class Grasscutter {
     /** Server shutdown event. */
     private static void onShutdown() {
         // Disable all plugins.
-        if (pluginManager != null) pluginManager.disablePlugins();
+        if (pluginManager != null) Utils.runAll("Plugin shutdown", pluginManager::disablePlugins);
         // Shutdown the game server.
-        if (gameServer != null) gameServer.onServerShutdown();
+        if (gameServer != null) Utils.runAll("Game server shutdown", gameServer::onServerShutdown);
 
+        // Held until the database writers have drained, so its waits are not cut short.
+        boolean interrupted = Thread.interrupted();
         try {
             // Wait for Grasscutter's thread pool to finish.
             var executor = Grasscutter.getThreadPool();
@@ -243,15 +250,22 @@ public final class Grasscutter {
             if (!executor.awaitTermination(5, TimeUnit.SECONDS)) {
                 executor.shutdownNow();
             }
-
-            // Wait for database operations to finish.
-            var dbExecutor = DatabaseHelper.getEventExecutor();
-            dbExecutor.shutdown();
-            if (!dbExecutor.awaitTermination(5, TimeUnit.SECONDS)) {
-                dbExecutor.shutdownNow();
-            }
         } catch (InterruptedException ignored) {
+            // Still drain accepted database writes before restoring the shutdown hook's interrupt.
+            interrupted = true;
         }
+
+        // Stop admission first, then drain every database writer against one shared deadline.
+        var databaseShutdown = DatabaseHelper.shutdownWriters(Duration.ofSeconds(5));
+        if (!databaseShutdown.completed()) {
+            logger.error(
+                    "Database shutdown incomplete: {} active at timeout, {} accepted tasks never started, interrupted={}; pools={}",
+                    databaseShutdown.activeAtTimeoutTaskCount(),
+                    databaseShutdown.notStartedTaskCount(),
+                    databaseShutdown.interrupted(),
+                    databaseShutdown.pools());
+        }
+        if (interrupted) Thread.currentThread().interrupt();
     }
 
     /** Utility method for starting the: - SDK server - Dispatch server */
@@ -375,7 +389,7 @@ public final class Grasscutter {
         var isLastInterrupted = false;
         while (config.server.game.enableConsole) {
             try {
-                input = consoleLineReader.readLine("> ");
+                input = consoleLineReader.readLine(commandMap.getConsolePrompt());
             } catch (UserInterruptException e) {
                 if (!isLastInterrupted) {
                     isLastInterrupted = true;

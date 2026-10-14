@@ -89,6 +89,9 @@ public class Player implements PlayerHook, FieldFetch {
     @Getter @Setter private Position prevPos;
     @Getter @Setter private Position prevPosForHome;
     @Getter @Setter private int prevScene;
+    // Written and read only as a pair, unlike prevScene, which entering a home also overwrites.
+    @Getter @Setter private Position prevPosForDungeon;
+    @Getter @Setter private int prevSceneForDungeon;
     @Getter private Position rotation;
     @Getter private PlayerBirthday birthday;
     @Getter private PlayerCodex codex;
@@ -130,8 +133,12 @@ public class Player implements PlayerHook, FieldFetch {
     private Map<Integer, Integer> tpsAmmunition;
     // TPS weapons the TPS traveler wears; it is a trial avatar and is never saved itself.
     private List<Integer> tpsLoadout;
+    // Snezhnaya Ice Creatures this player built.
+    private List<emu.grasscutter.game.icecreature.IceCreatureRecord> iceCreatures;
     @Getter @Setter private Map<Integer, Set<Integer>> unlockedSceneAreas;
     @Getter @Setter private Map<Integer, Set<Integer>> unlockedScenePoints;
+    /** Separate first-entry reward receipts; handbook unlocks do not establish discovery. */
+    private Map<Integer, Set<Integer>> rewardedDungeonEntries;
     /** Debug/test: points forced locked even if GetScenePointRsp would otherwise unlock-all. */
     @Getter @Setter private Map<Integer, Set<Integer>> forceLockedScenePoints;
     @Getter @Setter private List<Integer> chatEmojiIdList;
@@ -163,10 +170,6 @@ public class Player implements PlayerHook, FieldFetch {
     @Transient @Getter
     private final Map<Integer, java.util.List<Integer>> goddessNpcEntityByPoint =
             new ConcurrentHashMap<>();
-    /** Forged 303xx Talk-gate quests already pushed this session — not persisted. */
-    @Transient @Getter
-    private final Set<Integer> forgedStatueTalkQuests = ConcurrentHashMap.newKeySet();
-
     @Transient private long nextGuid = 0;
     @Transient @Getter @Setter private int peerId;
     // volatile rather than guarded by the player lock: Scene and World set these while holding
@@ -300,6 +303,7 @@ public class Player implements PlayerHook, FieldFetch {
         this.sceneTags = new HashMap<>();
         this.unlockedSceneAreas = new HashMap<>();
         this.unlockedScenePoints = new HashMap<>();
+        this.rewardedDungeonEntries = new HashMap<>();
         this.forceLockedScenePoints = new HashMap<>();
         this.chatEmojiIdList = new ArrayList<>();
         this.playerProgress = new PlayerProgress();
@@ -456,6 +460,35 @@ public class Player implements PlayerHook, FieldFetch {
         return scene;
     }
 
+    /** Check location, not only scene ID: Natlan shares Teyvat's scene 3. */
+    public boolean isInNatlan() {
+        return this.scene != null && PhlogistonRegion.contains(this.scene.getId(), this.position);
+    }
+
+    /** Update both client embryos and server ability IDs on a seamless regional crossing. */
+    public void refreshPhlogistonRegion() {
+        if (this.scene == null || this.session == null || this.teamManager == null) return;
+        boolean inNatlan = this.isInNatlan();
+        int enabled = inNatlan ? 1 : 0;
+        if (this.getProperty(PlayerProperty.PROP_PHLOGISTON_ENABLE) == enabled) return;
+
+        this.setProperty(PlayerProperty.PROP_PHLOGISTON_ENABLE, enabled);
+        for (var avatar : this.teamManager.getActiveTeam()) {
+            if (avatar == null) continue;
+            this.abilityManager.syncPhlogistonAvatarAbility(avatar, inNatlan);
+            this.sendPacket(new PacketAbilityChangeNotify(avatar));
+        }
+        var teamEntity = this.teamManager.getEntity();
+        if (teamEntity != null) {
+            this.sendPacket(new PacketAbilityChangeNotify(
+                    teamEntity.getId(), this.teamManager.getAbilityControlBlock()));
+            if (inNatlan) {
+                this.sendPacket(new PacketServerGlobalValueChangeNotify(
+                        teamEntity.getId(), "SGV_PlayerTeam_Phlogiston", this.getPhlogistonValue()));
+            }
+        }
+    }
+
     public void setScene(Scene scene) {
         this.scene = scene;
     }
@@ -567,6 +600,13 @@ public class Player implements PlayerHook, FieldFetch {
         return this.unlockedScenePoints.computeIfAbsent(sceneId, i -> new CopyOnWriteArraySet<>());
     }
 
+    public Set<Integer> getRewardedDungeonEntries(int sceneId) {
+        if (this.rewardedDungeonEntries == null) {
+            this.rewardedDungeonEntries = new HashMap<>();
+        }
+        return this.rewardedDungeonEntries.computeIfAbsent(sceneId, i -> new CopyOnWriteArraySet<>());
+    }
+
     public Set<Integer> getForceLockedScenePoints(int sceneId) {
         if (this.forceLockedScenePoints == null) {
             this.forceLockedScenePoints = new HashMap<>();
@@ -664,7 +704,8 @@ public class Player implements PlayerHook, FieldFetch {
                 withQuesting ? 10000 : 0);
         this.setOrFetch(PlayerProperty.PROP_PLAYER_RESIN, 200);
         this.setOrFetch(PlayerProperty.PROP_PHLOGISTON_MAX_VALUE, 10000);
-        this.setProperty(PlayerProperty.PROP_PHLOGISTON_ENABLE, 1);
+        // The active scene enables phlogiston when the player actually enters Natlan.
+        this.setProperty(PlayerProperty.PROP_PHLOGISTON_ENABLE, 0, false);
 
         this.setProperty(PlayerProperty.PROP_CUR_PERSIST_STAMINA,
             this.getProperty(PlayerProperty.PROP_MAX_STAMINA));
@@ -1126,6 +1167,16 @@ public class Player implements PlayerHook, FieldFetch {
         }
 
         target.onInteract(this, interactReq);
+        // EntityGadget, EntityItem and EntityMonster credit the quest themselves once the interaction
+        // goes through; a client-created gadget has no interaction logic of its own and still counts.
+        if (target instanceof emu.grasscutter.game.entity.EntityClientGadget clientGadget) {
+            onGadgetInteracted(clientGadget.getGadgetId());
+        }
+    }
+
+    /** Quest credit for a gadget interaction that went through. */
+    public void onGadgetInteracted(int gadgetId) {
+        this.getQuestManager().queueEvent(QuestContent.QUEST_CONTENT_INTERACT_GADGET, gadgetId);
     }
 
     public void onPause() {
@@ -1430,6 +1481,8 @@ public class Player implements PlayerHook, FieldFetch {
 
         this.setResinBuyCount(0);
 
+        BirthdayMailSystem.checkAndSend(this, currentDate);
+
         this.setLastDailyReset(currentTime);
     }
 
@@ -1449,6 +1502,13 @@ public class Player implements PlayerHook, FieldFetch {
             this.tpsLoadout = new ArrayList<>();
         }
         return this.tpsLoadout;
+    }
+
+    public List<emu.grasscutter.game.icecreature.IceCreatureRecord> getIceCreatures() {
+        if (this.iceCreatures == null) {
+            this.iceCreatures = new ArrayList<>();
+        }
+        return this.iceCreatures;
     }
 
     public Map<Integer, Integer> getTpsAmmunition() {
@@ -1542,6 +1602,21 @@ public class Player implements PlayerHook, FieldFetch {
             this.position.set(pos);
         }
 
+        // The same holds for every other dungeon, and mid-quest it strands the step: the scene
+        // comes back with no running dungeon, so the subquest never gets its rewind. Arriving in
+        // the world is what fires ENTER_MY_WORLD and lets the quest's own fail/rollback execs
+        // restart the segment, so send the player back to where they walked in from.
+        savedScene = GameData.getSceneDataMap().get(this.getSceneId());
+        if (savedScene != null && savedScene.getSceneType() == SceneType.SCENE_DUNGEON) {
+            var originScene = this.prevSceneForDungeon > 0 ? this.prevSceneForDungeon : 3;
+            var originPos = this.getPrevPosForDungeon();
+            this.setSceneId(originScene);
+            this.position.set(
+                    originPos != null && !originPos.equals(Position.ZERO)
+                            ? originPos
+                            : ScriptLoader.getSceneMeta(originScene).config.born_pos);
+        }
+
         World world = new World(this);
         world.addPlayer(this);
 
@@ -1556,6 +1631,7 @@ public class Player implements PlayerHook, FieldFetch {
         session.send(new PacketStoreWeightLimitNotify());
         session.send(new PacketPlayerStoreNotify(this));
         session.send(new PacketAvatarDataNotify(this));
+        session.send(new PacketCraftingAvatarDataNotify());
         session.send(new PacketAvatarWeaponSkinDataNotify(this));
         // 登录时下发头像/头像框数据：否则重登后个人主页的头像框会显示成"?"，要重新应用一次才恢复。
         // (HandlerMiao21517 修复头像框时发的也是这一组：25989+6326+4162。)
@@ -1661,15 +1737,16 @@ public class Player implements PlayerHook, FieldFetch {
             this.getEnterHomeRequests().values().forEach(req -> this.expireEnterHomeRequest(req, true));
             this.getEnterHomeRequests().clear();
 
-            this.save();
-            this.getTeamManager().saveAvatars();
-            this.getFriendsList().save();
-
             PlayerQuitEvent event = new PlayerQuitEvent(this);
             event.call();
         } catch (Throwable e) {
             Grasscutter.getLogger().warn("Player (UID {}) save failure", getUid(), e);
         } finally {
+            Utils.runAll(
+                    "Player (UID " + getUid() + ") logout save",
+                    this::save,
+                    () -> this.getTeamManager().saveAvatars(),
+                    () -> this.getFriendsList().save());
             removeFromServer();
         }
     }

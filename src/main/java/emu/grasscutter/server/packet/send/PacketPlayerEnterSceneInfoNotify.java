@@ -54,14 +54,6 @@ public class PacketPlayerEnterSceneInfoNotify extends BasePacket {
     public PacketPlayerEnterSceneInfoNotify(Player player) {
         super(PacketOpcodes.PlayerEnterSceneInfoNotify);
 
-        AbilityScalarValueEntry scalarValue = AbilityScalarValueEntry.newBuilder()
-                .setKey(AbilityStringOuterClass.AbilityString.newBuilder().setHash(Utils.abilityHash("SGV_PlayerTeam_Phlogiston"))
-                        .setStr("SGV_PlayerTeam_Phlogiston")
-                        .build())
-                        .setFloatValue(100)
-                .build();
-                player.setPhlogistonValue(100);
-
         long hexCount = player.getTeamManager().getActiveTeam().stream()
                 .filter(e -> e != null && getHexenzirkelIds().contains(e.getAvatar().getAvatarId()))
                 .count();
@@ -87,9 +79,44 @@ public class PacketPlayerEnterSceneInfoNotify extends BasePacket {
                 .build();
 
         AbilitySyncStateInfo.Builder teamInfo = AbilitySyncStateInfo.newBuilder()
-                .addSgvDynamicValueMap(scalarValue)
                 .addSgvDynamicValueMap(hexLevel)
                 .addSgvDynamicValueMap(moonPhaseLevel);
+        if (player.isInNatlan()) {
+            teamInfo.addSgvDynamicValueMap(AbilityScalarValueEntry.newBuilder()
+                    .setKey(AbilityString.newBuilder()
+                            .setHash(Utils.abilityHash("SGV_PlayerTeam_Phlogiston"))
+                            .setStr("SGV_PlayerTeam_Phlogiston")
+                            .build())
+                    .setFloatValue(player.getPhlogistonValue())
+                    .build());
+        }
+        if (emu.grasscutter.game.player.SnezhnayaFrigid.isGranted(player)) {
+            var frigidState = emu.grasscutter.game.player.SnezhnayaFrigid.stateOf(player);
+            String energy = emu.grasscutter.game.player.SnezhnayaFrigid.ENERGY_GV;
+            String frigid = emu.grasscutter.game.player.SnezhnayaFrigid.FRIGID_GV;
+            teamInfo.addSgvDynamicValueMap(AbilityScalarValueEntry.newBuilder()
+                    .setKey(AbilityString.newBuilder()
+                            .setHash(Utils.abilityHash(energy))
+                            .setStr(energy)
+                            .build())
+                    .setFloatValue(frigidState.getEnergy())
+                    .build());
+            teamInfo.addSgvDynamicValueMap(AbilityScalarValueEntry.newBuilder()
+                    .setKey(AbilityString.newBuilder()
+                            .setHash(Utils.abilityHash(frigid))
+                            .setStr(frigid)
+                            .build())
+                    .setFloatValue(frigidState.getFrigid())
+                    .build());
+            String material = emu.grasscutter.game.player.SnezhnayaFrigid.BUILD_MATERIAL_GV;
+            teamInfo.addSgvDynamicValueMap(AbilityScalarValueEntry.newBuilder()
+                    .setKey(AbilityString.newBuilder()
+                            .setHash(Utils.abilityHash(material))
+                            .setStr(material)
+                            .build())
+                    .setFloatValue(emu.grasscutter.game.icecreature.IceCreatureSystem.materialLeft(player))
+                    .build());
+        }
 
         if (moonPhaseCount > 0) {
             teamInfo.addDynamicValueMap(AbilityScalarValueEntry.newBuilder()
