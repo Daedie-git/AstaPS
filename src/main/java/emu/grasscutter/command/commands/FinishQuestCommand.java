@@ -9,7 +9,7 @@ import emu.grasscutter.game.quest.CurrentQuestCompletion;
 import emu.grasscutter.game.quest.QuestManager;
 import java.util.List;
 
-@Command(label = "finishquest", usage = {"[<questId>]"}, permission = "player.quest", permissionTargeted = "player.quest.others")
+@Command(label = "finishquest", permission = "player.quest", permissionTargeted = "player.quest.others")
 public final class FinishQuestCommand implements CommandHandler {
     @Override
     public void execute(Player sender, Player target, List<String> args) {

@@ -214,7 +214,7 @@ final class CharacterDamageTuningTest {
 
     @ParameterizedTest
     @ValueSource(ints = {10000042, 10000031, 10000016})
-    void actualHandlerQueuesAndForwardsTheSameDamageThenSceneAppliesItOnce(int avatarId) throws Exception {
+    void actualHandlerAppliesAndForwardsTheSameDamageOnce(int avatarId) throws Exception {
         var actor = avatar(8, avatarId);
         var player = allocate(Player.class);
         var team = new TeamManager();
@@ -245,15 +245,14 @@ final class CharacterDamageTuningTest {
             GAME_OPTIONS.dilucDamageMultiplier = previousDiluc;
         }
         float expected = avatarId == 10000042 ? 150f : avatarId == 10000016 ? 125f : 100f;
-        assertEquals(1, player.getAttackResults().size());
-        var queued = player.getAttackResults().remove();
+        // Upstream now drains standalone combat attacks before returning; UnionCmd batches
+        // retain their own end-of-batch boundary. Damage must still be tuned and applied once.
+        assertTrue(player.getAttackResults().isEmpty());
         var forwarded = EvtBeingHitInfo.parseFrom(invoke.entry.getCombatData());
-        assertEquals(expected, queued.getDamage());
-        assertEquals(queued, forwarded.getAttackResult());
+        assertEquals(expected, forwarded.getAttackResult().getDamage());
         assertEquals(forwarded, energy.hit);
         assertEquals(avatarId != 10000031 ? ForwardType.ForwardType_FORWARD_TO_ALL
                 : ForwardType.ForwardType_FORWARD_TO_ALL_EXCEPT_CUR, invoke.entry.getForwardType());
-        scene.handleAttack(queued);
         assertEquals(expected, monster.damage);
         assertEquals(1, monster.hits);
     }
