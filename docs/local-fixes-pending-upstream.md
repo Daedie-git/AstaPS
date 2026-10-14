@@ -12,20 +12,22 @@ No server deployment, restart or account mutation accompanies PR 141's submissio
 
 [PR 149: Seelie configured-route timing, stops and initial handoff](https://github.com/MeChen618/AstaPS/pull/149) is open from `Daedie-git:fix/seelie-config-route`, commit `04179329`. It includes route-change synchronization, the empty near-platform guard, route-resource aliases, ordered/cancellable scene-clock deadlines, authored stop markers and a continuous distance-based initial approach. The user confirms the final movement works correctly in live play. All 49 focused tests pass; the upstream-based non-integration suite runs 878 tests with zero failures/errors and four skipped. Temporary logging, capture tools, account resets and fork-only instructions are excluded.
 
+Four further focused PRs are open, all directly based on upstream `4ae9884d`:
+
+- [PR 150: canonical Adventure Rank request schema](https://github.com/MeChen618/AstaPS/pull/150), `fix/7.1-rank-request-schema`, commit `472a6329`. Only the generated field-15 descriptor and its captured-wire tests/documentation change; the handler fix is already merged in PR 107. Eight new cases fail before the correction and pass after it; full suite 837 tests, zero failures/errors, four skipped; generated-Java lint passes.
+- [PR 151: complete handbook claim payload validation](https://github.com/MeChen618/AstaPS/pull/151), `fix/handbook-whole-payload-validation`, commit `aa88d76f`. Fifty actual-handler tests pass (32 fail before the fix); full suite 879 tests, zero failures/errors, four skipped. No opcode/schema, authorization or delivery changes; chapter request identity remains unmapped.
+- [PR 152: point-array notification fallback](https://github.com/MeChen618/AstaPS/pull/152), `fix/platform-point-array-notification`, commit `2e0701bf`. Only the notification block and tests change. Three tests cover unavailable/positive opcode branches, ordered refresh, same-ID silence and state preservation; full suite 832 tests, zero failures/errors, four skipped. Unfinished movement/serializer behavior is excluded.
+- [PR 153: rotation-specific Abyss rewards](https://github.com/MeChen618/AstaPS/pull/153), `fix/abyss-rotation-rewards`, commit `b17b215c`. Shared group-aware resolution covers star, chamber and skipped-floor rewards with legacy fallback. Fourteen focused tests pass; full suite 843 tests, zero failures/errors, four skipped. Existing floor-loading and payment guards remain intact; fork-only reward policies are excluded.
+
+These submissions do not redeploy the server or mutate player state. The four fix branches are pushed; unrelated customization-branch work remains uncommitted as before.
+
 The deployed server's temporary logging is removed without changing the accepted gameplay or resetting progress. The customization fork includes this fix and latest `origin/main` (`4ae9884d`); its merged non-integration suite runs 945 tests with zero failures/errors and four skipped.
 
-## Small deployed changes with no matching PR
+## Remaining small local work
 
-| Fix | Local source | Important limit |
-|---|---|---|
-| Point-array platform notification fallback | `ScriptLib.SetPlatformPointArray`, `tools/check-platform-point-array.sh` | Fixes dropped opcode-zero notification, not the unfinished point-array movement/serializer. |
-| Whole-payload handbook claim validation | `HandlerTakeInvestigationRewardReq`, `HandlerTakeInvestigationTargetRewardReq` | Rejects malformed suffixes/wire types before rewards; chapter request remains unmapped. |
-| Canonical Adventure Rank request schema | `protocol/7.1/compat/TakePlayerLevelRewardReq.proto` | Only the field-15 generated descriptor remains pending; opcode and guarded handwritten handler already merged in PR 107. |
-| Achievement category/goal response | `TakeAchievementGoalRewardRsp.proto`, response opcode 22054 | Fields 7/8/9 are verified; request is still unmapped, so category claims are not fully enabled. |
-| Rotation-specific Abyss reward selection | local commit `fa8ce7b4`, `TowerRewards` and tower schedule/reward callers | Distinct from merged floor-loading PR 99; extract without reverting newer tower changes. |
-| `/finishquest` chain-preservation correction | `CurrentQuestCompletion`, `FinishQuestCommand` | Correctness fix to an optional custom command; keep unfinished successors on their normal progression path. |
+The four complete smaller upstream candidates are submitted in PRs 150–153. Achievement category/goal response fields remain local (`TakeAchievementGoalRewardRsp.proto`, response opcode 22054), but the request identity is still unmapped, so this is not a complete claiming fix or a submitted PR.
 
-The report groups these for human use; it is not a count of independent submission-ready patches. The deployed integration also retains handbook resource/unlock/delivery protection beyond the parser fixes above.
+`/finishquest`, including its chain-preservation correction, is explicitly fork-only and is not a pending upstream bugfix. The deployed integration also retains handbook resource/unlock/delivery protection beyond the submitted parser fix.
 
 ## Larger unsubmitted bundles
 
@@ -51,6 +53,6 @@ These need fresh current-main extraction and tests. Broad old branch diffs also 
 
 Already merged: PRs 98 (Experience target opcode), 99 (Abyss schedule key), 107 (rank handler), 118 (skill particle positions), 122–125 (initial persistence/world/combat/multiplayer work), 116/117/120 (reward admission/receipts/domain transactions), and 127–130 (related quest/Morphia/scene-save/open-state fixes).
 
-Intentional banner/odds/character tuning, `/catalog`, Paimon's shop policy, Primogem conversion, artifact odds/substats and announcements are customizations, not automatically pending bugfix PRs. Protocol mapping/export/research tools are separate tooling work. Heap dumps, client/capture artifacts and account test resets must not enter bugfix submissions.
+Intentional banner/odds/character tuning, `/catalog`, fork-only `/finishquest`, Paimon's shop policy, Primogem conversion, artifact odds/substats and announcements are customizations, not automatically pending bugfix PRs. Protocol mapping/export/research tools are separate tooling work. Heap dumps, client/capture artifacts and account test resets must not enter bugfix submissions.
 
 Detailed per-branch comparisons and installed/source qualifications: `captures/upstream-submission/LOCAL-FIX-INVENTORY.md`.
