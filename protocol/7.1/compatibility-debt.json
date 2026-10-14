@@ -1,0 +1,813 @@
+{
+  "client_artifact_sha256": "08a3086d5f3fe695f01dab61efa42e442006b18e5e475b2520df356f6a073b7d",
+  "entries": [
+    {
+      "code": "missing_client_field",
+      "fingerprint": "dacff9d9d594d214187bfee0f9ce98cf7da6fa14e790ea70f18481fc04fe38c3",
+      "reason": "Existing contract mismatch in the committed branch; corresponding achievement/team correction is submitted in upstream PR 141. Local deployment and uncommitted overrides are separate.",
+      "symbol": "ChooseCurAvatarTeamRsp"
+    },
+    {
+      "code": "missing_client_field",
+      "fingerprint": "938dd21b0fa97a6bccbf5673356e35478ccf7063f3c5c1b742093d1915a64def",
+      "reason": "Existing contract mismatch in the committed branch; corresponding achievement/team correction is submitted in upstream PR 141. Local deployment and uncommitted overrides are separate.",
+      "symbol": "ChooseCurAvatarTeamRsp"
+    },
+    {
+      "code": "opcode_not_registered",
+      "fingerprint": "a93b98bfa248e9f322955de5c039bd4c50b7be667621d3582f39ef9183cf5d83",
+      "reason": "Existing declared command is absent from the complete native registry for this client build; replacement identity remains unproved. Declaration is not proof of runtime delivery.",
+      "symbol": "EnterTransPointRegionNotify"
+    },
+    {
+      "code": "opcode_not_registered",
+      "fingerprint": "b5495c269137e7e1a97416177599dc0da54b083e5a08a185c2e2856e038c3909",
+      "reason": "Existing declared command is absent from the complete native registry for this client build; replacement identity remains unproved. Declaration is not proof of runtime delivery.",
+      "symbol": "ExecuteGadgetLuaRsp"
+    },
+    {
+      "code": "opcode_not_registered",
+      "fingerprint": "f1f207b557e95c802d9c036d0cdf804fe4dbb8988cf2454994e146a508e66c8d",
+      "reason": "Existing declared command is absent from the complete native registry for this client build; replacement identity remains unproved. Declaration is not proof of runtime delivery.",
+      "symbol": "ExitTransPointRegionNotify"
+    },
+    {
+      "code": "opcode_not_registered",
+      "fingerprint": "06895ab89cf9c76390f5813f5bdfca4df11d004dc6d9ed2f118ef00e08bd974e",
+      "reason": "Existing declared command is absent from the complete native registry for this client build; replacement identity remains unproved. Declaration is not proof of runtime delivery.",
+      "symbol": "GetHomeLevelUpRewardReq"
+    },
+    {
+      "code": "opcode_not_registered",
+      "fingerprint": "78079c4e9dbf7c8c82fe33042db87b023668e7697a41b08b5e4b82b29dc6f0e3",
+      "reason": "Existing declared command is absent from the complete native registry for this client build; replacement identity remains unproved. Declaration is not proof of runtime delivery.",
+      "symbol": "GetHomeLevelUpRewardRsp"
+    },
+    {
+      "code": "missing_client_field",
+      "fingerprint": "1bbb771c9103b1ace82b07198c35f770d27028e353c5d30ccfe27bc98cbdcca6",
+      "reason": "Existing category-response contract remains uncorrected on the committed branch; partial local correction is not submitted and request identity remains unknown.",
+      "symbol": "TakeAchievementGoalRewardRsp"
+    },
+    {
+      "code": "missing_client_field",
+      "fingerprint": "bc4bcfdb8b79a6f0af6690cc68d9f823dc46444280e0e7c13f671ef38c722af0",
+      "reason": "Existing category-response contract remains uncorrected on the committed branch; partial local correction is not submitted and request identity remains unknown.",
+      "symbol": "TakeAchievementGoalRewardRsp"
+    },
+    {
+      "code": "missing_client_field",
+      "fingerprint": "85f32825cdd6d5024d0ece36d68f28138830a0f55ba19db0401c5f0cd32b266b",
+      "reason": "Existing category-response contract remains uncorrected on the committed branch; partial local correction is not submitted and request identity remains unknown.",
+      "symbol": "TakeAchievementGoalRewardRsp"
+    },
+    {
+      "code": "semantic_opcode_mismatch",
+      "fingerprint": "07861b20a3f44fa79ca0fa7198d411e01b4f840ee65d81c01d0e2f5fc03e2ffb",
+      "reason": "Existing category-response contract remains uncorrected on the committed branch; partial local correction is not submitted and request identity remains unknown.",
+      "symbol": "TakeAchievementGoalRewardRsp"
+    },
+    {
+      "code": "direction_mismatch",
+      "fingerprint": "32449f5b3e907ea5ffa947d38806f403ea27eafecfdfada228fee3806ff3c545",
+      "reason": "Existing outbound achievement-request wrapper has an unexpected direction; active use is unproved and needs separate inspection rather than an automatic remap.",
+      "symbol": "TakeAchievementRewardReq"
+    },
+    {
+      "code": "missing_client_field",
+      "fingerprint": "42badd3f26874596f09d764c14dc2811cde37c30189bd29a2ac2ea6ce08515ec",
+      "reason": "Existing contract mismatch in the committed branch; corresponding achievement/team correction is submitted in upstream PR 141. Local deployment and uncommitted overrides are separate.",
+      "symbol": "TakeAchievementRewardReq"
+    },
+    {
+      "code": "semantic_opcode_mismatch",
+      "fingerprint": "27f2e97f4fbd95838fbe6ffe2fb0729d0bba49d47a75c87c1f480481abe45f63",
+      "reason": "Existing contract mismatch in the committed branch; corresponding achievement/team correction is submitted in upstream PR 141. Local deployment and uncommitted overrides are separate.",
+      "symbol": "TakeAchievementRewardReq"
+    },
+    {
+      "code": "semantic_opcode_mismatch",
+      "fingerprint": "7cbc2fd489cc66573df842815da0466766a2a98cb22103b2b31040aa984467af",
+      "reason": "Existing contract mismatch in the committed branch; corresponding achievement/team correction is submitted in upstream PR 141. Local deployment and uncommitted overrides are separate.",
+      "symbol": "TakeAchievementRewardReq"
+    },
+    {
+      "code": "missing_client_field",
+      "fingerprint": "b56212faa74d9db80172462b64a0afdb80401a2a301c0591d856cf061025eafc",
+      "reason": "Existing contract mismatch in the committed branch; corresponding achievement/team correction is submitted in upstream PR 141. Local deployment and uncommitted overrides are separate.",
+      "symbol": "TakeAchievementRewardRsp"
+    },
+    {
+      "code": "missing_client_field",
+      "fingerprint": "6840b1971130b79c1de11058f6ebb78c5ee75c5815578833db7eabf0a0f96b65",
+      "reason": "Existing contract mismatch in the committed branch; corresponding achievement/team correction is submitted in upstream PR 141. Local deployment and uncommitted overrides are separate.",
+      "symbol": "TakeAchievementRewardRsp"
+    },
+    {
+      "code": "missing_client_field",
+      "fingerprint": "c37e96e51285cbda4d5226bbf99744aecf1ed4b889730d5d8ea463c4b1242057",
+      "reason": "Existing contract mismatch in the committed branch; corresponding achievement/team correction is submitted in upstream PR 141. Local deployment and uncommitted overrides are separate.",
+      "symbol": "TakeAchievementRewardRsp"
+    },
+    {
+      "code": "semantic_opcode_mismatch",
+      "fingerprint": "11658698f34feb0b220fbf76bd34a02572c3d825a28b7a996e8e7722002a9266",
+      "reason": "Existing contract mismatch in the committed branch; corresponding achievement/team correction is submitted in upstream PR 141. Local deployment and uncommitted overrides are separate.",
+      "symbol": "TakeAchievementRewardRsp"
+    }
+  ],
+  "format": "astaps.protocol-compatibility-debt.v1",
+  "monitored_bindings": [
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerActivityTakeWatcherRewardReq.java",
+      "symbol": "ActivityTakeWatcherRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerAddBackupAvatarTeamReq.java",
+      "symbol": "AddBackupAvatarTeamReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerAddQuestContentProgressBatchReq.java",
+      "symbol": "_AddQuestContentProgressBatchReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerAddQuestContentProgressReq.java",
+      "symbol": "AddQuestContentProgressReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerAvatarExpeditionGetRewardReq.java",
+      "symbol": "AvatarExpeditionGetRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerAvatarFetterLevelRewardReq.java",
+      "symbol": "AvatarFetterLevelRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerBattlePassSetRewardPlanReq70.java",
+      "symbol": "_BattlePassSetRewardPlanReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerChangeMpTeamAvatarReq.java",
+      "symbol": "ChangeMpTeamAvatarReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerChangeTeamNameReq.java",
+      "symbol": "ChangeTeamNameReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerChooseCurAvatarTeamReq.java",
+      "symbol": "ChooseCurAvatarTeamReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerDelBackupAvatarTeamReq.java",
+      "symbol": "DelBackupAvatarTeamReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerDungeonDieOptionReq.java",
+      "symbol": "DungeonDieOptionReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerDungeonEntryInfoReq.java",
+      "symbol": "DungeonEntryInfoReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerDungeonPlayerDieReq.java",
+      "symbol": "DungeonPlayerDieReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerDungeonQuickOpenReq.java",
+      "symbol": "DungeonQuickOpenReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerDungeonRestartReq.java",
+      "symbol": "DungeonRestartReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerDungeonSlipRevivePointActivateReq.java",
+      "symbol": "DungeonSlipRevivePointActivateReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerDungeonWayPointActivateReq.java",
+      "symbol": "DungeonWayPointActivateReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerEnterTransPointRegionNotify.java",
+      "symbol": "EnterTransPointRegionNotify"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerEnterTrialAvatarActivityDungeonReq.java",
+      "symbol": "EnterTrialAvatarActivityDungeonReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerEvtCreateGadgetNotify.java",
+      "symbol": "EvtCreateGadgetNotify"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerEvtDestroyGadgetNotify.java",
+      "symbol": "EvtDestroyGadgetNotify"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerExecuteGadgetLuaReq.java",
+      "symbol": "ExecuteGadgetLuaReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerExitTransPointRegionNotify.java",
+      "symbol": "ExitTransPointRegionNotify"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerGadgetInteractReq.java",
+      "symbol": "GadgetInteractReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerGetDailyDungeonEntryInfoReq.java",
+      "symbol": "GetDailyDungeonEntryInfoReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerGetDungeonEntryExploreConditionReq.java",
+      "symbol": "GetDungeonEntryExploreConditionReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerGetHomeLevelUpRewardReq.java",
+      "symbol": "GetHomeLevelUpRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerGetInvestigationMonsterReq.java",
+      "symbol": "GetInvestigationMonsterReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerGetQuestLackingResourceReq.java",
+      "symbol": "GetQuestLackingResourceReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerHomeAvatarRewardEventGetReq.java",
+      "symbol": "HomeAvatarRewardEventGetReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerIceCreatureGadgetRemoveReq.java",
+      "symbol": "IceCreatureGadgetRemoveReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerInteractDailyDungeonInfoNotify.java",
+      "symbol": "InteractDailyDungeonInfoNotify"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerMoveTeamReq.java",
+      "symbol": "_MoveTeamReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerPlayerEnterDungeonReq.java",
+      "symbol": "PlayerEnterDungeonReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerPlayerQuitDungeonReq.java",
+      "symbol": "PlayerQuitDungeonReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerQuestCreateEntityReq.java",
+      "symbol": "QuestCreateEntityReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerQuestDestroyEntityReq.java",
+      "symbol": "QuestDestroyEntityReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerQuestDestroyNpcReq.java",
+      "symbol": "QuestDestroyNpcReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerQuestQuickLaunchReq.java",
+      "symbol": "_QuestQuickLaunchReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerQuestTransmitReq.java",
+      "symbol": "QuestTransmitReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerQuestUpdateQuestVarReq.java",
+      "symbol": "QuestUpdateQuestVarReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerReceivedTrialAvatarActivityRewardReq.java",
+      "symbol": "ReceivedTrialAvatarActivityRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerSetUpAvatarTeamReq.java",
+      "symbol": "SetUpAvatarTeamReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTakeAchievementGoalRewardReq.java",
+      "symbol": "TakeAchievementGoalRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTakeAchievementRewardReq.java",
+      "symbol": "TakeAchievementRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTakeBattlePassRewardReq.java",
+      "symbol": "TakeBattlePassRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTakeDailyTaskScoreRewardReq.java",
+      "symbol": "TakeDailyTaskScoreRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTakeInvestigationRewardReq.java",
+      "symbol": "TakeInvestigationRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTakeInvestigationTargetRewardReq.java",
+      "symbol": "TakeInvestigationTargetRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTakeOfferingLevelRewardReq.java",
+      "symbol": "TakeOfferingLevelRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTakePlayerLevelRewardReq.java",
+      "symbol": "TakePlayerLevelRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTowerGetFloorStarRewardReq.java",
+      "symbol": "TowerGetFloorStarRewardReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTowerTeamSelectReq.java",
+      "symbol": "TowerTeamSelectReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerUnlockTransPointReq.java",
+      "symbol": "UnlockTransPointReq"
+    },
+    {
+      "direction": "client_to_server",
+      "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerUpdateAbilityCreatedMovingPlatformNotify.java",
+      "symbol": "UpdateAbilityCreatedMovingPlatformNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketAchievementAllDataNotify.java",
+      "symbol": "AchievementAllDataNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketAchievementUpdateNotify.java",
+      "symbol": "AchievementUpdateNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketActivityTakeWatcherRewardRsp.java",
+      "symbol": "ActivityTakeWatcherRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketAddBackupAvatarTeamRsp.java",
+      "symbol": "AddBackupAvatarTeamRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketAddQuestContentProgressRsp.java",
+      "symbol": "AddQuestContentProgressRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketAvatarExpeditionGetRewardRsp.java",
+      "symbol": "AvatarExpeditionGetRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketAvatarFetterLevelRewardRsp.java",
+      "symbol": "AvatarFetterLevelRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketAvatarTeamAllDataNotify.java",
+      "symbol": "AvatarTeamAllDataNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketAvatarTeamUpdateNotify.java",
+      "symbol": "AvatarTeamUpdateNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketCardProductRewardNotify.java",
+      "symbol": "CardProductRewardNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketChangeMpTeamAvatarRsp.java",
+      "symbol": "ChangeMpTeamAvatarRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketChangeTeamNameRsp.java",
+      "symbol": "ChangeTeamNameRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketChooseCurAvatarTeamRsp.java",
+      "symbol": "ChooseCurAvatarTeamRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDelBackupAvatarTeamRsp.java",
+      "symbol": "DelBackupAvatarTeamRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDelQuestNotify.java",
+      "symbol": "QuestDelNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDelTeamEntityNotify.java",
+      "symbol": "DelTeamEntityNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonChallengeBeginNotify.java",
+      "symbol": "DungeonChallengeBeginNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonChallengeFinishNotify.java",
+      "symbol": "DungeonChallengeFinishNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonEntryInfoRsp.java",
+      "symbol": "DungeonEntryInfoRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonEntryToBeExploreNotify.java",
+      "symbol": "DungeonEntryToBeExploreNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonPlayerDieNotify.java",
+      "symbol": "DungeonPlayerDieNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonPlayerDieRsp.java",
+      "symbol": "DungeonPlayerDieRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonSettleNotify.java",
+      "symbol": "DungeonSettleNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonShowReminderNotify.java",
+      "symbol": "DungeonShowReminderNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonSlipRevivePointActivateRsp.java",
+      "symbol": "DungeonSlipRevivePointActivateRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonWayPointActivateRsp.java",
+      "symbol": "DungeonWayPointActivateRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketDungeonWayPointNotify.java",
+      "symbol": "DungeonWayPointNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketEnterTrialAvatarActivityDungeonRsp.java",
+      "symbol": "EnterTrialAvatarActivityDungeonRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketExecuteGadgetLuaRsp.java",
+      "symbol": "ExecuteGadgetLuaRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketFinishedParentQuestNotify.java",
+      "symbol": "FinishedParentQuestNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketFinishedParentQuestUpdateNotify.java",
+      "symbol": "FinishedParentQuestUpdateNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketGadgetAutoPickDropInfoNotify.java",
+      "symbol": "GadgetAutoPickDropInfoNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketGadgetInteractRsp.java",
+      "symbol": "GadgetInteractRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketGadgetStateNotify.java",
+      "symbol": "GadgetStateNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketGetDailyDungeonEntryInfoRsp.java",
+      "symbol": "GetDailyDungeonEntryInfoRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketGetDungeonEntryExploreConditionRsp.java",
+      "symbol": "GetDungeonEntryExploreConditionRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketGetHomeLevelUpRewardRsp.java",
+      "symbol": "GetHomeLevelUpRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketGetInvestigationMonsterRsp.java",
+      "symbol": "GetInvestigationMonsterRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketHomeAvatarAllFinishRewardNotify.java",
+      "symbol": "HomeAvatarAllFinishRewardNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketHomeAvatarRewardEventGetRsp.java",
+      "symbol": "HomeAvatarRewardEventGetRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketHomeAvatarRewardEventNotify.java",
+      "symbol": "HomeAvatarRewardEventNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketInvestigationMonsterUpdateNotify.java",
+      "symbol": "InvestigationMonsterUpdateNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketMarkTargetInvestigationMonsterNotify.java",
+      "symbol": "MarkTargetInvestigationMonsterNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketMoveTeamRsp.java",
+      "symbol": "_MoveTeamRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketPlatformChangeRouteNotify.java",
+      "symbol": "PlatformChangeRouteNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketPlatformStartRouteNotify.java",
+      "symbol": "PlatformStartRouteNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketPlatformStopRouteNotify.java",
+      "symbol": "PlatformStopRouteNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketPlayerEnterDungeonRsp.java",
+      "symbol": "PlayerEnterDungeonRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketPlayerInvestigationAllInfoNotify.java",
+      "symbol": "PlayerInvestigationAllInfoNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketPlayerLevelRewardUpdateNotify.java",
+      "symbol": "PlayerLevelRewardUpdateNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketQuestCreateEntityRsp.java",
+      "symbol": "QuestCreateEntityRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketQuestDestroyEntityRsp.java",
+      "symbol": "QuestDestroyEntityRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketQuestDestroyNpcRsp.java",
+      "symbol": "QuestDestroyNpcRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketQuestGlobalVarNotify.java",
+      "symbol": "QuestGlobalVarNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketQuestListNotify.java",
+      "symbol": "QuestListNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketQuestListUpdateNotify.java",
+      "symbol": "QuestListUpdateNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketQuestProgressUpdateNotify.java",
+      "symbol": "QuestProgressUpdateNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketQuestTransmitRsp.java",
+      "symbol": "QuestTransmitRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketQuestUpdateQuestVarNotify.java",
+      "symbol": "QuestUpdateQuestVarNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketQuestUpdateQuestVarRsp.java",
+      "symbol": "QuestUpdateQuestVarRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketReceivedTrialAvatarActivityRewardRsp.java",
+      "symbol": "ReceivedTrialAvatarActivityRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketSceneTeamUpdateNotify.java",
+      "symbol": "SceneTeamUpdateNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketServerCondMeetQuestListUpdateNotify.java",
+      "symbol": "ServerCondMeetQuestListUpdateNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketSetUpAvatarTeamRsp.java",
+      "symbol": "SetUpAvatarTeamRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketSyncScenePlayTeamEntityNotify.java",
+      "symbol": "SyncScenePlayTeamEntityNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketSyncTeamEntityNotify.java",
+      "symbol": "SyncTeamEntityNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTakeAchievementGoalRewardRsp.java",
+      "symbol": "TakeAchievementGoalRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTakeAchievementRewardReq.java",
+      "symbol": "TakeAchievementRewardReq"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTakeAchievementRewardRsp.java",
+      "symbol": "TakeAchievementRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTakeBattlePassRewardRsp.java",
+      "symbol": "TakeBattlePassRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTakeDailyTaskScoreRewardRsp.java",
+      "symbol": "TakeDailyTaskScoreRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTakeInvestigationRewardRsp.java",
+      "symbol": "TakeInvestigationRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTakeInvestigationTargetRewardRsp.java",
+      "symbol": "TakeInvestigationTargetRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTakePlayerLevelRewardRsp.java",
+      "symbol": "TakePlayerLevelRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTeamHexenzirkelChangeNotify.java",
+      "symbol": "TeamHexenzirkelChangeNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTeamMoonPhaseChangeNotify.java",
+      "symbol": "_TeamMoonPhaseChangeNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTowerGetFloorStarRewardRsp.java",
+      "symbol": "TowerGetFloorStarRewardRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTowerMiddleLevelChangeTeamNotify.java",
+      "symbol": "TowerMiddleLevelChangeTeamNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketTowerTeamSelectRsp.java",
+      "symbol": "TowerTeamSelectRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketUnlockTransPointRsp.java",
+      "symbol": "UnlockTransPointRsp"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketWidgetGadgetAllDataNotify.java",
+      "symbol": "WidgetGadgetAllDataNotify"
+    },
+    {
+      "direction": "server_to_client",
+      "path": "src/main/java/emu/grasscutter/server/packet/send/PacketWidgetGadgetDataNotify.java",
+      "symbol": "WidgetGadgetDataNotify"
+    }
+  ],
+  "reference_sha256": "64185ffaf0ff519d9609f2c203c374a0798b3d014124a8b34b0b299210ee1e0e"
+}
