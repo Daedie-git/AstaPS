@@ -8,8 +8,7 @@ import emu.grasscutter.data.excels.tower.TowerScheduleData;
 
 /**
  * Resolves Spiral Abyss rewards from the rotation's reward group, falling back to the floor and
- * chamber rows. The groups differ only on floors 9-12, where newer rotations pay 100 Primogems per
- * star chest instead of 50 and each rotation has its own chamber rewards.
+ * chamber rows when the group has no reward for that tier or chamber.
  */
 public final class TowerRewards {
     private TowerRewards() {}
@@ -49,8 +48,9 @@ public final class TowerRewards {
         var row = groupRow(schedule, floor);
         var rooms = row != null ? row.getRewardIdRoom() : null;
         int index = level.getLevelIndex() - 1;
-        if (rooms != null && index >= 0 && index < rooms.size() && rooms.get(index) > 0) {
-            return rooms.get(index);
+        if (rooms != null && index >= 0 && index < rooms.size()) {
+            var id = rooms.get(index);
+            if (id != null && id > 0) return id;
         }
         return level.getFirstPassRewardId();
     }

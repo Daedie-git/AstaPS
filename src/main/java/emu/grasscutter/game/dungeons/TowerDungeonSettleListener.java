@@ -87,7 +87,7 @@ public class TowerDungeonSettleListener implements DungeonSettleListener {
         scene.broadcastPacket(new PacketDungeonSettleNotify(result));
     }
 
-    /** First-clear chamber loot from TowerLevelExcel firstPassRewardId. */
+    /** First-clear chamber loot from the rotation reward group, with a chamber-row fallback. */
     private static List<GameItem> grantFirstPassRewards(
             emu.grasscutter.game.tower.TowerManager towerManager, int levelId) {
         var record = towerManager.getRecordMap().get(towerManager.getCurrentFloorId());

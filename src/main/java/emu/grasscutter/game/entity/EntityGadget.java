@@ -487,7 +487,9 @@ public class EntityGadget extends EntityBaseGadget {
         }
 
         if (routeConfig instanceof ConfigRoute configRoute
-                && !emu.grasscutter.game.quest.LiyueCloudDungeonSupport.isPlatform(this)) {
+                && !emu.grasscutter.game.quest.LiyueCloudDungeonSupport.isPlatform(this)
+                && !emu.grasscutter.game.quest.MondstadtStoryQuestSupport.isAmberWaterPlatform(this)
+                && !ConfigRouteRun.usesSpeedLevels(this, configRoute)) {
             return startOrdinaryConfigRoute(configRoute);
         }
 
@@ -528,10 +530,12 @@ public class EntityGadget extends EntityBaseGadget {
 
                 double time = 0;
                 boolean liyuePlatform = emu.grasscutter.game.quest.LiyueCloudDungeonSupport.isPlatform(this);
+                boolean timedPlatform = liyuePlatform
+                        || emu.grasscutter.game.quest.MondstadtStoryQuestSupport.isAmberWaterPlatform(this);
                 int startedRoute = configRoute.getRouteId();
                 for (var i = currIndex; i < points.length; ++i) {
                     double distance = points[i].getPos().computeDistance(prevpos);
-                    time += liyuePlatform
+                    time += timedPlatform
                             ? emu.grasscutter.game.quest.LiyueCloudDungeonSupport.pointSeconds(points[i], distance)
                             : distance / points[i].getTargetVelocity();
                     prevpos = points[i].getPos();
@@ -543,8 +547,10 @@ public class EntityGadget extends EntityBaseGadget {
                                             .getScheduler()
                                             .scheduleDelayedTask(
                                                     () -> {
-                                                        if (liyuePlatform && (!configRoute.isStarted()
+                                                        if (timedPlatform && (!configRoute.isStarted()
                                                                 || configRoute.getRouteId() != startedRoute)) return;
+                                                        configRoute.setStartIndex(I);
+                                                        this.position.set(points[I].getPos());
                                                         if (points[I].isHasReachEvent() && I > currIndex) {
                                                             this.getScene()
                                                                     .getScriptManager()
@@ -557,15 +563,13 @@ public class EntityGadget extends EntityBaseGadget {
                                                                                     .setParam3(I)
                                                                                     .setEventSource(this.getConfigId()));
                                                         }
-                                                        configRoute.setStartIndex(I);
-                                                        this.position.set(points[I].getPos());
                                                         if (liyuePlatform && points[I].getRotRoundLeaveDir() != null)
                                                             this.getRotation().set(points[I].getRotRoundLeaveDir());
                                                         if (I == points.length - 1) {
                                                             configRoute.setStarted(false);
                                                         }
                                                     },
-                                                    liyuePlatform
+                                                    timedPlatform
                                                             ? emu.grasscutter.game.quest.LiyueCloudDungeonSupport.ticksForSeconds(time + 0.3)
                                                             : (int) time));
                 }
@@ -578,8 +582,15 @@ public class EntityGadget extends EntityBaseGadget {
 
     private boolean startOrdinaryConfigRoute(ConfigRoute config) {
         var route = getScene().getSceneRouteById(config.getRouteId());
-        if (route == null || route.getPoints() == null || route.getPoints().length == 0)
+        if (route == null || route.getPoints() == null || route.getPoints().length == 0) {
+            Grasscutter.getLogger()
+                    .warn(
+                            "Cannot start ordinary platform group={} config={} route={}: route has no points",
+                            getGroupId(),
+                            getConfigId(),
+                            config.getRouteId());
             return false;
+        }
         var run = ConfigRouteRun.plan(this, config, route.getPoints());
         if (run == null) {
             Grasscutter.getLogger()
@@ -641,10 +652,17 @@ public class EntityGadget extends EntityBaseGadget {
         }
         run.config.setStartIndex(index);
         position.set(run.points[index].getPos());
-        // Do not stop again at the zero-distance source point when resuming a stopped segment.
-        if (index == run.endIndex && (index > run.startIndex || index == run.points.length - 1))
+        if (index == run.points.length - 1) {
+            // The client already ran the route to its end; a stop here would refresh the entity
+            // (no 7.1 stop opcode) and drop anyone standing on it, so only the state is closed.
+            invalidatePlatformRouteRun();
+            for (int id : run.config.getScheduledIndexes()) getScene().getScheduler().cancelTask(id);
+            run.config.getScheduledIndexes().clear();
+            run.config.stopRoute(getScene());
+        } else if (index == run.endIndex && index > run.startIndex) {
+            // Do not stop again at the zero-distance source point when resuming a stopped segment.
             stopPlatform();
-        if (index == run.points.length - 1) run.config.setStarted(false);
+        }
     }
 
     /**
