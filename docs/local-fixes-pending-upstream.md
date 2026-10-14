@@ -1,18 +1,18 @@
 # Local fixes pending upstream submission
 
-Original inventory checked on 2026-10-13 against `MeChen618/AstaPS` main `4ae9884d`, using all-author open/closed/merged PR history and actual source comparisons. Seelie submission and fork synchronization updated on 2026-10-14. Commit ancestry alone is not sufficient because several fixes were integrated or squash-merged.
+Original inventory checked on 2026-10-13 against `MeChen618/AstaPS` main `4ae9884d`, using all-author open/closed/merged PR history and actual source comparisons. PRs 141 and 149–153 are confirmed merged, and both fork branches are synchronized with upstream `271d1ba1` on 2026-10-14. The older larger-bundle inventory still needs fresh per-change comparison against that integration. Commit ancestry alone is not sufficient because several fixes were integrated or squash-merged.
 
-## Submitted now
+## Submitted And Merged
 
-[PR 141: 7.1 achievement claims and saved-team response fields](https://github.com/MeChen618/AstaPS/pull/141) is open from `Daedie-git:fix/7.1-achievement-team-responses`, commit `9fab7c45`.
+[PR 141: 7.1 achievement claims and saved-team response fields](https://github.com/MeChen618/AstaPS/pull/141) is merged from `Daedie-git:fix/7.1-achievement-team-responses`, commit `9fab7c45`.
 
-It contains individual achievement request/response command and field corrections, complete request/batch validation, explicit routing, saved-team acknowledgement fields, tests and generation documentation. It does not include category claims, account test resets, Seelie changes, local customizations or protocol extraction artifacts. The current upstream already has team response command 29488; the PR corrects its stale fields rather than resubmitting that opcode change. Local validation: 852 tests pass, 4 skip, generated-code lint passes; all 27 new cases fail on the unmodified upstream baseline.
+It contains individual achievement request/response command and field corrections, complete request/batch validation, explicit routing, saved-team acknowledgement fields, tests and generation documentation. It does not include category claims, account test resets, Seelie changes, local customizations or protocol extraction artifacts. At submission, upstream already had team response command 29488; the PR corrects its stale fields rather than resubmitting that opcode change. Local validation: 852 tests pass, 4 skip, generated-code lint passes; all 27 new cases fail on the unmodified upstream baseline.
 
 No server deployment, restart or account mutation accompanies PR 141's submission.
 
-[PR 149: Seelie configured-route timing, stops and initial handoff](https://github.com/MeChen618/AstaPS/pull/149) is open from `Daedie-git:fix/seelie-config-route`, commit `04179329`. It includes route-change synchronization, the empty near-platform guard, route-resource aliases, ordered/cancellable scene-clock deadlines, authored stop markers and a continuous distance-based initial approach. The user confirms the final movement works correctly in live play. All 49 focused tests pass; the upstream-based non-integration suite runs 878 tests with zero failures/errors and four skipped. Temporary logging, capture tools, account resets and fork-only instructions are excluded.
+[PR 149: Seelie configured-route timing, stops and initial handoff](https://github.com/MeChen618/AstaPS/pull/149) is merged from `Daedie-git:fix/seelie-config-route`, commit `04179329`. It includes route-change synchronization, the empty near-platform guard, route-resource aliases, ordered/cancellable scene-clock deadlines, authored stop markers and a continuous distance-based initial approach. The user confirms the final movement works correctly in live play. All 49 focused tests pass; the upstream-based non-integration suite runs 878 tests with zero failures/errors and four skipped. Temporary logging, capture tools, account resets and fork-only instructions are excluded.
 
-Four further focused PRs are open, all directly based on upstream `4ae9884d`:
+Four further focused PRs are merged, each originally based on upstream `4ae9884d`:
 
 - [PR 150: canonical Adventure Rank request schema](https://github.com/MeChen618/AstaPS/pull/150), `fix/7.1-rank-request-schema`, commit `472a6329`. Only the generated field-15 descriptor and its captured-wire tests/documentation change; the handler fix is already merged in PR 107. Eight new cases fail before the correction and pass after it; full suite 837 tests, zero failures/errors, four skipped; generated-Java lint passes.
 - [PR 151: complete handbook claim payload validation](https://github.com/MeChen618/AstaPS/pull/151), `fix/handbook-whole-payload-validation`, commit `aa88d76f`. Fifty actual-handler tests pass (32 fail before the fix); full suite 879 tests, zero failures/errors, four skipped. No opcode/schema, authorization or delivery changes; chapter request identity remains unmapped.
@@ -21,11 +21,11 @@ Four further focused PRs are open, all directly based on upstream `4ae9884d`:
 
 These submissions do not redeploy the server or mutate player state. The four fix branches are pushed; unrelated customization-branch work remains uncommitted as before.
 
-The deployed server's temporary logging is removed without changing the accepted gameplay or resetting progress. The customization fork includes this fix and latest `origin/main` (`4ae9884d`); its merged non-integration suite runs 945 tests with zero failures/errors and four skipped.
+The deployed server's temporary logging is removed without changing the accepted gameplay or resetting progress. The customization fork now includes all six submitted fixes and latest upstream main (`271d1ba1`). Its synchronized non-integration suite runs 1,044 tests with zero failures/errors and four skipped; all 59 offline protocol-checker tests also pass, with no new hard protocol findings. This synchronization does not replace the privately patched installed server archive or reset any account state.
 
 ## Remaining small local work
 
-The four complete smaller upstream candidates are submitted in PRs 150–153. Achievement category/goal response fields remain local (`TakeAchievementGoalRewardRsp.proto`, response opcode 22054), but the request identity is still unmapped, so this is not a complete claiming fix or a submitted PR.
+The four complete smaller upstream candidates are merged in PRs 150–153. Achievement category/goal response fields remain local (`TakeAchievementGoalRewardRsp.proto`, response opcode 22054), but the request identity is still unmapped, so this is not a complete claiming fix or a submitted PR.
 
 `/finishquest`, including its chain-preservation correction, is explicitly fork-only and is not a pending upstream bugfix. The deployed integration also retains handbook resource/unlock/delivery protection beyond the submitted parser fix.
 
