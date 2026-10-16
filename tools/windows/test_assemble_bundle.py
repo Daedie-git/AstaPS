@@ -21,6 +21,7 @@ class AssemblyTest(unittest.TestCase):
         self.source = self.setup / 'patch-source'
         self.source.mkdir(parents=True)
         (self.source / 'LICENSE').write_text('synthetic license')
+        (self.source / 'Cargo.lock').write_bytes(b'synthetic lockfile')
         (self.setup / 'Astrolabe.dll').write_bytes(b'synthetic proxy')
         (self.setup / 'rea').mkdir()
         (self.setup / 'rea' / 'mhypbase-original.dll').write_bytes(b'synthetic stock')
@@ -29,6 +30,7 @@ class AssemblyTest(unittest.TestCase):
             'patch_commit': '1' * 40,
             'patch_sha256': hashlib.sha256(b'synthetic proxy').hexdigest(),
             'bootstrap_sha256': hashlib.sha256(b'synthetic stock').hexdigest(),
+            'patch_lock_sha256': hashlib.sha256(b'synthetic lockfile').hexdigest(),
         }
         self.status = ''
         self.commit = self.manifest['patch_commit']
@@ -51,6 +53,7 @@ class AssemblyTest(unittest.TestCase):
         result = MODULE.assemble(self.setup, self.output)
         self.assertEqual('2' * 40, result['handoff_commit'])
         self.assertIn('patch-source/LICENSE', result['files'])
+        self.assertIn('patch-source/Cargo.lock', result['files'])
         self.assertIn('Client.cmd', result['files'])
         for path, facts in result['files'].items():
             self.assertEqual(facts['sha256'], MODULE.digest(self.output / path))
@@ -90,6 +93,12 @@ class AssemblyTest(unittest.TestCase):
 
     def test_modified_original_refused(self):
         (self.setup / 'rea/mhypbase-original.dll').write_bytes(b'changed')
+        with self.assertRaises(ValueError):
+            MODULE.assemble(self.setup, self.output)
+        self.assertFalse(self.output.exists())
+
+    def test_modified_dependency_lock_refused(self):
+        (self.source / 'Cargo.lock').write_bytes(b'changed dependencies')
         with self.assertRaises(ValueError):
             MODULE.assemble(self.setup, self.output)
         self.assertFalse(self.output.exists())

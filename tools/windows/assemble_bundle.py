@@ -30,7 +30,8 @@ def assemble(setup: Path, output: Path) -> dict:
         raise ValueError('Patch checkout is dirty; do not mislabel its provenance')
     proxy = setup / 'Astrolabe.dll'
     stock = setup / 'rea' / 'mhypbase-original.dll'
-    for path, expected in [(proxy, manifest['patch_sha256']), (stock, manifest['bootstrap_sha256'])]:
+    for path, expected in [(proxy, manifest['patch_sha256']), (stock, manifest['bootstrap_sha256']),
+                           (source / 'Cargo.lock', manifest['patch_lock_sha256'])]:
         if path.is_symlink() or digest(path) != expected:
             raise ValueError(f'Unexpected source binary: {path}')
     # Never overwrite an existing handoff, game installation, runtime, or repository.
@@ -51,7 +52,9 @@ def assemble(setup: Path, output: Path) -> dict:
         shutil.copyfile(proxy, stage / 'payload' / 'Astrolabe.dll')
         # Private recovery copy ONLY. This proprietary DLL is never added to Git.
         shutil.copyfile(stock, stage / 'originals' / 'mhypbase.dll')
-        for relative in git(source, 'ls-files').splitlines():
+        # The patch repository ignores Cargo.lock; retain the exact locally built
+        # dependency lock explicitly so the supplied --locked rebuild works.
+        for relative in sorted(set(git(source, 'ls-files').splitlines()) | {'Cargo.lock'}):
             path = source / relative
             if path.is_symlink() or not path.is_file():
                 raise ValueError(f'Unsupported patch-source entry: {relative}')

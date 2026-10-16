@@ -8,6 +8,7 @@
   "wine_bootstrap_sha256": "042efb8885b51d45ff5bd15a3329468d69b4dbd38e2e2800339421996ad1e96d",
   "patch_source": "https://github.com/capyb2222/animegamepatch.git",
   "patch_commit": "562248bf212518872e3027d579fa511716f39294",
+  "patch_lock_sha256": "8b6b968a87ccc2721067f61619937c343914d12c31f365400e0287e83fe4c64b",
   "dispatch_url": "http://127.0.0.1:8088",
   "validation": "Proxy binary used successfully under Wine. Native Windows gameplay is not yet tested."
 }

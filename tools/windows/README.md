@@ -70,7 +70,9 @@ Direct commands, from PowerShell in this kit directory:
 
 Proxy source: https://github.com/capyb2222/animegamepatch.git at
 `562248bf212518872e3027d579fa511716f39294`. The kit includes every tracked source
-file at that revision in `patch-source/`, including `LICENSE` and `Cargo.lock`.
+file at that revision in `patch-source/`, including `LICENSE`. It also retains
+the exact locally built `Cargo.lock` (ignored by the patch's own repository),
+whose SHA-256 is separately pinned in `client-manifest.json`.
 The binary is unchanged from the working local installation; its SHA-256 is
 `b067813ef3fa643f6fdc861a447780b7bcfc2a194885298c412d94c79a3bd3f3`.
 The original build used official Rust 1.98.1, target `x86_64-pc-windows-msvc`,
@@ -98,5 +100,13 @@ The repository tracks scripts, hash facts and these instructions, **not** the
 proprietary stock bootstrap or game executable. `assemble_bundle.py` assembles
 this local kit from an existing verified setup; it never overwrites an existing
 output directory. `SHA256SUMS.txt` and `package-manifest.json` enumerate the bundle.
+The saved server source and these tools are pushed to the fork's `windows-ready`
+branch:
+
+```powershell
+git clone --branch windows-ready https://github.com/Daedie-git/AstaPS.git
+```
+
+Read `docs/windows-handoff.md` in that checkout before rebuilding the server.
 The complete server's deployed private source composition is separate from this
 client kit; a plain checkout build must not be assumed to reproduce it.
