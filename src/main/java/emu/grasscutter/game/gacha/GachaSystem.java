@@ -295,6 +295,11 @@ public class GachaSystem extends BaseGameSystem {
 
         // Check against total limit
         PlayerGachaBannerInfo gachaInfo = player.getGachaInfo().getBannerInfo(banner);
+        if (banner.isChronicleMixedBanner()
+                && (gachaInfo.getWishItemId() == 0 || !banner.isValidEpitomizedWish(gachaInfo.getWishItemId()))) {
+            player.sendPacket(new PacketDoGachaRsp(Retcode.RET_GACHA_WISH_INVALID_ITEM));
+            return;
+        }
         // Call pre-PlayerWishEvent.
         var event =
                 new PlayerWishEvent(
@@ -548,8 +553,10 @@ public class GachaSystem extends BaseGameSystem {
 
         long currentTime = System.currentTimeMillis() / 1000L;
 
-        int linkedCharWish = GachaEpitomizedPrefabHelper.resolveChronicleCharacterWish(player);
-        int linkedWeaponWish = GachaEpitomizedPrefabHelper.resolveChronicleWeaponWish(player);
+        int linkedCharWish = getGachaBanners().containsKey(GachaEpitomizedPrefabHelper.LINKED_CHARACTER_SCHEDULE_ID)
+                ? GachaEpitomizedPrefabHelper.resolveChronicleCharacterWish(player) : 0;
+        int linkedWeaponWish = getGachaBanners().containsKey(GachaEpitomizedPrefabHelper.LINKED_WEAPON_SCHEDULE_ID)
+                ? GachaEpitomizedPrefabHelper.resolveChronicleWeaponWish(player) : 0;
         var activeBanners = new ArrayList<GachaBanner>();
         for (GachaBanner banner : getGachaBanners().values()) {
             boolean timeOk = banner.getEndTime() >= currentTime && banner.getBeginTime() <= currentTime;
@@ -619,6 +626,17 @@ public class GachaSystem extends BaseGameSystem {
             fallbackItems4Pool2 = banner.getFallbackItems4Pool2();
             fallbackItems5Pool1 = banner.getFallbackItems5Pool1();
             fallbackItems5Pool2 = banner.getFallbackItems5Pool2();
+
+            if (banner.isChronicleMixedBanner() && wishItemId > 0
+                    && banner.isValidEpitomizedWish(wishItemId)) {
+                boolean characterChoice = wishItemId < 10000;
+                rateUpItems5 = new int[] {wishItemId};
+                int[] others = Arrays.stream(banner.getRateUpItems5())
+                        .filter(item -> item != wishItemId && (item < 10000) == characterChoice)
+                        .toArray();
+                fallbackItems5Pool1 = characterChoice ? others : new int[0];
+                fallbackItems5Pool2 = characterChoice ? new int[0] : others;
+            }
 
             if (banner.isAutoStripRateUpFromFallback()) {
                 fallbackItems4Pool1 = Utils.setSubtract(fallbackItems4Pool1, rateUpItems4);

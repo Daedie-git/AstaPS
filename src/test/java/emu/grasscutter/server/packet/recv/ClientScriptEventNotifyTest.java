@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import emu.grasscutter.net.proto.ClientScriptEventNotifyOuterClass.ClientScriptEventNotify;
 import emu.grasscutter.scripts.constants.EventType;
-
 import org.junit.jupiter.api.Test;
 
 class ClientScriptEventNotifyTest {
@@ -25,14 +24,12 @@ class ClientScriptEventNotifyTest {
 
     @Test
     void emptyParametersForOtherEventsStillReachSceneAccess() {
-        byte[] payload =
-                ClientScriptEventNotify.newBuilder()
-                        .setEventType(EventType.EVENT_PLATFORM_REACH_POINT)
-                        .build()
-                        .toByteArray();
+        byte[] payload = ClientScriptEventNotify.newBuilder()
+                .setEventType(EventType.EVENT_PLATFORM_REACH_POINT)
+                .build()
+                .toByteArray();
 
-        assertThrows(
-                NullPointerException.class,
+        assertThrows(NullPointerException.class,
                 () -> new HandlerClientScriptEventNotify().handle(null, new byte[0], payload));
     }
 }

@@ -817,12 +817,8 @@ public final class TeamManager extends BasePlayerDataManager {
         this.setCurrentTeamId(teamId);
         this.updateTeamEntities(new PacketChooseCurAvatarTeamRsp(teamId));
 
-        // ChooseCurAvatarTeamRsp has no 7.1 CmdId (PacketOpcodes gives it 0), and GameSession.send()
-        // drops any packet whose opcode is <= 0 - so the client never learns the active team changed.
-        // It keeps showing the previous team as 出战, refuses to switch back to it, and shows no
-        // confirmation; only a relogin repairs the view, because the full team data goes out on
-        // login. Re-send the same notify that login and add/removeCustomTeam already use, which
-        // does have a 7.1 CmdId and carries cur_avatar_team_id.
+        // Refresh the saved-team snapshot as well as the normal choose-team acknowledgement.
+        // This retains the full team data and custom-team ordering used by the party screen.
         this.getPlayer().sendPacket(new PacketAvatarTeamAllDataNotify(this.getPlayer()));
         // Also nudge the team-config screen: AvatarTeamUpdateNotify is what the other team
         // operations (reorder, trial avatar) use to get that screen to redraw.

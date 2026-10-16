@@ -7,7 +7,7 @@ import java.time.Clock;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-/** Apply the durable catalog to the existing seven slots without touching player records. */
+/** Apply the durable catalog without touching player records. */
 public final class CatalogRotation {
     private static CatalogStore store;
     private static CatalogStore.Snapshot installed;
@@ -54,10 +54,18 @@ public final class CatalogRotation {
     }
 
     public static String command(GachaSystem system, boolean next) throws IOException {
+        return command(system, next, null);
+    }
+
+    public static String command(GachaSystem system, int number) throws IOException {
+        return command(system, false, number);
+    }
+
+    private static String command(GachaSystem system, boolean next, Integer number) throws IOException {
         synchronized (system) {
             if (store == null) initialize(system);
             if (store == null) throw new IOException("Catalog unavailable; check server logs");
-            var snapshot = store.current(next);
+            var snapshot = number == null ? store.current(next) : store.select(number);
             apply(system, snapshot);
             return "Catalog " + (snapshot.index() + 1) + "/" + store.size() + ": " + snapshot.name()
                     + ". Daily at 00:00 Europe/Amsterdam. Close and reopen Wishes to refresh.";
@@ -66,6 +74,9 @@ public final class CatalogRotation {
 
     private static void apply(GachaSystem system, CatalogStore.Snapshot snapshot) {
         // Stable IDs keep existing character/weapon pity routing; no player state is modified.
+        if (installed != null) {
+            for (var previous : installed.banners()) system.getGachaBanners().remove(previous.getScheduleId());
+        }
         for (var banner : snapshot.banners()) system.getGachaBanners().put(banner.getScheduleId(), banner);
         installed = snapshot;
         Grasscutter.getLogger().info("[Catalog] Active set {}: {}", snapshot.index() + 1, snapshot.name());

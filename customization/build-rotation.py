@@ -1,121 +1,124 @@
 #!/usr/bin/env python3
-"""Build a full five-star catalog while preserving Standard and wish rates."""
+"""Generate five limited tabs and a matching weapon-only Chronicled Wish each day."""
 import argparse
+from collections import Counter
 import copy
 import json
 from pathlib import Path
-from catalog_roster import five_star_cards, validate_coverage
+from catalog_roster import character_cards, validate_coverage, event_counts
 
-root = Path(__file__).resolve().parent
-parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--output', type=Path, default=root/'rotation-catalog.json')
-parser.add_argument('--baseline', type=Path, default=root/'Banners.json' if (root/'Banners.json').exists()
-                    else root.parent/'src/main/resources/defaults/data/Banners.json')
-parser.add_argument('--server-root', type=Path, default=root.parent,
-                    help='Server directory containing resources/ and data/')
-args = parser.parse_args()
-resources = args.server_root / 'resources/ExcelBinOutput'
-old = json.loads(args.baseline.read_text())
-standard = next(b for b in old if b['bannerType'] == 'STANDARD')
-art = {r['itemId']: r for r in json.loads((args.server_root/'data/GachaEpitomizedPrefabMap.json').read_text())}
-# Name, avatar card, signature weapon, featured four-star cards.
-phases = [
-    ('Versatile supports and Vaporize', [
-        ('Kazuha',1047,11503,[1043,1031,1032]), ('Xilonen',4103,11516,[1027,1064,1032]),
-        ('Yelan',1060,15508,[1025,1031,1043]), ('Arlecchino',1096,13512,[1032,1025,1090])]),
-    ('Diluc plunge and classic Mondstadt', [
-        ('Diluc',1016,12502,[1032,1025,1043]), ('Xianyun',1093,14515,[1076,1032,1043]),
-        ('Keqing',1042,11505,[1031,1077,1043]), ('Jean',1003,11501,[1031,1039,1045])]),
-    ('Natlan archon and carries', [
-        ('Mavuika',4106,12514,[1032,1025,1097]), ('Mualani',4102,14516,[1023,1032,1097]),
-        ('Chasca',4104,15514,[1032,1031,1039]), ('Varesa',4111,14519,[1090,1031,1032])]),
-    ('Bloom and Dendro cores', [
-        ('Nahida',1073,14511,[1065,1025,1072]), ('Alhaitham',1078,11512,[1065,1031,1077]),
-        ('Nilou',1070,11511,[1072,1014,1067]), ('Kokomi',1054,14506,[1025,1072,1067])]),
-    ('Electro carries and healing', [
-        ('Raiden',1052,13509,[1056,1090,1032]), ('Furina',1089,11513,[1034,1088,1039]),
-        ('Clorinde',1098,11515,[1031,1090,1032]), ('Baizhu',1082,14505,[1065,1077,1031])]),
-    ('Cryo and Freeze', [
-        ('Ayaka',1002,11509,[1039,1045,1025]), ('Shenhe',1063,13507,[1045,1039,1043]),
-        ('Wriothesley',1086,14513,[1032,1039,1025]), ('Sigewinne',1095,15513,[1031,1025,1088])]),
-    ('Hydro exploration and Burning', [
-        ('Neuvillette',1087,14514,[1031,1043,1092]), ('Emilie',1099,13513,[1023,1032,1067]),
-        ('Kinich',4101,12513,[1032,1023,1067]), ('Venti',1022,15503,[1031,1043,1039])]),
-    ('Geo foundations', [
-        ('Navia',1091,12512,[1032,1023,1031]), ('Zhongli',1030,13504,[1027,1064,1032]),
-        ('Itto',1057,12510,[1055,1064,1034]), ('Chiori',1094,11514,[1055,1027,1064])]),
-    ('Xiao plunge and Liyue carries', [
-        ('Xiao',1026,13505,[1076,1032,1039]), ('Xianyun',1093,14515,[1076,1032,1043]),
-        ('Hu Tao',1046,13501,[1025,1045,1039]), ('Yae Miko',1058,14509,[1031,1077,1065])]),
-    ('Inazuma carries, shields and Freeze', [
-        ('Yoimiya',1049,15509,[1032,1064,1025]), ('Citlali',4107,14517,[1032,1025,1043]),
-        ('Ayato',1066,11510,[1025,1031,1064]), ('Escoffier',4112,13514,[1039,1045,1025])]),
-    ('Fontaine and ranged carries', [
-        ('Lyney',1084,15512,[1032,1023,1085]), ('Skirk',4114,11517,[1039,1045,1025]),
-        ('Tartaglia',1033,15507,[1023,1032,1043]), ('Ganyu',1037,15502,[1039,1023,1032])]),
-    ('Classic Mondstadt and healing', [
-        ('Albedo',1038,11514,[1064,1027,1055]), ('Klee',1029,14502,[1032,1023,1043]),
-        ('Eula',1051,12503,[1031,1039,1045]), ('Mona',1041,14501,[1039,1045,1025])]),
-    ('Sumeru carries and Inazuma healing', [
-        ('Tighnari',1069,15511,[1031,1077,1065]), ('Cyno',1071,13511,[1031,1077,1025]),
-        ('Dehya',1079,12511,[1032,1023,1090]), ('Mizuki',4109,14518,[1031,1025,1043])]),
-    ('Lunar reaction foundations', [
-        ('Lauma',4119,14520,[1065,1077,1072]), ('Nefer',4122,14521,[1065,1077,1072]),
-        ('Flins',4120,13516,[1031,1025,1077]), ('Ineffa',4116,13515,[1031,1025,1077])]),
-    ('Northern supports and elemental carries', [
-        ('Columbina',4125,14522,[1031,1025,1077]), ('Zibai',4126,11518,[1055,1064,1027]),
-        ('Durin',4123,11519,[1032,1023,1031]), ('Nicole',4131,14523,[1032,1025,1043])]),
-    ('Northern front line', [
-        ('Varka',4128,12515,[1032,1031,1076]), ('Lohen',4129,13517,[1032,1025,1043]),
-        ('Linnea',4130,15515,[1064,1055,1027]), ('Sandrone',4133,12516,[1031,1025,1032])]),
-    ('Special visitors and returning favorites', [
-        ('Qiqi',1035,11502,[1031,1045,1039]), ('Aloy',1062,15501,[1039,1045,1025]),
-        ('Wanderer',1075,14512,[1076,1032,1039]), ('Odette',4150,11520,[1032,1025,1043])]),
-    ('Remaining five-stars and archon supports', [
-        ('Vodyanitsa',4140,14524,[1031,1025,1043]), ('Vesna',4143,11521,[1032,1025,1043]),
-        ('Mavuika',4106,12514,[1032,1025,1097]), ('Furina',1089,11513,[1034,1088,1039])]),
-]
-materials = {r['id']: r for r in json.loads((resources/'MaterialExcelConfigData.json').read_text())}
-weapons = {r['id']: r for r in json.loads((resources/'WeaponExcelConfigData.json').read_text())}
-avatars = {r['id']: r for r in json.loads((resources/'AvatarExcelConfigData.json').read_text())}
-shared = {k: copy.deepcopy(standard[k]) for k in ('costItemAmount','costItemAmount10','eventChance4','eventChance5','weights4','weights5','poolBalanceWeights4','poolBalanceWeights5')}
-output = []
-for theme, entries in phases:
-    banners = [copy.deepcopy(standard)]
-    for i,(name,card,signature,four) in enumerate(entries):
-        avatar_id = 10000000 + (card-1000 if card < 4000 else card-4000)
-        assert materials[card]['rankLevel'] in (5, 105) and materials[card]['materialType'] == 'MATERIAL_AVATAR'
-        assert weapons[signature]['rankLevel'] == 5
-        assert avatars[avatar_id]['weaponType'] == weapons[signature]['weaponType'], name
-        b = dict(shared, comment=name, bannerType='CHARACTER2',gachaType=400,
-            scheduleId=7101+i,sortId=9997-i,costItemId=223,rateUpItems4=four,rateUpItems5=[card],
-            fallbackItems4Pool1=standard['fallbackItems4Pool1'],fallbackItems5Pool1=standard['fallbackItems5Pool1'],fallbackItems5Pool2=[])
-        skin = art.get(card, art[1016])  # Missing art must not exclude a supported character.
-        b.update({k:skin[k] for k in ('prefabPath','titlePath')})
-        if skin['previewPrefabPath'] != 'UI_Tab_' + skin['prefabPath']:
-            b['previewPrefabPath'] = skin['previewPrefabPath']
-        banners.append(b)
-    for i in range(2):
-        pair=entries[i*2:i*2+2]; signatures=[r[2] for r in pair]
-        skin=next((a for a in art.values() if set(a.get('displayItemIds',[]))==set(signatures)),art.get(signatures[1], art[11501]))
-        b=dict(shared,comment='Signatures: '+', '.join(r[0] for r in pair),bannerType='WEAPON',gachaType=302,
-            scheduleId=7200+i,sortId=9990-i,costItemId=223,rateUpItems4=[11401,12401,13407,14401,15401],
-            rateUpItems5=signatures,fallbackItems5Pool1=[],fallbackItems5Pool2=standard['fallbackItems5Pool2'])
-        b.update({k:skin[k] for k in ('prefabPath','titlePath')})
-        if skin['previewPrefabPath'] != 'UI_Tab_' + skin['prefabPath']:
-            b['previewPrefabPath'] = skin['previewPrefabPath']
-        banners.append(b)
-    for b in banners:
-        for rarity in (4,5):
-            for item in b[f'rateUpItems{rarity}']:
-                resource=materials[item] if item<10000 else weapons[item]
-                assert resource['rankLevel']==rarity or (rarity==5 and item==1062 and resource['rankLevel']==105),(theme,item)
-                if item<10000: assert resource['materialType']=='MATERIAL_AVATAR'
-    output.append(dict(name=theme,characters=[dict(name=r[0],card=r[1],signature=r[2]) for r in entries],banners=banners))
-expected = five_star_cards(resources)
-counts = validate_coverage(output, expected)
-roster = [dict(name=next(c['name'] for p in output for c in p['characters'] if c['card']==card),
-               card=card, **data) for card, data in sorted(expected.items())]
-args.output.write_text(json.dumps(dict(timezone='Europe/Amsterdam',phases=output),indent=2)+'\n')
-args.output.with_name('five-star-roster.json').write_text(json.dumps(roster,indent=2)+'\n')
-print(f'Validated {len(phases)} phases, all {len(counts)} resource-supported five-star cards (Xianyun/Mavuika/Furina twice; no Travelers), weapon types/rarities and seven tabs per phase.')
+ROOT = Path(__file__).resolve().parent
+ARCHON_CARDS = {1022, 1030, 1052, 1073, 1089, 4106}
+
+
+def validate_daily_features(characters, archon):
+    if len(characters) != 5 or len(set(characters)) != 5:
+        raise ValueError('Five daily character tabs must be distinct')
+    if characters[0] != archon or set(characters) & ARCHON_CARDS != {archon}:
+        raise ValueError('Every daily set must feature exactly the scheduled Archon first')
+
+
+def build(server_root, baseline):
+    history = json.loads((ROOT/'historical-banners.json').read_text())
+    order = json.loads((ROOT/'team-banner-order.json').read_text())
+    standard = next(b for b in json.loads(baseline.read_text()) if b['bannerType']=='STANDARD')
+    resources = server_root/'resources/ExcelBinOutput'
+    cards = character_cards(resources)
+    items = history['items']
+    missing_metadata = cards.keys()-{int(k) for k,v in items.items() if v['kind']=='characters'}
+    if missing_metadata:
+        raise ValueError(f'Historical dataset missing playable cards: {sorted(missing_metadata)}')
+    weapons = {r['id']:r for r in json.loads((resources/'WeaponExcelConfigData.json').read_text())}
+    shared = {k:copy.deepcopy(standard[k]) for k in (
+        'costItemAmount','costItemAmount10','eventChance4','eventChance5','weights4','weights5',
+        'poolBalanceWeights4','poolBalanceWeights5')}
+    sources = {}
+    signatures = {}
+    for source in history['phases']:
+        for index, character in enumerate(source['characters']):
+            sources.setdefault(character['card'], []).append((source, character))
+            signatures[character['card']] = source['weapons'][index]
+    signatures.update({int(k):v for k,v in order['weaponOverrides'].items()})
+    sequence = order['archonOrder']
+    if len(sequence) != 6 or set(sequence) != ARCHON_CARDS or len(order['days']) % 6:
+        raise ValueError('Archon order must cover all six and continue across cycle wrap')
+    if order['days'][1]['characters'][0] != 4106:
+        raise ValueError('Tomorrow must feature Mavuika')
+    limited = {card for day in order['days'] for card in day['characters']}
+    expected_limited = {k for k,v in cards.items() if v['rarity']==5}-set(standard['fallbackItems5Pool1'])
+    if limited != expected_limited:
+        raise ValueError(f'Limited coverage mismatch: missing={sorted(expected_limited-limited)}, unexpected={sorted(limited-expected_limited)}')
+    phases = []
+    for day, entry in enumerate(order['days']):
+        featured = entry['characters']
+        validate_daily_features(featured, sequence[day % 6])
+        banners = [copy.deepcopy(standard)]
+        characters = []
+        for index, card in enumerate(featured):
+            # Preserve a real portrait and the four-stars depicted on that portrait.
+            source, character = sources[card][-1]
+            characters.append(dict(copy.deepcopy(character), weapon=signatures[card], sourcePhase=source['id']))
+            banners.append(dict(shared, comment=character['name'], bannerType='CHARACTER2',gachaType=400,
+                scheduleId=7101+index,sortId=9997-index,costItemId=223,
+                rateUpItems4=source['fourStars'],rateUpItems5=[card],
+                fallbackItems4Pool1=standard['fallbackItems4Pool1'],
+                fallbackItems5Pool1=standard['fallbackItems5Pool1'],fallbackItems5Pool2=[],
+                prefabPath=character['prefabPath'],titlePath=character['titlePath']))
+        pool = [signatures[card] for card in featured]
+        if len(set(pool)) != 5:
+            raise ValueError('Each daily weapon banner must offer five distinct associated weapons')
+        art = history['chronicles'][0]
+        four_weapons = sorted({w for c in featured for w in sources[c][-1][0]['fourStarWeapons']})
+        banners.append(dict(shared, comment='Weapons: '+' / '.join(items[str(w)]['name'] for w in pool),
+            bannerType='CHRONICLE',gachaType=500,scheduleId=7300,sortId=9992,costItemId=223,
+            epitomizedPath=True,epitomizedTarget='WEAPON',pityGroup='CHRONICLE_WEAPON',
+            epitomizedItems5=pool,autoStripRateUpFromFallback=False,
+            rateUpItems5=pool,rateUpItems4=four_weapons,
+            fallbackItems5Pool1=[],fallbackItems5Pool2=pool,
+            fallbackItems4Pool1=[],fallbackItems4Pool2=four_weapons,
+            **{k:art[k] for k in ('prefabPath','previewPrefabPath','titlePath')}))
+        for banner in banners[1:]:
+            for rarity in (4,5):
+                for item in banner[f'rateUpItems{rarity}']:
+                    resource = cards[item] if item < 10000 else weapons[item]
+                    if resource['rankLevel'] != rarity: raise ValueError(f'Wrong rarity: {item}')
+        phases.append(dict(name=' / '.join(c['name'] for c in characters),
+            theme=entry['theme'],characters=characters,banners=banners))
+    validate_coverage(phases, cards)
+    five, four = event_counts(phases)
+    if not all(n == len(phases)//6 if card in ARCHON_CARDS else 1 <= n <= 2 for card,n in five.items()):
+        raise ValueError('Event five-star exposure exceeds the fairness bounds')
+    catalog = dict(schemaVersion=3,timezone='Europe/Amsterdam',anchorDate=order['anchorDate'],phases=phases)
+    roster = [dict(name=items[str(card)]['name'],card=card,**value) for card,value in sorted(cards.items())]
+    report = dict(days=len(phases),excludedCards=[1005,1007,1062],
+        fiveStarCharacters=sum(v['rarity']==5 for v in cards.values()),
+        fourStarCharacters=sum(v['rarity']==4 for v in cards.values()),
+        eventFiveStarBounds=[min(five.values()),max(five.values())],
+        nonArchonEventFiveStarBounds=[min(n for c,n in five.items() if c not in ARCHON_CARDS),
+                                     max(n for c,n in five.items() if c not in ARCHON_CARDS)],
+        archonBounds=[min(five[c] for c in ARCHON_CARDS),max(five[c] for c in ARCHON_CARDS)],
+        archonEveryDay=True,archonCards=sorted(ARCHON_CARDS),
+        eventFourStarBounds=[min(four.values()),max(four.values())],
+        eventAppearanceUnit='one character tab, including repeated four-star lineups',
+        characters=[dict(name=items[str(card)]['name'],card=card,rarity=value['rarity'],
+            eventAppearances=(five if value['rarity']==5 else four)[card],
+            eventDays=[i+1 for i,p in enumerate(phases) if any(card in b[f'rateUpItems{value["rarity"]}']
+                for b in p['banners'] if b['bannerType']=='CHARACTER2')],
+            standardAvailable=card in standard[f'fallbackItems{value["rarity"]}Pool1'],chronicledDays=[])
+            for card,value in sorted(cards.items())])
+    return catalog, roster, report
+
+
+if __name__ == '__main__':
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--server-root',type=Path,default=ROOT.parent)
+    parser.add_argument('--baseline',type=Path,default=ROOT.parent/'src/main/resources/defaults/data/Banners.json')
+    parser.add_argument('--output',type=Path,default=ROOT/'rotation-catalog.json')
+    args=parser.parse_args()
+    catalog,roster,report=build(args.server_root,args.baseline)
+    args.output.parent.mkdir(parents=True,exist_ok=True)
+    for path,value in ((args.output,catalog),(args.output.with_name('character-roster.json'),roster),
+                       (args.output.with_name('banner-fairness.json'),report)):
+        path.write_text(json.dumps(value,indent=2)+'\n')
+    args.output.with_name('five-star-roster.json').write_text(json.dumps([r for r in roster if r['rarity']==5],indent=2)+'\n')
+    print(f"Validated {report['days']} days, five limiteds and five matching Chronicled weapons; Standard unchanged.")

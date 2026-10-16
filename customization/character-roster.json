@@ -1,0 +1,835 @@
+[
+  {
+    "name": "Kamisato Ayaka",
+    "card": 1002,
+    "avatarId": 10000002,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Jean",
+    "card": 1003,
+    "avatarId": 10000003,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Lisa",
+    "card": 1006,
+    "avatarId": 10000006,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Barbara",
+    "card": 1014,
+    "avatarId": 10000014,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Kaeya",
+    "card": 1015,
+    "avatarId": 10000015,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Diluc",
+    "card": 1016,
+    "avatarId": 10000016,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Razor",
+    "card": 1020,
+    "avatarId": 10000020,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Amber",
+    "card": 1021,
+    "avatarId": 10000021,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Venti",
+    "card": 1022,
+    "avatarId": 10000022,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Xiangling",
+    "card": 1023,
+    "avatarId": 10000023,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Beidou",
+    "card": 1024,
+    "avatarId": 10000024,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Xingqiu",
+    "card": 1025,
+    "avatarId": 10000025,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Xiao",
+    "card": 1026,
+    "avatarId": 10000026,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Ningguang",
+    "card": 1027,
+    "avatarId": 10000027,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Klee",
+    "card": 1029,
+    "avatarId": 10000029,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Zhongli",
+    "card": 1030,
+    "avatarId": 10000030,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Fischl",
+    "card": 1031,
+    "avatarId": 10000031,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Bennett",
+    "card": 1032,
+    "avatarId": 10000032,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Tartaglia",
+    "card": 1033,
+    "avatarId": 10000033,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Noelle",
+    "card": 1034,
+    "avatarId": 10000034,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Qiqi",
+    "card": 1035,
+    "avatarId": 10000035,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Chongyun",
+    "card": 1036,
+    "avatarId": 10000036,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Ganyu",
+    "card": 1037,
+    "avatarId": 10000037,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Albedo",
+    "card": 1038,
+    "avatarId": 10000038,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Diona",
+    "card": 1039,
+    "avatarId": 10000039,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Mona",
+    "card": 1041,
+    "avatarId": 10000041,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Keqing",
+    "card": 1042,
+    "avatarId": 10000042,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Sucrose",
+    "card": 1043,
+    "avatarId": 10000043,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Xinyan",
+    "card": 1044,
+    "avatarId": 10000044,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Rosaria",
+    "card": 1045,
+    "avatarId": 10000045,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Hu Tao",
+    "card": 1046,
+    "avatarId": 10000046,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Kaedehara Kazuha",
+    "card": 1047,
+    "avatarId": 10000047,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Yanfei",
+    "card": 1048,
+    "avatarId": 10000048,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Yoimiya",
+    "card": 1049,
+    "avatarId": 10000049,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Thoma",
+    "card": 1050,
+    "avatarId": 10000050,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Eula",
+    "card": 1051,
+    "avatarId": 10000051,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Raiden Shogun",
+    "card": 1052,
+    "avatarId": 10000052,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Sayu",
+    "card": 1053,
+    "avatarId": 10000053,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Sangonomiya Kokomi",
+    "card": 1054,
+    "avatarId": 10000054,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Gorou",
+    "card": 1055,
+    "avatarId": 10000055,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Kujou Sara",
+    "card": 1056,
+    "avatarId": 10000056,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Arataki Itto",
+    "card": 1057,
+    "avatarId": 10000057,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Yae Miko",
+    "card": 1058,
+    "avatarId": 10000058,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Shikanoin Heizou",
+    "card": 1059,
+    "avatarId": 10000059,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Yelan",
+    "card": 1060,
+    "avatarId": 10000060,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Kirara",
+    "card": 1061,
+    "avatarId": 10000061,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Shenhe",
+    "card": 1063,
+    "avatarId": 10000063,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Yun Jin",
+    "card": 1064,
+    "avatarId": 10000064,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Kuki Shinobu",
+    "card": 1065,
+    "avatarId": 10000065,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Kamisato Ayato",
+    "card": 1066,
+    "avatarId": 10000066,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Collei",
+    "card": 1067,
+    "avatarId": 10000067,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Dori",
+    "card": 1068,
+    "avatarId": 10000068,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Tighnari",
+    "card": 1069,
+    "avatarId": 10000069,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Nilou",
+    "card": 1070,
+    "avatarId": 10000070,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Cyno",
+    "card": 1071,
+    "avatarId": 10000071,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Candace",
+    "card": 1072,
+    "avatarId": 10000072,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Nahida",
+    "card": 1073,
+    "avatarId": 10000073,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Layla",
+    "card": 1074,
+    "avatarId": 10000074,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Wanderer",
+    "card": 1075,
+    "avatarId": 10000075,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Faruzan",
+    "card": 1076,
+    "avatarId": 10000076,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Yaoyao",
+    "card": 1077,
+    "avatarId": 10000077,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Alhaitham",
+    "card": 1078,
+    "avatarId": 10000078,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Dehya",
+    "card": 1079,
+    "avatarId": 10000079,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Mika",
+    "card": 1080,
+    "avatarId": 10000080,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Kaveh",
+    "card": 1081,
+    "avatarId": 10000081,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Baizhu",
+    "card": 1082,
+    "avatarId": 10000082,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Lynette",
+    "card": 1083,
+    "avatarId": 10000083,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Lyney",
+    "card": 1084,
+    "avatarId": 10000084,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Freminet",
+    "card": 1085,
+    "avatarId": 10000085,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Wriothesley",
+    "card": 1086,
+    "avatarId": 10000086,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Neuvillette",
+    "card": 1087,
+    "avatarId": 10000087,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Charlotte",
+    "card": 1088,
+    "avatarId": 10000088,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Furina",
+    "card": 1089,
+    "avatarId": 10000089,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Chevreuse",
+    "card": 1090,
+    "avatarId": 10000090,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Navia",
+    "card": 1091,
+    "avatarId": 10000091,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Gaming",
+    "card": 1092,
+    "avatarId": 10000092,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Xianyun",
+    "card": 1093,
+    "avatarId": 10000093,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Chiori",
+    "card": 1094,
+    "avatarId": 10000094,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Sigewinne",
+    "card": 1095,
+    "avatarId": 10000095,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Arlecchino",
+    "card": 1096,
+    "avatarId": 10000096,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Sethos",
+    "card": 1097,
+    "avatarId": 10000097,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Clorinde",
+    "card": 1098,
+    "avatarId": 10000098,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Emilie",
+    "card": 1099,
+    "avatarId": 10000099,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Kachina",
+    "card": 4100,
+    "avatarId": 10000100,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Kinich",
+    "card": 4101,
+    "avatarId": 10000101,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Mualani",
+    "card": 4102,
+    "avatarId": 10000102,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Xilonen",
+    "card": 4103,
+    "avatarId": 10000103,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Chasca",
+    "card": 4104,
+    "avatarId": 10000104,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Ororon",
+    "card": 4105,
+    "avatarId": 10000105,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Mavuika",
+    "card": 4106,
+    "avatarId": 10000106,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Citlali",
+    "card": 4107,
+    "avatarId": 10000107,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Lan Yan",
+    "card": 4108,
+    "avatarId": 10000108,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Yumemizuki Mizuki",
+    "card": 4109,
+    "avatarId": 10000109,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Iansan",
+    "card": 4110,
+    "avatarId": 10000110,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Varesa",
+    "card": 4111,
+    "avatarId": 10000111,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Escoffier",
+    "card": 4112,
+    "avatarId": 10000112,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Ifa",
+    "card": 4113,
+    "avatarId": 10000113,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Skirk",
+    "card": 4114,
+    "avatarId": 10000114,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Dahlia",
+    "card": 4115,
+    "avatarId": 10000115,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Ineffa",
+    "card": 4116,
+    "avatarId": 10000116,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Lauma",
+    "card": 4119,
+    "avatarId": 10000119,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Flins",
+    "card": 4120,
+    "avatarId": 10000120,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Aino",
+    "card": 4121,
+    "avatarId": 10000121,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Nefer",
+    "card": 4122,
+    "avatarId": 10000122,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Durin",
+    "card": 4123,
+    "avatarId": 10000123,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Jahoda",
+    "card": 4124,
+    "avatarId": 10000124,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Columbina",
+    "card": 4125,
+    "avatarId": 10000125,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Zibai",
+    "card": 4126,
+    "avatarId": 10000126,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Illuga",
+    "card": 4127,
+    "avatarId": 10000127,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Varka",
+    "card": 4128,
+    "avatarId": 10000128,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Lohen",
+    "card": 4129,
+    "avatarId": 10000129,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Linnea",
+    "card": 4130,
+    "avatarId": 10000130,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Nicole",
+    "card": 4131,
+    "avatarId": 10000131,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Prune",
+    "card": 4132,
+    "avatarId": 10000132,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Sandrone",
+    "card": 4133,
+    "avatarId": 10000133,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Vodyanitsa",
+    "card": 4140,
+    "avatarId": 10000140,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Vesna",
+    "card": 4143,
+    "avatarId": 10000143,
+    "rankLevel": 5,
+    "rarity": 5
+  },
+  {
+    "name": "Alyosha",
+    "card": 4148,
+    "avatarId": 10000148,
+    "rankLevel": 4,
+    "rarity": 4
+  },
+  {
+    "name": "Odette",
+    "card": 4150,
+    "avatarId": 10000150,
+    "rankLevel": 5,
+    "rarity": 5
+  }
+]

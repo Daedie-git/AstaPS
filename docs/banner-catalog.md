@@ -1,59 +1,64 @@
-# Daily banner catalog
+# Daily Team Banner Catalog
 
-`customization/rotation-catalog.json` mirrors the deployed 18-set catalog. It retains seven tabs: Standard, four character slots and two weapon pairs. Rates, pity routing and Standard content remain unchanged.
+Every day offers **five limited character tabs, one weapon-only Chronicled Wish with their five associated weapons, and unchanged Standard**. There are seven visible schedules: Standard `200`, characters `7101`–`7105`, and Chronicled `7300`. The old paired weapon tabs `7200`/`7201` disappear on reload. Character tabs retain shared event-character pity; Chronicled retains its separate pity record. Existing event-weapon pity is not transferred or erased.
 
-| Set | Character slots 1–4 |
-| --- | --- |
-| 1 | Kazuha, Xilonen, Yelan, Arlecchino |
-| 2 | Diluc, Xianyun, Keqing, Jean |
-| 3 | Mavuika, Mualani, Chasca, Varesa |
-| 4 | Nahida, Alhaitham, Nilou, Kokomi |
-| 5 | Raiden, Furina, Clorinde, Baizhu |
-| 6 | Ayaka, Shenhe, Wriothesley, Sigewinne |
-| 7 | Neuvillette, Emilie, Kinich, Venti |
-| 8 | Navia, Zhongli, Itto, Chiori |
-| 9 | Xiao, Xianyun, Hu Tao, Yae Miko |
-| 10 | Yoimiya, Citlali, Ayato, Escoffier |
-| 11 | Lyney, Skirk, Tartaglia, Ganyu |
-| 12 | Albedo, Klee, Eula, Mona |
-| 13 | Tighnari, Cyno, Dehya, Mizuki |
-| 14 | Lauma, Nefer, Flins, Ineffa |
-| 15 | Columbina, Zibai, Durin, Nicole |
-| 16 | Varka, Lohen, Linnea, Sandrone |
-| 17 | Qiqi, Aloy, Wanderer, Odette |
-| 18 | Vodyanitsa, Vesna, Mavuika, Furina |
+## Schedule
 
-All 69 non-Traveler canonical five-star avatar cards in the installed resources appear, including Aloy. Aether and Lumine are explicitly excluded. Xianyun, Mavuika and Furina appear twice; the other 66 entries appear once. Coverage derives from formal five-star avatar data and each card's `ITEM_USE_GAIN_AVATAR` target; alternate acquisition tokens and non-card NPC/debug variants are not separate characters. Aloy's special rarity is encoded as 105, not 5. `customization/five-star-roster.json` records the audited roster. Resource presence does not establish that every newer character works fully in the client. Weapon pairs follow slots 1/2 and 3/4. Set 2 pairs Wolf's Gravestone/Crane's Echoing Call and Primordial Jade Cutter/Aquila Favonia. Keqing/Jean's weapons are selected five-star options, not official signatures. Cards without dedicated artwork use the Standard fallback; configured pools determine rewards, not the artwork. Diluc's weapon is `12502` (Wolf's Gravestone), correcting the earlier `12501` (Skyward Pride).
+The 18-day cycle starts on 2026-10-10, at midnight Europe/Amsterdam. The first character is always the day's sole Archon. The sequence is Venti → Mavuika → Nahida → Furina → Raiden → Zhongli, repeated three times; wrap continues the same sequence. Tomorrow, 2026-10-11, is Mavuika.
 
-The catalog advances at midnight Europe/Amsterdam, checked every 30 seconds or when Wishes is requested. `/catalog` shows the position; `/catalog next` advances manually. Both require `server.catalog`. Close and reopen Wishes afterward. Shared character pity and shared weapon pity/target state persist; weapon banners do not have independent Epitomized Path records.
+| Day | Archon | Other Limited Characters |
+| --- | --- | --- |
+| 1 | Venti | Mualani, Kazuha, Xilonen, Chasca |
+| 2 | Mavuika | Citlali, Xilonen, Mualani, Kinich |
+| 3 | Nahida | Alhaitham, Nilou, Kokomi, Cyno |
+| 4 | Furina | Neuvillette, Wriothesley, Xianyun, Sigewinne |
+| 5 | Raiden | Yae Miko, Kazuha, Yelan, Eula |
+| 6 | Zhongli | Hu Tao, Yelan, Albedo, Xiao |
+| 7 | Venti | Ayaka, Shenhe, Kokomi, Ganyu |
+| 8 | Mavuika | Emilie, Kinich, Chasca, Citlali |
+| 9 | Nahida | Nefer, Lauma, Baizhu, Clorinde |
+| 10 | Furina | Skirk, Escoffier, Ayato, Yoimiya |
+| 11 | Raiden | Varesa, Xianyun, Eula, Wanderer |
+| 12 | Zhongli | Itto, Chiori, Navia, Linnea |
+| 13 | Venti | Klee, Lyney, Arlecchino, Tartaglia |
+| 14 | Mavuika | Lohen, Nicole, Durin, Varka |
+| 15 | Nahida | Columbina, Ineffa, Flins, Sandrone |
+| 16 | Furina | Vesna, Vodyanitsa, Odette, Zibai |
+| 17 | Raiden | Yae Miko, Alhaitham, Baizhu, Ayato |
+| 18 | Zhongli | Neuvillette, Navia, Yoimiya, Arlecchino |
 
-## Generate and validate
+These are collections of team options, not five-character teams. Day 2 supports Mavuika/Citlali/Xilonen melt, or off-field Mavuika for Mualani or Kinich. Nahida days offer bloom/quicken options; Furina days include healing and compatible damage dealers; Raiden offers energy, Electro application and superconduct; Zhongli offers shielding; Venti offers grouping and resistance reduction. Venti's burst does not suit every melee enemy matchup. Synergy for the newer resource-only kits, especially days 14–16, remains unverified; resource presence is not evidence of complete gameplay.
 
-From the repo, with Java 21 and a disk-backed `TMPDIR`:
+`customization/team-banner-order.json` is the authoritative curated order. The previous historical pair order is retained only as legacy reference, not used by the generator. All 60 non-Standard five-stars appear; non-Archons appear one or two times, each Archon three times. Standard's eight five-star characters and all 51 four-stars remain obtainable there. Aloy and the Travelers remain excluded. Four-star event appearances count each individual tab, no longer each historical pair. `banner-fairness.json` records event days and Standard availability separately.
+
+## Weapons And UI
+
+Chronicled offers exactly the five active characters' weapons **in character-tab order**, with no character drops. Select one before wishing. A lost five-star gives another of the remaining four weapons and one Fate Point; the next five-star guarantees the chosen weapon. Four-star drops are also weapons only. Costs and rarity curves stay unchanged. A target absent from a later day must be selected again.
+
+Day 2 weapons: A Thousand Blazing Suns, Starcaller's Watch, Peak Patrol Song, Surf's Up, Fang of the Mountain King. The historical Wriothesley/Furina source lists weapons in opposite order; explicit overrides prevent a wrong association. Albedo has no dedicated five-star signature, so his historical Primordial Jade Cutter pairing is used. Klee similarly uses her historical Lost Prayer pairing. These exceptions are recorded in the order file rather than called dedicated signatures.
+
+Character portraits and depicted four-star pools remain historical and match each other. Chronicled uses the installed selector prefab `GachaShowPanel_N?5` and tab `UI_Tab_GachaShowPanel_N5`; its selectable item list carries the actual five weapons. No new artwork or client resources are installed. The stock Chronicle title/backdrop is reused, not a custom five-weapon illustration. Packet tests verify the five weapon choices, item categories and retained selection across reopens; actual visual readability still needs an in-client check.
+
+## Validate
 
 ```bash
-mkdir -p captures/catalog-check
-python3 customization/build-rotation.py --server-root /home/aim/.local/share/astaps --output captures/catalog-check/rotation-catalog.json
-cmp customization/rotation-catalog.json captures/catalog-check/rotation-catalog.json
-cmp customization/five-star-roster.json captures/catalog-check/five-star-roster.json
+python3 customization/build-rotation.py --server-root /home/aim/.local/share/astaps
 python3 tools/test_catalog_roster.py
-cp src/main/resources/defaults/data/Banners.json captures/catalog-check/Banners.json
-javac -cp /home/aim/.local/share/astaps/grasscutter.jar -d captures/catalog-check tools/CheckRotation.java
-```
-
-Run the compiled checks from the installed server directory so its startup resource checks find the installed resources:
-
-```bash
+python3 tools/test_real_banner_catalog.py
+JAVA_HOME=/home/aim/.local/share/astaps/runtime/jdk PATH=/home/aim/.local/share/astaps/runtime/jdk/bin:$PATH bash gradlew test --tests 'emu.grasscutter.game.gacha.*' --no-daemon
+mkdir -p captures/team-catalog-check
+cp customization/rotation-catalog.json src/main/resources/defaults/data/Banners.json captures/team-catalog-check/
+/home/aim/.local/share/astaps/runtime/jdk/bin/javac -cp build/classes/java/main:/home/aim/.local/share/astaps/grasscutter.jar -d captures/team-catalog-check tools/CheckRotation.java
 cd /home/aim/.local/share/astaps
-java -Djava.io.tmpdir="$TMPDIR" -cp grasscutter.jar:/home/aim/git/astaps/captures/catalog-check CheckRotation "$PWD/grasscutter.jar" /home/aim/git/astaps/captures/catalog-check
+/home/aim/.local/share/astaps/runtime/jdk/bin/java -cp /home/aim/git/astaps/build/classes/java/main:/home/aim/git/astaps/captures/team-catalog-check:grasscutter.jar CheckRotation grasscutter.jar /home/aim/git/astaps/captures/team-catalog-check
 ```
 
-Checks cover rates, seven stable schedule IDs, featured pools and weapon targets, Diluc/Xianyun as set 2, Mavuika/Mualani as set 3, Xiao/Xianyun as set 9, coverage against the actual resource roster, midnight/DST, full-cycle wrap, restart/catch-up, concurrent advancement and failure retention. Python tests reject missing Mavuika, a newly added resource character and accidentally included Travelers; the old nine-set catalog fails the Java coverage check. They execute installed load/refresh/command hooks against isolated state; no wishes or account records change. Client artwork and actual wishes remain unverified.
+Checks use fake accounts, sessions and isolated catalog state; they do not change real inventories or wishes. They cover layout, portrait pools, all limiteds, matching weapon pools, rates/costs/targets, the one-point guarantee, midnight/DST, anchor initialization, persistence, wrap, concurrent advances, malformed-state retention, actual client packets and stale-slot removal.
 
-## Deploy
+## Deploy And Roll Back
 
-Stop the game service, back up the installed catalog and state, copy the tracked catalog to the installation's `customization/rotation-catalog.json`, then restart. Preserve `rotation-state.json`; it is runtime state and is deliberately not tracked. When changing phase order on an existing installation, map its active set to the new index rather than blindly retaining an index that now names another set. This deployment retained set 1 at index 0; set 2 is next.
+This change is prepared and tested in the checkout, **not deployed**. It needs the updated Java classes as well as the catalog: `CatalogStore` accepts the new layout, and `GachaBanner`/`GachaSystem` stop old linked-tab migration from clearing standalone Chronicled weapon selections.
 
-`customization/game-options.json` records only the four deployed character tuning values. Merge these keys into `server.game.gameOptions` in the installation's config; this file is not loaded automatically and is not a replacement for the full config. See [character damage tuning](character-damage-tuning.md) and [Amber support](amber-support.md).
+Before deployment, stop the game service when empty and back up its archive, changed customization files and `rotation-state.json`. Install the built archive and generated catalog together. Explicitly set the new state to the number of local calendar days since 2026-10-10 modulo 18, with today's local date; do not preserve an index from the old 25-day cycle. When no state exists, the new catalog's anchor date supplies this alignment automatically. Restart and check `/catalog`, then reopen Wishes and inspect all seven tabs and the weapon selector. Do not transfer player pity or modify Mongo records. To roll back, stop the service, restore the backed-up archive, catalog and old state together, then restart.
 
-To undo only the catalog change, stop the service, restore its catalog/state backup, then restart. Leave the archive and character tuning intact. The installed backup/manifest paths are recorded in `/home/aim/SYSTEM_CHANGES.md`.
+`/catalog next` advances manually; `/catalog` reports without advancing. `/catalog <number>` selects a set directly using the displayed one-based numbering (for example, `/catalog 5`). Out-of-range numbers leave the active set unchanged. Selection persists across restarts and daily rotation resumes from the selected set at the next local midnight. Automatic refresh runs every 30 seconds and when Wishes opens, at local midnight Europe/Amsterdam.

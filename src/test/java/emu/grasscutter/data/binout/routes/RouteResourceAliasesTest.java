@@ -3,14 +3,11 @@ package emu.grasscutter.data.binout.routes;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.google.gson.JsonParser;
-
 import emu.grasscutter.utils.JsonUtils;
-
 import org.junit.jupiter.api.Test;
 
 class RouteResourceAliasesTest {
-    private static final String ROUTE =
-            """
+    private static final String ROUTE = """
             [{"_localId":300300282,"_name":"Seelie","_type":"Loop",
               "_arriveRange":2,"_rotType":"ROT_ROUND","_rotAngleType":"ROT_ANGLE_Y",
               "_points":[{"_pos":{"_x":2453.382,"_y":296.623,"_z":-1613.664},

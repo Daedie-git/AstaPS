@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-/** Select one active parent quest; never guess between concurrent quests or complete successors. */
+/** Finish currently active steps in one parent; only normal final-step hooks close the chain. */
 public final class CurrentQuestCompletion {
     private CurrentQuestCompletion() {}
 
@@ -37,14 +37,15 @@ public final class CurrentQuestCompletion {
         if (steps.isEmpty()) throw new IllegalArgumentException("Quest has no active steps.");
         int completed = 0;
         for (var step : steps) {
+            if (quest.isFinished() || quest.getState() == ParentQuestState.PARENT_QUEST_STATE_FINISHED) break;
             if (step.getState().getValue() != QuestState.QUEST_STATE_UNFINISHED.getValue()) continue;
             step.finish();
             if (step.getState().getValue() != QuestState.QUEST_STATE_FINISHED.getValue())
                 throw new IllegalStateException("A quest hook refused completion; stopped without finishing the parent.");
             completed++;
         }
-        if (!quest.isFinished() && quest.getState() != ParentQuestState.PARENT_QUEST_STATE_FINISHED) quest.finish();
-        if (!quest.isFinished()) throw new IllegalStateException("Parent quest did not finish.");
+        // Finish hooks queue events that may unlock required steps after this call returns.
+        // Even an empty active-step set cannot establish that the parent is complete.
         return completed;
     }
 }

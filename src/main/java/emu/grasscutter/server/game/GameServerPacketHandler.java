@@ -91,6 +91,10 @@ public final class GameServerPacketHandler {
             this.registerPacketHandler(
                     emu.grasscutter.server.packet.recv.HandlerDungeonQuickOpenReq.class);
         }
+        // Captured achievement claims must also register when Reflections misses a patched class.
+        registerIfAbsent(
+                PacketOpcodes.TakeAchievementRewardReq,
+                emu.grasscutter.server.packet.recv.HandlerTakeAchievementRewardReq.class);
         // Keep Katheryne claims registered when a patched class is missed by Reflections.
         registerIfAbsent(
                 PacketOpcodes.TakePlayerLevelRewardReq,

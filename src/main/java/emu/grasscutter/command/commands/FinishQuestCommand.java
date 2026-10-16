@@ -36,8 +36,10 @@ public final class FinishQuestCommand implements CommandHandler {
                 if (!GameData.getMainQuestDataMap().containsKey(quest.getParentQuestId()))
                     throw new IllegalArgumentException("Quest resource data is missing; nothing completed.");
                 int count = CurrentQuestCompletion.complete(quest);
-                CommandHandler.sendMessage(sender, "Finished quest " + quest.getParentQuestId() + " (" + count
-                        + " active steps). Normal rewards and successor startup applied.");
+                CommandHandler.sendMessage(sender, "Finished " + count + " active step(s) of quest "
+                        + quest.getParentQuestId() + ". " + (quest.isFinished()
+                        ? "Its final step completed the chain; normal rewards and successor startup applied."
+                        : "The chain stays open. Newly unlocked steps are not skipped; use /finishquest again if needed."));
             } catch (IllegalArgumentException e) {
                 CommandHandler.sendMessage(sender, e.getMessage());
             } catch (Exception e) {

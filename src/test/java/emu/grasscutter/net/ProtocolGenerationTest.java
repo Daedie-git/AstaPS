@@ -1,5 +1,6 @@
 package emu.grasscutter.net;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import emu.grasscutter.net.packet.PacketOpcodes;
@@ -15,6 +16,11 @@ import emu.grasscutter.net.proto.SceneTeamAvatarOuterClass.SceneTeamAvatar;
 import emu.grasscutter.net.proto.SceneWeaponInfoOuterClass.SceneWeaponInfo;
 import emu.grasscutter.net.proto.TpsEquipChangeNotifyOuterClass.TpsEquipChangeNotify;
 import emu.grasscutter.net.proto.TpsWeapon._TpsWeapon;
+import emu.grasscutter.net.proto.TakePlayerLevelRewardReqOuterClass.TakePlayerLevelRewardReq;
+import emu.grasscutter.net.proto.TakeAchievementGoalRewardRspOuterClass.TakeAchievementGoalRewardRsp;
+import emu.grasscutter.net.proto.ItemParamOuterClass.ItemParam;
+import emu.grasscutter.net.proto.RetcodeOuterClass.Retcode;
+import emu.grasscutter.server.packet.send.PacketTakeAchievementGoalRewardRsp;
 import java.util.HexFormat;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -72,6 +78,37 @@ public final class ProtocolGenerationTest {
                 SceneWeaponInfo.getDescriptor().findFieldByName("ammunition_list").getNumber());
         assertEquals(
                 2, _TpsWeapon.getDescriptor().findFieldByName("accessory_id_list").getNumber());
+    }
+
+    @Test
+    public void rankRequestUsesCapturedAndNativeField15() throws Exception {
+        assertEquals(15, TakePlayerLevelRewardReq.getDescriptor().findFieldByName("level").getNumber());
+        for (int level : List.of(2, 3, 4)) {
+            byte[] captured = {(byte) 0x78, (byte) level};
+            assertEquals(level, TakePlayerLevelRewardReq.parseFrom(captured).getLevel());
+            assertArrayEquals(captured, TakePlayerLevelRewardReq.newBuilder().setLevel(level).build().toByteArray());
+        }
+    }
+
+    @Test
+    public void achievementGoalResponseUsesNativeCommandAndFields() throws Exception {
+        assertEquals(22054, PacketOpcodes.TakeAchievementGoalRewardRsp);
+        // Request identity is still unverified; do not guess or enable its handler.
+        assertEquals(0, PacketOpcodes.TakeAchievementGoalRewardReq);
+        var descriptor = TakeAchievementGoalRewardRsp.getDescriptor();
+        assertEquals(7, descriptor.findFieldByName("retcode").getNumber());
+        assertEquals(8, descriptor.findFieldByName("id_list").getNumber());
+        assertEquals(9, descriptor.findFieldByName("item_list").getNumber());
+        var item = ItemParam.newBuilder().setItemId(201).setCount(5).build();
+        var success = new PacketTakeAchievementGoalRewardRsp(List.of(1), List.of(item));
+        assertEquals(22054, success.getOpcode());
+        assertArrayEquals(HexFormat.of().parseHex("4201014a0508c9011005"), success.getData());
+        var error = new PacketTakeAchievementGoalRewardRsp();
+        var decoded = TakeAchievementGoalRewardRsp.parseFrom(error.getData());
+        assertEquals(22054, error.getOpcode());
+        assertEquals(Retcode.RET_REWARD_HAS_TAKEN_VALUE, decoded.getRetcode());
+        assertEquals(0, decoded.getIdListCount());
+        assertEquals(0, decoded.getItemListCount());
     }
 
     @Test

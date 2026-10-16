@@ -42,13 +42,8 @@ final class PlayerLevelRewardClaimTest {
     void setup() throws Exception {
         for (int level : List.of(2, 3, 4, 5, 6)) {
             oldLevels.put(level, GameData.getPlayerLevelDataMap().get(level));
-            GameData.getPlayerLevelDataMap()
-                    .put(
-                            level,
-                            new Gson()
-                                    .fromJson(
-                                            "{\"level\":" + level + ",\"rewardId\":991001}",
-                                            PlayerLevelData.class));
+            GameData.getPlayerLevelDataMap().put(level, new Gson().fromJson(
+                    "{\"level\":" + level + ",\"rewardId\":991001}", PlayerLevelData.class));
         }
         oldReward = GameData.getRewardDataMap().get(991001);
         var reward = new RewardData();
@@ -67,11 +62,10 @@ final class PlayerLevelRewardClaimTest {
 
     @AfterEach
     void restore() {
-        oldLevels.forEach(
-                (id, row) -> {
-                    if (row == null) GameData.getPlayerLevelDataMap().remove((int) id);
-                    else GameData.getPlayerLevelDataMap().put((int) id, row);
-                });
+        oldLevels.forEach((id, row) -> {
+            if (row == null) GameData.getPlayerLevelDataMap().remove((int) id);
+            else GameData.getPlayerLevelDataMap().put((int) id, row);
+        });
         if (oldReward == null) GameData.getRewardDataMap().remove(991001);
         else GameData.getRewardDataMap().put(991001, oldReward);
     }
@@ -185,32 +179,15 @@ final class PlayerLevelRewardClaimTest {
     private static final class RecordingPlayer extends Player {
         RecordingInventory inventory;
         int saves;
-
-        @Override
-        public int getLevel() {
-            return 5;
-        }
-
-        @Override
-        public Inventory getInventory() {
-            return inventory;
-        }
-
-        @Override
-        public void save() {
-            saves++;
-        }
+        @Override public int getLevel() { return 5; }
+        @Override public Inventory getInventory() { return inventory; }
+        @Override public void save() { saves++; }
     }
 
     private static final class RecordingInventory extends Inventory {
         List<List<ItemParamData>> grants;
-
-        private RecordingInventory() {
-            super(null);
-        }
-
-        @Override
-        public void addItemParamDatas(Collection<ItemParamData> items, ActionReason reason) {
+        private RecordingInventory() { super(null); }
+        @Override public void addItemParamDatas(Collection<ItemParamData> items, ActionReason reason) {
             assertEquals(ActionReason.PlayerUpgradeReward, reason);
             grants.add(List.copyOf(items));
         }
@@ -219,20 +196,8 @@ final class PlayerLevelRewardClaimTest {
     private static final class CaptureSession extends GameSession {
         final List<BasePacket> sent = new ArrayList<>();
         Player player;
-
-        private CaptureSession() {
-            super(null);
-            setState(SessionState.ACTIVE);
-        }
-
-        @Override
-        public Player getPlayer() {
-            return player;
-        }
-
-        @Override
-        public void send(BasePacket packet) {
-            sent.add(packet);
-        }
+        private CaptureSession() { super(null); setState(SessionState.ACTIVE); }
+        @Override public Player getPlayer() { return player; }
+        @Override public void send(BasePacket packet) { sent.add(packet); }
     }
 }

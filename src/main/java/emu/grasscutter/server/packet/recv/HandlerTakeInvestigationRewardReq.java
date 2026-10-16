@@ -1,13 +1,13 @@
 package emu.grasscutter.server.packet.recv;
 
 import com.google.protobuf.CodedInputStream;
+import java.io.IOException;
 import emu.grasscutter.game.player.InvestigationHandbookHelper;
 import emu.grasscutter.net.packet.Opcodes;
 import emu.grasscutter.net.packet.PacketHandler;
 import emu.grasscutter.net.packet.PacketOpcodes;
 import emu.grasscutter.server.game.GameSession;
 import emu.grasscutter.server.packet.send.PacketTakeInvestigationRewardRsp;
-import java.io.IOException;
 
 /** TakeInvestigationRewardReq (7.1 CmdId 8841): id = 6, the handbook chapter. */
 @Opcodes(PacketOpcodes.TakeInvestigationRewardReq)

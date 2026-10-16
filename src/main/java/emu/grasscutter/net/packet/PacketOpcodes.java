@@ -256,7 +256,7 @@ public final class PacketOpcodes {
     public static final int StartFishingReq = 0; // 7.1 CmdId unknown (7.0: 1223)
     public static final int AllShareCDDataNotify = 24819;
     public static final int SkyCrystalDetectorDataUpdateNotify = 6791;
-    public static final int TakeAchievementGoalRewardRsp = 0; // 7.1 CmdId unknown (7.0: 1233)
+    public static final int TakeAchievementGoalRewardRsp = 22054; // 7.1 native getter/reader and goal-claim receive handler
     // public static final int MGNFCHDMNEJ = 22026;
     public static final int StartBuoyantCombatGalleryReq = 27450;
     public static final int SceneAvatarStaminaStepRsp = 7933;
@@ -1507,7 +1507,7 @@ public final class PacketOpcodes {
     // public static final int KEFILHHHBCB = 9995;
     // public static final int ABJLJDNCJNP = 27119;
     // public static final int DLOMILCFHPB = 28098;
-    public static final int ChooseCurAvatarTeamRsp = 29488; // 7.1 CmdId from kitkat-multiverse/genshin-protocol 7.1.0
+    public static final int ChooseCurAvatarTeamRsp = 29488; // Verified 7.1 client team response dispatcher.
     public static final int GCGStartChallengeByCheckRewardRsp = 4269;
     // public static final int GCGDSDeckSaveReq = 25609;
     // public static final int _TakeAquariumTaskRewardRsp = 23990;

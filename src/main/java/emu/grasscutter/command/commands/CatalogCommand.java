@@ -11,13 +11,26 @@ import java.util.List;
 public final class CatalogCommand implements CommandHandler {
     @Override
     public void execute(Player sender, Player targetPlayer, List<String> args) {
-        if (args.size() > 1 || (!args.isEmpty() && !args.get(0).equalsIgnoreCase("next"))) {
-            CommandHandler.sendMessage(sender, "Usage: /catalog [next]");
+        if (args.size() > 1) {
+            CommandHandler.sendMessage(sender, "Usage: /catalog [next|number]");
             return;
         }
+        Integer number = null;
+        if (!args.isEmpty() && !args.get(0).equalsIgnoreCase("next")) {
+            try {
+                number = Integer.parseInt(args.get(0));
+            } catch (NumberFormatException e) {
+                CommandHandler.sendMessage(sender, "Usage: /catalog [next|number]");
+                return;
+            }
+        }
         try {
-            CommandHandler.sendMessage(sender, CatalogRotation.command(
-                    Grasscutter.getGameServer().getGachaSystem(), !args.isEmpty()));
+            var system = Grasscutter.getGameServer().getGachaSystem();
+            CommandHandler.sendMessage(sender, number == null
+                    ? CatalogRotation.command(system, !args.isEmpty())
+                    : CatalogRotation.command(system, number.intValue()));
+        } catch (IllegalArgumentException e) {
+            CommandHandler.sendMessage(sender, e.getMessage());
         } catch (Exception e) {
             Grasscutter.getLogger().error("[Catalog] Command failed", e);
             CommandHandler.sendMessage(sender, "Catalog change failed; active banners retained. Check server logs.");

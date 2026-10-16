@@ -19,6 +19,7 @@ public final class CatalogStore {
     private final Clock clock;
     private final ZoneId zone;
     private final JsonArray phases;
+    private final LocalDate anchorDate;
     private final Gson gson = new Gson();
 
     public record Snapshot(int index, LocalDate day, String name, GachaBanner[] banners) {}
@@ -28,6 +29,7 @@ public final class CatalogStore {
         this.clock = clock;
         var config = gson.fromJson(Files.readString(root.resolve("rotation-catalog.json")), JsonObject.class);
         this.zone = ZoneId.of(config.get("timezone").getAsString());
+        this.anchorDate = config.has("anchorDate") ? LocalDate.parse(config.get("anchorDate").getAsString()) : null;
         this.phases = config.getAsJsonArray("phases");
         if (phases == null || phases.isEmpty()) throw new IOException("Empty banner catalog");
         for (int i = 0; i < phases.size(); i++) parse(i);
@@ -41,7 +43,7 @@ public final class CatalogStore {
         var today = LocalDate.now(clock.withZone(zone));
         boolean missing = !Files.exists(statePath);
         int index = 0;
-        var day = today;
+        var day = missing && anchorDate != null ? anchorDate : today;
         if (!missing) {
             var state = gson.fromJson(Files.readString(statePath), JsonObject.class);
             index = state.get("index").getAsInt();
@@ -56,12 +58,24 @@ public final class CatalogStore {
         return new Snapshot(next, nextDay, phases.get(next).getAsJsonObject().get("name").getAsString(), banners);
     }
 
+    /** Select a one-based catalog number and resume daily rotation from today. */
+    public synchronized Snapshot select(int number) throws IOException {
+        if (number < 1 || number > size())
+            throw new IllegalArgumentException("Catalog number must be between 1 and " + size() + ".");
+        int index = number - 1;
+        var today = LocalDate.now(clock.withZone(zone));
+        var banners = parse(index);
+        save(index, today);
+        return new Snapshot(index, today, phases.get(index).getAsJsonObject().get("name").getAsString(), banners);
+    }
+
     private GachaBanner[] parse(int index) throws IOException {
         var phase = phases.get(index).getAsJsonObject();
         var banners = gson.fromJson(phase.get("banners"), GachaBanner[].class);
-        if (banners == null || banners.length != 7 || Arrays.stream(banners).mapToInt(GachaBanner::getScheduleId).distinct().count() != 7)
-            throw new IOException("Catalog must have seven distinct schedules");
-        int standard = 0, characters = 0, weapons = 0;
+        if (banners == null || (banners.length != 7 && banners.length != 8)
+                || Arrays.stream(banners).mapToInt(GachaBanner::getScheduleId).distinct().count() != banners.length)
+            throw new IOException("Catalog must have seven or eight distinct schedules");
+        int standard = 0, characters = 0, weapons = 0, chronicles = 0;
         for (var b : banners) {
             b.onLoad();
             b.ensureFallback4Pools();
@@ -70,10 +84,27 @@ public final class CatalogStore {
                 case STANDARD -> standard++;
                 case CHARACTER2 -> characters++;
                 case WEAPON -> weapons++;
+                case CHRONICLE -> chronicles++;
                 default -> throw new IOException("Unexpected catalog banner type");
             }
         }
-        if (standard != 1 || characters != 4 || weapons != 2) throw new IOException("Invalid catalog layout");
+        boolean legacy = characters == 4 && weapons == 2 && chronicles == banners.length-7;
+        boolean curated = banners.length == 7 && characters == 5 && weapons == 0 && chronicles == 1;
+        if (standard != 1 || (!legacy && !curated)) throw new IOException("Invalid catalog layout");
+        if (curated) {
+            var featured = Arrays.stream(banners).filter(b -> b.getBannerType() == GachaBanner.BannerType.CHARACTER2)
+                    .flatMapToInt(b -> Arrays.stream(b.getRateUpItems5())).toArray();
+            var chronicle = Arrays.stream(banners).filter(b -> b.getBannerType() == GachaBanner.BannerType.CHRONICLE)
+                    .findFirst().orElseThrow();
+            if (featured.length != 5 || Arrays.stream(featured).distinct().count() != 5
+                    || chronicle.getRateUpItems5().length != 5
+                    || Arrays.stream(chronicle.getRateUpItems5()).distinct().count() != 5
+                    || Arrays.stream(chronicle.getRateUpItems5()).anyMatch(id -> id < 10000)
+                    || chronicle.getFallbackItems5Pool1().length != 0
+                    || chronicle.getFallbackItems4Pool1().length != 0
+                    || !chronicle.isWeaponEpitomizedPool() || !chronicle.hasEpitomized())
+                throw new IOException("Invalid curated character or weapon-only Chronicle pools");
+        }
         return banners;
     }
 
