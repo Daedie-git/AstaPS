@@ -1,0 +1,641 @@
+{
+  "format": 1,
+  "base_commit": "1a1b45f9d015142a6e5218ca2a95254ddc324ae5",
+  "purpose": "Archival preservation of private deployment source layers, not an already-applied source integration",
+  "layers": {
+    "private-safety": {
+      "patch_sha256": "54c0398ea655530ac43d06b003f4cecc74e1b2d03a1f76267bfde0caf111bc0b",
+      "source_files": [
+        {
+          "path": "src/main/java/emu/grasscutter/Grasscutter.java",
+          "before_sha256": "e54aa6b6df068f2e9ac595950bd63209ba128b6f7983dde9928de49876142a88",
+          "after_sha256": "ba64dac804c5dbd6e0bb84d8e1adf11347927de8a72f1c46afa669fa428edb09",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/auth/DefaultAuthenticators.java",
+          "before_sha256": "24f3040013cc8756c40370ef908a542d84f8fa4fe37d4de2ab55977ee031a5d0",
+          "after_sha256": "76cbcd6adc0c132d6ab65ed1ebb2adb3d1a15ff398880b5b10d7b0e4172b7ca7",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/command/CommandLog.java",
+          "before_sha256": null,
+          "after_sha256": "ead2b0d2cf9575863dcfe8a7eaec72f66379e080ac443caf30edddc06bbccd5f",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/command/CommandMap.java",
+          "before_sha256": "b76f3f485045b6671e8b677b54258562ec9e70a5a8b58ab8a092f7ee680c52a8",
+          "after_sha256": "cc99e2132f327dc577a496fe23ce0f4d42e0211b528fb30f99cac87c36a7c873",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/command/commands/TpsCommand.java",
+          "before_sha256": "cbf41202266854612bea10be9fbffbee5695a4f675221efc617d2edb189d360c",
+          "after_sha256": "8cc04ff930e08f36a326b0c988b0d844686b9f50885706e6c3971cfe248d99df",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/command/commands/WindyCommand.java",
+          "before_sha256": "a1e934a328a684efe623c781551ad5b88eea4486b700f0f391d5c1c38ebaa71d",
+          "after_sha256": "a1e934a328a684efe623c781551ad5b88eea4486b700f0f391d5c1c38ebaa71d",
+          "changed": false
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/config/ConfigContainer.java",
+          "before_sha256": "39335c84d90029af3df060cb7af15e1d58f775d63c5ec18f69c71d30843cb61a",
+          "after_sha256": "28344e99aa84ebfd5231e7bb839893150ac1952b12fae64a245a1a6fa9b9da90",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/config/ConfigFileStore.java",
+          "before_sha256": null,
+          "after_sha256": "88eec61ba830bbe2f528fb3c8c854730393aba4341dfd61f952ec1d2344fd695",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/data/excels/tower/TowerRewardData.java",
+          "before_sha256": "26172f8847000ed5320d051560352921b34d04d9dd8bb43fb5c4705af4c0f9a4",
+          "after_sha256": "26172f8847000ed5320d051560352921b34d04d9dd8bb43fb5c4705af4c0f9a4",
+          "changed": false
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/data/excels/tower/TowerScheduleData.java",
+          "before_sha256": "5f0a1399918e25b191f69da28b1f94013b92b4df4eb2813e54b9bf3c05f30c84",
+          "after_sha256": "5f0a1399918e25b191f69da28b1f94013b92b4df4eb2813e54b9bf3c05f30c84",
+          "changed": false
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/database/DatabaseHelper.java",
+          "before_sha256": "6bc8de04c353eec5e9c991e58c349ee36f8a0376860fd7c3355cb44cee5f9404",
+          "after_sha256": "920aeedd7ee422dd497f46c5a7b0b480c390cfbe382da9d043ae97bca9a58b9d",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/database/DatabaseWriterManager.java",
+          "before_sha256": "6db58dea2030dc4ccc7db82825b939213573ae968f2f067ee12c1318cbe32474",
+          "after_sha256": "75672dedc58ee6599e6efa374208484cfb5b8fa50fed385c792c2da89b4e530c",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/database/ItemPersistenceService.java",
+          "before_sha256": "db5bb8c633cdac6c1329a7787a508eec6f759c58a39e604ebd51a9143a5fd830",
+          "after_sha256": "fdc236ae5abe52fbf9b323c600b6f6c737be39e5ea7928d394d0d4c1d0464a70",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/HandbookActions.java",
+          "before_sha256": "ccb7de887cb330f49106ad28092292d9dda9c74787eab1e6f965b3a7259fe619",
+          "after_sha256": "bb0aaf71bb6363c6748929406dde00abf356693e1dc4c7b922da64becd6c4a0e",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/achievement/Achievements.java",
+          "before_sha256": "52e58848f0da30d9a728b6ac0c143ac2024d6860bec96ca012e783160c011158",
+          "after_sha256": "71ef35b96f9cb638a4a3df65712f0a44836b844fb2c8cacdf12699de61a62aa8",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/achievement/lombok.config",
+          "before_sha256": "153083e3792059d6069db38a53c8e8807db92dba42a945d3450877e645ec23f1",
+          "after_sha256": "153083e3792059d6069db38a53c8e8807db92dba42a945d3450877e645ec23f1",
+          "changed": false
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/activity/trialavatar/TrialAvatarActivityHandler.java",
+          "before_sha256": "aa155693e667cc92b12ef4e7c7ee0ac483f3bb5b1b93c514ca7adec3ee2f844c",
+          "after_sha256": "ad695722a2a53a430675c927400f3986379ea1721972fdae647d519aaab45fb3",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/battlepass/BattlePassCompatHelper.java",
+          "before_sha256": "522110bdf0f492d3e8f32647118e12641775cd9aa89485ab41f798681acb64c5",
+          "after_sha256": "ee4b135ebc86e52cd640b51292248882ef7f4d21344c8a8966a44c9c98e4e422",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/battlepass/BattlePassManager.java",
+          "before_sha256": "e546b464f4a872cb3ef79a880828d69c2be8f91312701bf08cfb533ab42fa3ea",
+          "after_sha256": "2adb37889eb47e5da028a60bd213fc03e05ab325b2ce575221401caf78f0c121",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/battlepass/BattlePassSelectChestHelper.java",
+          "before_sha256": "a2f3389b1340fa715e10f659337aff14b09469cf4d48005f418dcbc197e57fac",
+          "after_sha256": "a9847c54415f15142b48a3adb9a239eeefb9845018df8772c1d066d9bae1ca05",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/combine/CombineManger.java",
+          "before_sha256": "53729acddf3389e644fcbb4a5652bc5722801f1a7e0e56cfdf087d824f65bb5e",
+          "after_sha256": "9a60cd7b0f523535208cabe990590c5bfe753579a9fb8a685b3d6646c866cbeb",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/dungeons/TowerDungeonSettleListener.java",
+          "before_sha256": "e8b47956f9b0233ca8176064aea22c3c4c1d225c4de80cdea83aa72fef6f1c6c",
+          "after_sha256": "efef396402087f9cf4702d5b1d95ede2883cc6817f6a4b4a121afdd7f454a74c",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/expedition/ExpeditionHelper.java",
+          "before_sha256": "585ee0ea892f4519dc4275d873e87a63132605973dea9de30a7276004b923f79",
+          "after_sha256": "25b76ece5a8f7c9d4763eaa3acb66bb0928fed9323e6efd145500259aa5dd63b",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/expedition/ExpeditionRewardData.java",
+          "before_sha256": "2240c3e91cda2726c6381e9e9bc5dcd23a672c82c573205014083df33962a612",
+          "after_sha256": "0194b8da3210556d22f9432945f65da8f66e785b666cf5383c0b1f14629e54f9",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/home/GameHome.java",
+          "before_sha256": "64c42d32d0708a1c05b0c79b3a9c82b77758bc6072b5de1420f1c30625aae2df",
+          "after_sha256": "12331e752a94bc9d683ed6fb2af099d28540f8bbe56f03321b56796eb0a7d0eb",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/home/HomeSceneItem.java",
+          "before_sha256": "2e72573efc9ebfd022d3f85ea1be6669f2369459a0aae34760ac310f00e67c22",
+          "after_sha256": "7396745f14fcd27156bbd0c40573b2f686725aa1c60a14f981c6a4951a551ddf",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/home/lombok.config",
+          "before_sha256": "153083e3792059d6069db38a53c8e8807db92dba42a945d3450877e645ec23f1",
+          "after_sha256": "153083e3792059d6069db38a53c8e8807db92dba42a945d3450877e645ec23f1",
+          "changed": false
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/inventory/ClaimBoundary.java",
+          "before_sha256": null,
+          "after_sha256": "314556548fbedf2b089faac86cd37e2c488906c0509bb55c583dcfe9b972febb",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/inventory/ClaimRewardDelivery.java",
+          "before_sha256": null,
+          "after_sha256": "c05c1378e541e1dbb4af84fbe3dcdd59fad48c777d2bb6ac6e6f6b496b943703",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/inventory/GameItem.java",
+          "before_sha256": "29575d7340b7e82be160ba72ff16b7c4e4ba960120c4454a05aea15ad34316f8",
+          "after_sha256": "987861e793bbde6c143294a6ae40d14fbe1df1d390ad39e6524e52ce94ee44f1",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/inventory/Inventory.java",
+          "before_sha256": "47e879ac6d4d74dcabaf8599255a1371457baa1581a0924bc0a4c6be43fb6550",
+          "after_sha256": "d02e8c7d2ddd439430a1bfd2a9d3a2cfb4aff3faab1e82eca5a6c621de7ea4de",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/inventory/InventoryRewardAdmission.java",
+          "before_sha256": "2f246b757d685f28a66dd16a42eb9eed31bfa3b32fbccac866bbc5df6ff5a400",
+          "after_sha256": "36468d7318dcdcb684d0245366d0dd63852127ad96e1114a95730eee5318e496",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/inventory/MaterialType.java",
+          "before_sha256": "8e2e1ed26d3c6d03b8f14a714d499e87a95b08b360ad363401881ec8657f1d5b",
+          "after_sha256": "69e9fbda6c5961296bcac6c6a421d0671c66d83a6554f1fb817a5a9c277cdf1f",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/inventory/PrimogemAutoConvert.java",
+          "before_sha256": "4fca1726a61351f6b723286a2047729f52dbbe6bbe25f0e1da81444b8cd57b9f",
+          "after_sha256": "7a609717c6440209b144de13a370231b992e08002d9440f48e6f82ad0f91599e",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/managers/cooking/ActiveCookCompoundData.java",
+          "before_sha256": "2700076e03aaeed1a177a91bde94d3212c99335961b286202dd8f4931eb952e7",
+          "after_sha256": "a90bdcc8fc11686b8a5e02d3ffd3bc6513b3ff01b146cda879df5838dd3f0a53",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/managers/cooking/CookingCompoundManager.java",
+          "before_sha256": "f2d6a14406aabcce3f7648f05d4d9270b4bd1e65301456d7f5556f0c2865e919",
+          "after_sha256": "81397026e8f35d7067de1c801cff2f1bd2455d5d2bc1b22416e2b38a6e20a717",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/managers/cooking/CookingManager.java",
+          "before_sha256": "895f7a63409a5e8beb14c1856d6871aaeb1b3c3dab268ee5ce1c16ded1991fad",
+          "after_sha256": "d258c217aaa49df9e44e4b0fd41c5cc715c047078e097956c8fcfd2330135bdc",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/managers/forging/ForgingManager.java",
+          "before_sha256": "49ace55d367407f3cf5e5280bddab6ce02b8929b8714bf0ee0e63657153208af",
+          "after_sha256": "54af9c2196d199f754415119e42d603b6f076b39d305ff0fe22b47e5a9de5fa5",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/player/FallDamageSample.java",
+          "before_sha256": null,
+          "after_sha256": "e62d2f69622787e5b26559c846f5a97efcf2a2b393a39b714da2fa0968216fae",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/player/InvestigationHandbookHelper.java",
+          "before_sha256": "68132de7f4ca7b63e8c158db6263e97bc1d7ee2c4456b1798ac3376ef12bd799",
+          "after_sha256": "d73d1da18f70f6a5b5a2e313550a262c84684d827a03cddfe7e6587eedfa5440",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/player/Player.java",
+          "before_sha256": "f6f41fc51f3bfe828899f02d56eed948e52a3626708b743557223a0cc971fdeb",
+          "after_sha256": "e7fe0cf0420265d5eb03eb9117f51dd84241da68b242567a11c64e9e549f4e10",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/systems/InventorySystem.java",
+          "before_sha256": "314ad865167d167530ff17f92419db2b0eb6b56244e0c6823bf5fc41bff4691b",
+          "after_sha256": "19a2f8cd286888c03d139a2c1e699c6d00ea4ea5938de03ea7f55481eda1d526",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/tower/TowerLevelRecord.java",
+          "before_sha256": "765d96e1e470f5e18c719b7a6a5272b6ae7ab371c61f3b5f8bd194b133a4b24c",
+          "after_sha256": "1d69b50845ee16b4a230736888cbf3faeee6d33d94a7901409a768fa8e861e7a",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/tower/TowerManager.java",
+          "before_sha256": "6f6b18ed18bc4d8b25be14f8e3daf36e60abe427048d791fbedecb33758e047a",
+          "after_sha256": "b0342c18414f60724c43efe4095812c84f18ee1ba0994300ff0fb42ff30d5f9f",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/tower/TowerRewards.java",
+          "before_sha256": "5dbdd26585f226b4db77e6b66f7e8a475b7d738f6458a169a004cf4ec35b3a14",
+          "after_sha256": "5dbdd26585f226b4db77e6b66f7e8a475b7d738f6458a169a004cf4ec35b3a14",
+          "changed": false
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/tps/TpsAvatarSystem.java",
+          "before_sha256": "22b57a517853eb6e434488d816492f39e8f090309048487275c4584def7ebb39",
+          "after_sha256": "0eff801b0047cc5e1b7d6466d39eb696019846de9bd3fc5b76fbffdf7792d0da",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/tps/TpsWeaponSystem.java",
+          "before_sha256": "0ba113ae9209d666ac09b6ed280549161c082f09615f034c9ac0f2ba8378a991",
+          "after_sha256": "f2b9f8c08de6426909846f5e551e9c366c5268bd9b50086940280a019fdbeac8",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/born/BornIntroGate.java",
+          "before_sha256": "51f70c803f6e9cbd36981838db38dcfd33c2eff0bd84e92807e7a3775cd2a341",
+          "after_sha256": "968e6a4ad17e58f1b5e849c8c6ffa6c796904f4a51422d1ceb4b8f10db8d7adb",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/dispatch/IDispatcher.java",
+          "before_sha256": "85c6179daa5eec0fd400bdf2f401eb00336b9a0b180ee4d9c1f8209fc0bf279a",
+          "after_sha256": "4a6700511da037ceb2843041d43de660ec3fbb4dc79ae00eddd5d9f9a8a89d26",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/game/GameServerPacketHandler.java",
+          "before_sha256": "1c334a1024f1905274b6ae678aca6c219a7831b259e6de53d93170fe3e19e8ff",
+          "after_sha256": "568664cf04443b66ecd1bfc7538dda02900c78d99e94c4b5ec8bc3f2a36394ff",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/game/GameSession.java",
+          "before_sha256": "2a2d7004193b5a21157b4d7921ea22ba717996cc049c6e300d5e512c70c3e380",
+          "after_sha256": "f17a7fb44bfe06e4b595fb7306d77702ddb138a5a689e1ebe2190bd59ef8414d",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/game/GameSessionManager.java",
+          "before_sha256": "72890b247600c456d04e5c1fd8593c0ca393b56e26c126304a672693d7647601",
+          "after_sha256": "1695651cf43ed0eff3d241810dd868aaa5ad696863d7e4a10818869ec5deabb8",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/game/PendingLogoutSaves.java",
+          "before_sha256": null,
+          "after_sha256": "34b6f0b1824bfad07083a5ac732479089a56b5447ae96c5057b92f5d03ad423c",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/http/HttpServer.java",
+          "before_sha256": "bbf17b4241d22294a4050fbbd7e837055448fbd9a4e5f9c880a3e5d94f6c29f3",
+          "after_sha256": "bf8136433c75d190606ad09e7f66c238a60a4e593014ad785397a380de79aa01",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/http/console/WebConsoleHandler.java",
+          "before_sha256": "4dfe712932a48bb05d989c5e824a89609c90a7749de78bfeb7e4ae0b3441c48c",
+          "after_sha256": "9099e7baa807db93218c50613b9492a5fc0a5572690276b27aea8347d1523896",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerAvatarExpeditionGetRewardReq.java",
+          "before_sha256": "611cb2d7a320ff776ba671f21758c54e7813ac71b673b0945be9311a044181a6",
+          "after_sha256": "ec4d63595c61328e70ef3fc9b79bdc3b6ccddd63cbc4723b6c57fc61cd212966",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerAvatarExpeditionStartReq.java",
+          "before_sha256": "f27f4740d0df4c32bad7999231d41ecf55e1ef3f0eecf75859f83323a45d2942",
+          "after_sha256": "d53cda0836ca0e0f339d87999fcbd8d30780f43d8c0984eb67042a31cf0c6d29",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerBuyGoodsReq.java",
+          "before_sha256": "646e616af592ee87fbc32519e37e7380425a7afaf5507506646cb83128b4ce6a",
+          "after_sha256": "5d5ef8c32231f2efd30318e6d6d1c54049d4691012796a32dcf99c7aff24de5e",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerGetHomeLevelUpRewardReq.java",
+          "before_sha256": "6b9cae03f02ac8b48e9b3556100b6ebbf37bda616a93f814763bdb7dc4315c94",
+          "after_sha256": "c172cf8c6c260bb390328587974b6fa701c981a8260cedc09a2ceb52e359e79a",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerGetPlayerTokenReq.java",
+          "before_sha256": "8b3b9c81ba95f3ddfc0722d816d33b236b8e4a21af6f665fcd8218b64426a90a",
+          "after_sha256": "d2700ff5a541ca435aa5f5564b8c519c9566331ceab172ef3a2788f6e8e17f5a",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerHomeUpdateArrangementInfoReq.java",
+          "before_sha256": "096eb581a09fa96e82763d16bc68a826d9937fca2fa32541417b64d10435b1e4",
+          "after_sha256": "ac83312b9b0a7d55d251778ae4194d47abd606a6b41e00e3ea71401814c5ccd5",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTakeBattlePassRewardReq.java",
+          "before_sha256": "4762727bbbcb56471770e3e6e6267126b9b374bdb535d3393b19f28cab440e1c",
+          "after_sha256": "cb55291098093eccb4b85dbfef92173fd2796d62989681e268efcfcbe0d74615",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerTakePlayerLevelRewardReq.java",
+          "before_sha256": "f6b0b2f6dbc554032f08fd07beff2f42b2de52c1db1723f22d724f8c519bdffb",
+          "after_sha256": "d9137c239b244b523f180367296df7bfe106ec46f30db21ec703ae95092ba6bc",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerUnionCmdNotify.java",
+          "before_sha256": "10622f401349c31202ede6d5ed7da164f97657fe7d695f41d1ac0a2e3c19aa13",
+          "after_sha256": "98dc46e85a0610913aada413e52b53895be96cb62ebd8af05cf12e2625855c41",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/send/PacketForgeQueueManipulateRsp.java",
+          "before_sha256": "221594beaa01578e05a543854aa0e4286e761539841b4c887cf9bd79e45644c7",
+          "after_sha256": "72585d47f3ade9c0f347eb2b6aa92b827359f5951b38e90649bcf37b822b4450",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/send/PacketGetMailItemRsp.java",
+          "before_sha256": "32a4fc2938c43f9116c4de10d05856ddb575df6717427aa0a15019dd6ea87cee",
+          "after_sha256": "c139309ec2d20ec8e4adab0d00a18a8cf6f8900c5f6c51676d13ff1cc30cb7b4",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/utils/DispatchUtils.java",
+          "before_sha256": "55f24b1cf8e680c007877b98b532b50df9903c32e476f7976ff491917d0d1294",
+          "after_sha256": "8002eece810bdd9ad5ac2c7181546e19e69cbb92a76af72b9622ce5b9c151231",
+          "changed": true
+        }
+      ]
+    },
+    "residual-safety": {
+      "patch_sha256": "d6ef75fe58171b5d67a5d1966c78e472a1f662a41780aaae980c2f97ce63f8bd",
+      "source_files": [
+        {
+          "path": "src/main/java/emu/grasscutter/data/binout/AbilityMixinData.java",
+          "before_sha256": "362bb6f83c84cd7fce92b1749717fb7721139c59ba0e838e2730065372082d2e",
+          "after_sha256": "848236f51115145bbd498a0e3b90339db1e99ad8659289dc1cb967284e706af1",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/data/binout/AbilityModifier.java",
+          "before_sha256": "f5cc93801e1cfd1c2b290fd6a3159f311139a04503d682984a79a3a0aa96beb3",
+          "after_sha256": "978dcad8a8369eb0d2df7d349ffbc9bfcad0256695f034c847c28e41df7f6cfd",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/data/excels/dungeon/DungeonEntryData.java",
+          "before_sha256": "2091e7a5d5d66583d2924d68ae35f68c5b215389cfce9f0ca24c06d0ce988b5c",
+          "after_sha256": "487e6d5e6ce81ec5ccf69772866d97ee100c63f4ace7250c8e857ceea246fa8a",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/ability/AbilityManager.java",
+          "before_sha256": "f545798f3b25b5f3d94211d91d741ee09705614f2d36e3beaf20e43a84657cbb",
+          "after_sha256": "fda40772767d339e496d3b0e5322b4d77b81407ccf9f56f5f1ed6091de8ec3c9",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/ability/actions/ActionHealHP.java",
+          "before_sha256": "93a745b899a721a487ac28971563560364e3440a48140cf1f0325d37e1339cba",
+          "after_sha256": "aa07e40b4cc85b581eac5a99782f7a27aabd8cb6098a0ad4d316719f9168aa12",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/ability/actions/ActionReviveElemEnergy.java",
+          "before_sha256": "549ca5e5baeb8e2167e59ecd769be4b2d44b40f82985eecc1b18ed9e817da3e6",
+          "after_sha256": "706a95488fba04f36a4d63960cbb38bf525580f4413edfcece9bd771107fcd38",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/ability/actions/ActionTriggerAbility.java",
+          "before_sha256": "d06baa9dcb8ea2735b2d7bf5168ade879bcf44ba47c4d4cf5ed1824a21ac3f13",
+          "after_sha256": "9885d270370ba601e4530757583f80964ce2d3ef76107e235487ea4dcd7a173a",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/ability/mixins/CostStaminaMixin.java",
+          "before_sha256": "a37a1908770e7209ee6424a171935d4be5c4517050af0faea1fe4ae5c885c8b2",
+          "after_sha256": "35aa0f9b1c58204ba2df105649eabf06a3d17bbed498ec3a9dc089aea5b20085",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/activity/ActivityHandler.java",
+          "before_sha256": "8218ec3febd7a2219b80671c4758cfe8e53c3f5b38d500a97783a4f528b17ce7",
+          "after_sha256": "4440cd287d734933947c50e94ea939baba3baebc5aaaee89583c9c5d53698ce4",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/activity/PlayerActivityData.java",
+          "before_sha256": "af2b3b86fad1614053cfbe5863033e713ef55f3faf65ad8742575babede57ff5",
+          "after_sha256": "f977224d77e466ce89b0adef4a0ef5beaf5577193ae54a11f8ccb0c19fa63e08",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/chat/ChatSystem.java",
+          "before_sha256": "ab737be79f56b876cb12ea8c4110d11bdcedcc02383557f262ea61fc8d55441b",
+          "after_sha256": "24e1bebe8ac873e704fc8c77225258282297e348d38bed1f7ce2b25f67332252",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/dungeons/DomainDungeonHelper.java",
+          "before_sha256": "6836dcd5fc6afb24763ef1dcd79d13c05839faaceae98d536935515ba666598a",
+          "after_sha256": "c8e9207b9b074dfbf21f41e453538721928bea9eef67ba2d9b31c150d190338a",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/dungeons/DungeonManager.java",
+          "before_sha256": "eb16a5d43c4fe31614075981fda8fb8507e05fd0d8b466b04a872730febe20d0",
+          "after_sha256": "fcdde35c208ea004373d781ccf30ab6045213f6fa17b07114bf27ea26347d460",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/dungeons/DungeonSystem.java",
+          "before_sha256": "36ec9ac7504b8c5dd1bcf2638f3902c14aee65c61e49cd6e7e3b36b385e554e7",
+          "after_sha256": "49a5fda221cc85fa53a011e390160c02ad23bdb411478c1874a511c8efef46e1",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/dungeons/enums/DungeonType.java",
+          "before_sha256": "d0bf692043b52eadb3cbb8c5db44faf075c3bd964cf1667a9772517d677a979d",
+          "after_sha256": "09e5448717af010fc5923e2de2214a5053ddfb0c2101d47196538f7d17c80826",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/entity/EntityAvatar.java",
+          "before_sha256": "8af340455c19e01cb7434badd3a08f103978c6e23293458006a2a94df1d34762",
+          "after_sha256": "acd37211ea42e478250cf4151df8b3eb8be8a1f190e12d93c4da05188e4bbf3b",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/entity/EntityGadget.java",
+          "before_sha256": "c2613bf31b4efe6c33211359293db92e136a30191722c68623290e32d4fd37f1",
+          "after_sha256": "f87f9509d38bb8248c407efa3550351d43d22b40920a00693de778caa88ef6b9",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/entity/EntityItem.java",
+          "before_sha256": "a0a6eda4ab9eb73f2be395e095835b531bc49bc7f56f7b7f77152e0c3b205edd",
+          "after_sha256": "a77fb24fd7333f2acade16a85459e1ed5657fa237fa2a91b0964cd9b8b00fe66",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/entity/EntityMonster.java",
+          "before_sha256": "5a508f93327d0b4e25da42bbb9cfe42b2d2c8be404a288c204cf18f8d09b85e3",
+          "after_sha256": "838fa9f1d3f344dd674dbe59b93ee631132d957b2a234137ab1aa2308c93c8b5",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/entity/EntityTeam.java",
+          "before_sha256": "bbe6f52ae4037733366ed89e092861b210158242c0d2a5a864d9fd77cee71b75",
+          "after_sha256": "5dbb8c1664664998d3d10b9a3deac112cbd8097e779b4226f3188292aec77a43",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/entity/GameEntity.java",
+          "before_sha256": "0f9b04363753513ca76d34b56013267bd617f704799614b2925f055c556a2aa3",
+          "after_sha256": "44b54b2d4a00152880eca10c11007cddb5f34ea69490e2f68e7bdd9c7fefda2a",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/entity/gadget/GadgetChest.java",
+          "before_sha256": "b868374f734dd5f4deafd825a22a85f363e2920269ae10f635ce6666f5520a95",
+          "after_sha256": "1a1b4c19ce05d793f0aef7fbac78938e582763891862b20d06753d4b845bd715",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/gacha/BatchAvatarOwnership.java",
+          "before_sha256": null,
+          "after_sha256": "9646e3c21ff40838f306c22918f50484495d9ba771d81499253fe1d7dff4b875",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/gacha/GachaSystem.java",
+          "before_sha256": "dbf0ba42c1aed2e7d5251aa9492c66ab50725f4196dca7703723febbcda4160e",
+          "after_sha256": "6ac387faa48a5759b49320a32acdc2f429c09e71b44575b5d18c851ecafd2dd6",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/managers/energy/EnergyManager.java",
+          "before_sha256": "659b9f8850d4e226bbe917488957cf33f035b2d47b1ffd6dfacb7293b0be6c60",
+          "after_sha256": "99c853ee2b8cbe483cf6745d966d35f8d37244dbe4003d88d6d60d41cb622cfa",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/managers/stamina/StaminaManager.java",
+          "before_sha256": "58912386ecf722f50b0223f203a6ff494b9fbabba85149211620a2e900f68b7b",
+          "after_sha256": "5876bd63d3d8fb7e44427d2bc0bb65927cd034ab73ffbb371e34afbd8051050c",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/player/TeamManager.java",
+          "before_sha256": "bc0fd6cf9555f5ffb69b19587b4062018f0d27ee916a808d5e79fe9b8758ed90",
+          "after_sha256": "252adc5ba7b6d45f07921e2787f0bdb90f9d0b2ff245ca851902b8cfa9a5b191",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/systems/MultiplayerSystem.java",
+          "before_sha256": "f2a7678b33bd421d669b745ce289df29af6f4f469937d232e2b8b130d654c357",
+          "after_sha256": "a20913351a6acf325a4d2eec7e0ebd566bd6fdf7c4e08f316cecdba4ecbe1e57",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/world/Scene.java",
+          "before_sha256": "a61a4f7db3c04641cf90061b9576442111d9e4266928f4c96f4dd9cf10775951",
+          "after_sha256": "1adada3186efc265a0fd31fcfe38e86cec0b91a349ad4364628e17cb92d00b49",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/world/SceneGroupInstance.java",
+          "before_sha256": "5b43929426e28b643f7d37e1daf51dd94cf8f81eaaff10d83781caf8ac6778a0",
+          "after_sha256": "ec7f66f1c95860aed148a46ef419df61114e07717dbc4434af288e57916aadb0",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/world/World.java",
+          "before_sha256": "103e7dc4f9f637e2e5bbf533a7b85ed66b1a496f0c139b13c50120d524438d6b",
+          "after_sha256": "0a9db6d5427c6b6b4962d89bbb7c7d62af078dc1197b31f262c9cece8749520b",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/game/world/data/TeleportProperties.java",
+          "before_sha256": "309b7341f49c2db761f56216ff1386e68fe52dfb47f2970dbc71c7407dd48200",
+          "after_sha256": "4a83891061f919f2a6d8d3acc82a8116360e6db622dd5afe32fe6d4062ef89d6",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/scripts/SceneScriptManager.java",
+          "before_sha256": "a4100da37c248333ccd538b3ffa9d034e9251d4c86b43b46e9a37b9659fcfebd",
+          "after_sha256": "82edd941530afe0a06352e07cc34377c80595e468489e7b3323756b6b5f9c2e8",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/scripts/data/ScriptArgs.java",
+          "before_sha256": "a6c8ac1201aefb50d08b140096559cabb251848da660138bad3065f2a9d31e95",
+          "after_sha256": "2685053f937e23f0720152daa534dde5b672fd7d13414c7c8e96a0e5d35ab75d",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerCombatInvocationsNotify.java",
+          "before_sha256": "07e272bd3a804aec69c1e61a6e1c77618408a02e67f878a6a2c506dcae14fe62",
+          "after_sha256": "a0487064d14e1532e80a4625cb845eb001a8e16d0d6506cad71cc0a133f55df5",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/server/packet/recv/HandlerPlayerEnterDungeonReq.java",
+          "before_sha256": "9ccc8d023adf1357dd3524eb28b8010ba35e13c6f5cd1bacd976c80bf42fcd2b",
+          "after_sha256": "b5bdcf08f8720f8b82c8984cc8448f4ac7e9e281569ff239d8a9247239099250",
+          "changed": true
+        },
+        {
+          "path": "src/main/java/emu/grasscutter/utils/Utils.java",
+          "before_sha256": "80370cee91cc03bde49c2a92cbfe41c3356581fbca3aeed914212d577dfa1491",
+          "after_sha256": "5d87b06daef62bcbf5715967a7bc3853a95c7930e74a9c06e99677126542bfa8",
+          "changed": true
+        }
+      ]
+    }
+  }
+}

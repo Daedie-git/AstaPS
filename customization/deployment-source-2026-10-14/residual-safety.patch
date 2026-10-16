@@ -1,0 +1,1690 @@
+--- a/src/main/java/emu/grasscutter/data/binout/AbilityMixinData.java
++++ b/src/main/java/emu/grasscutter/data/binout/AbilityMixinData.java
+@@ -34,6 +34,7 @@
+         KENHGCLICPB,
+         DoActionOnGlobalValueChangeMixin,
+         CurLocalAvatarMixin,
++        CurLocalAvatarMixinV2,
+         @SerializedName(value = "NyxCostMixin", alternate = "ChangeNyxValueMixin")
+         NyxCostMixin,
+         ModifyDamageMixin,
+@@ -48,6 +49,7 @@
+         AttachToMultiNormalizedTimeMixin,
+         DLJBCMKDMEK,
+         PhlogistonCostMixin,
++        ChangePhlogistonMixin,
+         FIHACJPNNED,
+         JMEOJHGPNMB,
+         AttachModifierToSelfGlobalValueMixin,
+@@ -197,6 +199,12 @@
+     public DynamicFloat value = DynamicFloat.ZERO;
+     public DynamicFloat detectWindow = DynamicFloat.ONE;
+     public String globalValueKey;
++    public String globalValueTarget;
++    public String targetType;
++    /** Retained 7.1 phlogiston cadence field; units require native-client validation. */
++    public DynamicFloat LANIGKLMJHP = DynamicFloat.ZERO;
++    public List<DynamicFloat> valueSteps = new ArrayList<>();
++    public boolean removeAppliedModifier;
+     public List<String> stateIDs = new ArrayList<>();
+     public String stateID;
+     public DynamicFloat defaultGlobalValueOnCreate = DynamicFloat.ZERO;
+--- a/src/main/java/emu/grasscutter/data/binout/AbilityModifier.java
++++ b/src/main/java/emu/grasscutter/data/binout/AbilityModifier.java
+@@ -1,6 +1,6 @@
+ package emu.grasscutter.data.binout;
+ 
+-import com.google.gson.TypeAdapter;
++import com.google.gson.*;
+ import com.google.gson.annotations.JsonAdapter;
+ import com.google.gson.annotations.SerializedName;
+ import com.google.gson.stream.JsonReader;
+@@ -12,6 +12,7 @@
+ import java.io.Serializable;
+ import java.util.List;
+ import java.util.Map;
++import java.util.HashMap;
+ 
+ import lombok.ToString;
+ 
+@@ -460,6 +461,8 @@
+             return this.ratio == DynamicFloat.ONE ? DynamicFloat.ZERO : this.ratio;
+         }
+         public String determineType;
++        /** ChangePhlogiston resources use Add/Sub/Set here, independently of determineType. */
++        public String costType;
+         public int configID;
+ 
+         public int[] configIdArray;
+@@ -503,7 +506,19 @@
+         }
+     }
+ 
++    @JsonAdapter(ModifierPropertyAdapter.class)
+     public static class AbilityModifierProperty implements Serializable {
++        private final Map<String, DynamicFloat> additionalProperties = new HashMap<>();
++
++        /** Retain resource properties without opting them into server-authoritative stat changes. */
++        public Map<String, DynamicFloat> values() {
++            var result = new HashMap<>(additionalProperties);
++            result.put("Actor_HpThresholdRatio", Actor_HpThresholdRatio);
++            result.put("Actor_MaxHPRatio", Actor_MaxHPRatio);
++            result.put("Actor_CostStaminaRatio", Actor_CostStaminaRatio);
++            return Map.copyOf(result);
++        }
++
+         // Usually a constant, but a config may also name an ability special to read it from.
+         public DynamicFloat Actor_HpThresholdRatio = DynamicFloat.ZERO;
+         /** Max HP multiplier added to FIGHT_PROP_HP_PERCENT (e.g. Yelan C4 / Furina overflow). */
+@@ -513,6 +528,40 @@
+          * {@code -2} so exploration movement spends nightsoul instead of stamina.
+          */
+         public DynamicFloat Actor_CostStaminaRatio = DynamicFloat.ZERO;
++    }
++
++    public static final class ModifierPropertyAdapter
++            implements JsonDeserializer<AbilityModifierProperty> {
++        @Override
++        public AbilityModifierProperty deserialize(JsonElement json, java.lang.reflect.Type type,
++                JsonDeserializationContext context) {
++            var result = new AbilityModifierProperty();
++            if (!json.isJsonObject()) return result;
++            for (var entry : json.getAsJsonObject().entrySet()) {
++                var raw = entry.getValue();
++                if (raw.isJsonNull() || raw.isJsonObject()) continue;
++                if (raw.isJsonArray()) {
++                    boolean valid = true;
++                    for (var item : raw.getAsJsonArray()) valid &= item.isJsonPrimitive();
++                    if (!valid) continue;
++                }
++                DynamicFloat value;
++                try {
++                    value = context.deserialize(raw, DynamicFloat.class);
++                } catch (JsonParseException | IllegalArgumentException malformed) {
++                    emu.grasscutter.Grasscutter.getLogger().debug("Skipping malformed modifier property {}", entry.getKey());
++                    continue;
++                }
++                if (value == null) continue;
++                switch (entry.getKey()) {
++                    case "Actor_HpThresholdRatio" -> result.Actor_HpThresholdRatio = value;
++                    case "Actor_MaxHPRatio" -> result.Actor_MaxHPRatio = value;
++                    case "Actor_CostStaminaRatio" -> result.Actor_CostStaminaRatio = value;
++                    default -> result.additionalProperties.put(entry.getKey(), value);
++                }
++            }
++            return result;
++        }
+     }
+ 
+     public enum State {
+--- a/src/main/java/emu/grasscutter/data/excels/dungeon/DungeonEntryData.java
++++ b/src/main/java/emu/grasscutter/data/excels/dungeon/DungeonEntryData.java
+@@ -23,6 +23,7 @@
+     private boolean isShowInAdvHandbook;
+     private boolean isDefaultOpen;
+ 
++    @Getter
+     public static class DungeonEntryCondition {
+         private DungeonEntrySatisfiedConditionType type;
+         private int param1;
+--- a/src/main/java/emu/grasscutter/game/ability/AbilityManager.java
++++ b/src/main/java/emu/grasscutter/game/ability/AbilityManager.java
+@@ -182,8 +182,15 @@
+         this.scanTarget = scanTarget;
+     }
+ 
++    private final Executor abilityExecutor;
++
+     public AbilityManager(Player player) {
++        this(player, eventExecutor::submit);
++    }
++
++    AbilityManager(Player player, Executor abilityExecutor) {
+         super(player);
++        this.abilityExecutor = abilityExecutor;
+         removePendingEnergyClear();
+     }
+ 
+@@ -281,23 +288,25 @@
+ 
+     public void executeAction(
+         Ability ability, AbilityModifierAction action, ByteString abilityData, GameEntity target) {
++        if (ability == null) return;
++        var handler = actionHandlers.get(action.type);
+         try {
+-            if (ability != null && target != null) ClorindeBoLUtil.onAbilityAction(ability, target);
++            // This fired-shot hook must run immediately even when the generic action has no handler.
++            var name = ability.getData() == null ? null : ability.getData().abilityName;
++            if (target != null && name != null && name.contains("GunShot")) {
++                ClorindeBoLUtil.onAbilityAction(ability, target);
++            }
+         } catch (Throwable ignored) {
+-            // Character compatibility hooks are best-effort.
+-        }
+-        var handler = actionHandlers.get(action.type);
+-        if (handler == null || ability == null) {
++            // Compatibility hook must not cancel the normal action.
++        }
++        if (handler == null) {
+             if (DebugConstants.LOG_MISSING_ABILITY_HANDLERS) {
+-                Grasscutter.getLogger()
+-                    .debug("Missing ability action handler for {} (invoker: {}).", action.type, ability);
+-            }
+-
+-            return;
+-        }
+-
++                Grasscutter.getLogger().debug("Missing ability action handler for {} (invoker: {}).", action.type, ability);
++            }
++            return;
++        }
+         boolean ownerWasLive = isLive(ability.getOwner());
+-        eventExecutor.submit(
++        abilityExecutor.execute(
+             () -> {
+                 try {
+                     if (ownerWasLive && !isLive(ability.getOwner())) return;
+@@ -345,24 +354,23 @@
+ 
+     public void executeMixin(Ability ability, AbilityMixinData mixinData, ByteString abilityData) {
+ 
++        if (ability == null) return;
+         var handler = mixinHandlers.get(mixinData.type);
+         GameEntity target = ability.getOwner();
+ 
+-        // This mixin has no handler; it only marks Clorinde and Arlecchino as converting heals to HP debt.
+-        if (mixinData.type == AbilityMixinData.Type.SwitchHealToHPDebtsMixin
++        boolean hpDebtConversion = mixinData.type == AbilityMixinData.Type.SwitchHealToHPDebtsMixin
+                 && target instanceof EntityAvatar avatar
+-                && (avatar.getAvatar().getAvatarId() == 10000098 || avatar.getAvatar().getAvatarId() == 10000096)) {
+-            target.setConvertToHpDebt(true);
+-        }
+-
+-        if (handler == null) {
++                && (avatar.getAvatar().getAvatarId() == 10000098 || avatar.getAvatar().getAvatarId() == 10000096);
++        if (handler == null && !hpDebtConversion) {
+             Grasscutter.getLogger()
+                 .trace("Could not execute ability mixin {} at {}", mixinData.type, ability);
+             return;
+         }
+ 
++        if (hpDebtConversion) target.setConvertToHpDebt(true);
++        if (handler == null) return;
+         boolean ownerWasLive = isLive(target);
+-        eventExecutor.submit(
++        abilityExecutor.execute(
+             () -> {
+                 try {
+                     if (ownerWasLive && !isLive(target)) return;
+--- a/src/main/java/emu/grasscutter/game/ability/actions/ActionHealHP.java
++++ b/src/main/java/emu/grasscutter/game/ability/actions/ActionHealHP.java
+@@ -150,7 +150,7 @@
+                 && furinaTarget.getAvatar().getAvatarId() == 10000089) {
+             var player = ability.getPlayerOwner();
+             if (player != null) {
+-                float baseAmount = finalAmount / abilityRatio;
++                float baseAmount = amountToRegenerate * action.healRatio.get(ability, 1f);
+                 var seen = new java.util.HashSet<Long>();
+                 seen.add(furinaTarget.getAvatar().getGuid());
+                 for (var member : player.getTeamManager().getActiveTeam()) {
+@@ -179,8 +179,8 @@
+         for (int depth = 0; depth < 4 && owner instanceof EntityClientGadget gadget; depth++) {
+             var scene = gadget.getScene();
+             if (scene == null) return null;
+-            owner = scene.getEntityById(gadget.getOwnerEntityId());
+-            if (owner == null) owner = scene.getEntityById(gadget.getOriginalOwnerEntityId());
++            owner = scene.getEntityById(gadget.getOriginalOwnerEntityId());
++            if (owner == null) owner = scene.getEntityById(gadget.getOwnerEntityId());
+             if (owner == null
+                     && (gadget.gadgetId == 41089011 || gadget.gadgetId == 41089012 || gadget.gadgetId == 41089013)
+                     && ability.getPlayerOwner() != null) {
+--- a/src/main/java/emu/grasscutter/game/ability/actions/ActionReviveElemEnergy.java
++++ b/src/main/java/emu/grasscutter/game/ability/actions/ActionReviveElemEnergy.java
+@@ -5,6 +5,8 @@
+ import emu.grasscutter.game.ability.Ability;
+ import emu.grasscutter.game.entity.EntityAvatar;
+ import emu.grasscutter.game.entity.GameEntity;
++import emu.grasscutter.net.proto.PropChangeReasonOuterClass.PropChangeReason;
++import emu.grasscutter.net.proto.ChangeEnergyReasonOuterClass.ChangeEnergyReason;
+ 
+ @AbilityAction(AbilityModifierAction.Type.ReviveElemEnergy)
+ public final class ActionReviveElemEnergy extends AbilityActionHandler {
+--- a/src/main/java/emu/grasscutter/game/ability/actions/ActionTriggerAbility.java
++++ b/src/main/java/emu/grasscutter/game/ability/actions/ActionTriggerAbility.java
+@@ -26,7 +26,10 @@
+         }
+ 
+         var world = player.getWorld();
+-        if (world == null || world.getHost() == null) return false;
++        if (world == null || world.getHost() == null
++                || (target.getScene() != null && target.getScene().getWorld() != world)) {
++            return false;
++        }
+         AbilityManager manager = world.getHost().getAbilityManager();
+         // Re-triggering an already-instanced ability (e.g. Skirk Pickable_Handler on absorb) must
+         // run onAbilityStart. Blindly stacking another copy only fires onAdded and skips energy.
+--- a/src/main/java/emu/grasscutter/game/ability/mixins/CostStaminaMixin.java
++++ b/src/main/java/emu/grasscutter/game/ability/mixins/CostStaminaMixin.java
+@@ -3,56 +3,67 @@
+ import com.google.protobuf.ByteString;
+ import emu.grasscutter.data.binout.AbilityMixinData;
+ import emu.grasscutter.game.ability.Ability;
++import emu.grasscutter.game.ability.NightsoulStaminaExempt;
+ import emu.grasscutter.game.entity.GameEntity;
+ import emu.grasscutter.game.managers.stamina.Consumption;
+ import emu.grasscutter.game.managers.stamina.ConsumptionType;
+-import emu.grasscutter.server.game.GameSession;
+-import emu.grasscutter.game.managers.stamina.StaminaManager;
+-import emu.grasscutter.game.player.Player;
+-import emu.grasscutter.Grasscutter;
++import java.lang.ref.WeakReference;
++import java.util.Map;
++import java.util.WeakHashMap;
+ 
+-@AbilityMixin(value = AbilityMixinData.Type.CostStaminaMixin)
++@AbilityMixin(AbilityMixinData.Type.CostStaminaMixin)
+ public class CostStaminaMixin extends AbilityMixinHandler {
+-    private static final long MAX_COST_INTERVAL = 1000;
++    // Bound catch-up after a pause; slower executions still pay a positive interval.
++    private static final long MAX_CHARGE_INTERVAL_MS = 1000;
++    private final Map<Ability, Map<AbilityMixinData, Timing>> streams = new WeakHashMap<>();
++
++    protected long monotonicMillis() {
++        return System.nanoTime() / 1_000_000L;
++    }
+ 
+     @Override
+-    public boolean execute(Ability ability, AbilityMixinData mixinData, ByteString abilityData, GameEntity target) {
+-        float staminaRatio = mixinData.costStaminaDelta.get(ability);
+-        if (staminaRatio == 0.0f) {
+-            staminaRatio = 1.0f;
+-        }
+-
+-        Player player = ability.getPlayerOwner();
+-        if (player == null) {
+-            return false;
+-        }
+-
+-        // Nightsoul exploration already pays via NyxCost / phlogiston; skip parallel stamina.
+-        if (emu.grasscutter.game.ability.NightsoulStaminaExempt.shouldSkipCharacterStamina(player)) {
++    public synchronized boolean execute(Ability ability, AbilityMixinData data,
++            ByteString abilityData, GameEntity target) {
++        var player = ability.getPlayerOwner();
++        if (player == null) return false;
++        if (NightsoulStaminaExempt.shouldSkipCharacterStamina(player)) {
++            streams.remove(ability);
+             return true;
+         }
+-
+-        StaminaManager staminaManager = player.getStaminaManager();
+-        GameSession session = player.getSession();
+-        long now = System.currentTimeMillis();
+-        // Charge for the time since the last tick, a pause longer than the cap bills nothing.
+-        long gap = now - staminaManager.getLastCostStaminaTime();
+-        long pastTime = gap > MAX_COST_INTERVAL ? 0 : Math.max(0, gap);
+-        staminaManager.setLastCostStaminaTime(now);
+-
+-        // costStaminaDelta is stamina per second in units of 100; a negative delta refunds.
+-        int costStamina = (int) (staminaRatio * 100 * pastTime / 1000);
+-        if (costStamina != 0) {
+-            staminaManager.updateStaminaRelative(
+-                    session, new Consumption(ConsumptionType.FIGHT, -costStamina), true);
+-            if (costStamina > 0) staminaManager.staminaRecoverDelay = 0;
++        float ratio = data.costStaminaDelta.get(ability);
++        if (ratio == 0f) ratio = 1f;
++        if (!Float.isFinite(ratio) || target == null) return false;
++        long now = monotonicMillis();
++        var mixins = streams.computeIfAbsent(ability, ignored -> new WeakHashMap<>());
++        var timing = mixins.get(data);
++        if (timing == null || timing.target.get() != target
++                || timing.scene.get() != target.getScene()) {
++            mixins.put(data, new Timing(target, now));
++            return true;
+         }
+-
+-        // Not getAbilityName(null): that dereferences its argument, so this threw on every tick of
+-        // every stamina-costing ability - Mona's sprint above all - and took the mixin with it.
+-        Grasscutter.getLogger().debug("MIXIN STAMINA CONSUMPTION: Skill={}, Cost={}, PastTime={}",
+-            ability.getData() != null ? ability.getData().abilityName : null, costStamina, pastTime);
+-
++        long elapsed = Math.max(0, Math.min(MAX_CHARGE_INTERVAL_MS, now - timing.at));
++        timing.at = now;
++        double charge = timing.remainder + ratio * 100d * elapsed / 1000d;
++        int cost = (int) Math.max(-Integer.MAX_VALUE, Math.min(Integer.MAX_VALUE, charge));
++        timing.remainder = charge - cost;
++        if (cost != 0) {
++            var stamina = player.getStaminaManager();
++            stamina.updateStaminaRelative(player.getSession(),
++                    new Consumption(ConsumptionType.FIGHT, -cost), true);
++            if (cost > 0) stamina.staminaRecoverDelay = 0;
++        }
+         return true;
+     }
++
++    private static final class Timing {
++        final WeakReference<GameEntity> target;
++        final WeakReference<emu.grasscutter.game.world.Scene> scene;
++        long at;
++        double remainder;
++        Timing(GameEntity target, long at) {
++            this.target = new WeakReference<>(target);
++            this.scene = new WeakReference<>(target.getScene());
++            this.at = at;
++        }
++    }
+ }
+--- a/src/main/java/emu/grasscutter/game/activity/ActivityHandler.java
++++ b/src/main/java/emu/grasscutter/game/activity/ActivityHandler.java
+@@ -104,6 +104,7 @@
+                 PlayerActivityData.of()
+                         .activityId(activityConfigItem.getActivityId())
+                         .uid(player.getUid())
++                        .player(player)
+                         .watcherInfoMap(initWatchersDataForPlayer())
+                         .build();
+ 
+--- a/src/main/java/emu/grasscutter/game/activity/PlayerActivityData.java
++++ b/src/main/java/emu/grasscutter/game/activity/PlayerActivityData.java
+@@ -31,7 +31,11 @@
+     @Transient ActivityHandler activityHandler;
+ 
+     public static PlayerActivityData getByPlayer(Player player, int activityId) {
+-        return DatabaseHelper.getPlayerActivityData(player.getUid(), activityId);
++        var data = DatabaseHelper.getPlayerActivityData(player.getUid(), activityId);
++        if (data != null) {
++            data.setPlayer(player);
++        }
++        return data;
+     }
+ 
+     public void save() {
+--- a/src/main/java/emu/grasscutter/game/chat/ChatSystem.java
++++ b/src/main/java/emu/grasscutter/game/chat/ChatSystem.java
+@@ -46,29 +46,43 @@
+     /********************
+      * Chat history handling
+      ********************/
+-    private synchronized void putInHistory(int uid, int partnerId, ChatInfo info) {
+-        this.history
+-                .computeIfAbsent(uid, x -> new HashMap<>())
+-                .computeIfAbsent(partnerId, x -> new ArrayList<>())
+-                .add(info);
+-    }
+-
+-    public synchronized void clearHistoryOnLogout(Player player) {
+-        this.history.remove(player.getUid());
+-    }
+-
+-    /** Copies one conversation so packets never iterate the live list. */
+-    private synchronized List<ChatInfo> copyHistory(int uid, int partnerId) {
+-        return new ArrayList<>(
+-                this.history.getOrDefault(uid, Map.of()).getOrDefault(partnerId, List.of()));
++    private void putInHistory(int uid, int partnerId, ChatInfo info) {
++        synchronized (history) {
++            this.history.computeIfAbsent(uid, x -> new HashMap<>())
++                    .computeIfAbsent(partnerId, x -> new ArrayList<>()).add(info);
++        }
++    }
++
++    public void clearHistoryOnLogout(Player player) {
++        synchronized (history) { this.history.remove(player.getUid()); }
+     }
+ 
+     public void handlePullPrivateChatReq(Player player, int partnerId) {
+-        player.sendPacket(new PacketPullPrivateChatRsp(copyHistory(player.getUid(), partnerId)));
++        final List<ChatInfo> chatHistory;
++        synchronized (history) {
++            chatHistory = List.copyOf(this.history.computeIfAbsent(player.getUid(), x -> new HashMap<>())
++                    .computeIfAbsent(partnerId, x -> new ArrayList<>()));
++        }
++        player.sendPacket(new PacketPullPrivateChatRsp(chatHistory));
+     }
+ 
+     public void handlePullRecentChatReq(Player player) {
+-        this.ensureServerConversation(player);
++        final boolean needsWelcome;
++        synchronized (history) {
++            var conversations = this.history.computeIfAbsent(player.getUid(), x -> new HashMap<>());
++            var serverHistory = conversations.get(GameConstants.SERVER_CONSOLE_UID);
++            needsWelcome = serverHistory == null || serverHistory.isEmpty();
++        }
++        if (needsWelcome) this.sendServerWelcomeMessages(player);
++        final List<ChatInfo> snapshot;
++        synchronized (history) {
++            snapshot = this.history.getOrDefault(player.getUid(), Map.of()).values().stream()
++                    .flatMap(List::stream).toList();
++        }
++        var recentMessages = snapshot.stream()
++                .sorted(Comparator.comparingInt(ChatInfo::getTime).reversed()
++                        .thenComparingInt(ChatInfo::getUid).thenComparingInt(ChatInfo::getToUid)).toList();
++        player.sendPacket(new PacketPullRecentChatRsp(recentMessages));
+     }
+ 
+     /********************
+@@ -265,19 +279,21 @@
+      * after login, not only once the client pulls it after a teleport.
+      */
+     public void ensureServerConversation(Player player) {
+-        var serverHistory = copyHistory(player.getUid(), GameConstants.SERVER_CONSOLE_UID);
+-        if (serverHistory.isEmpty()) {
+-            this.sendServerWelcomeMessages(player);
+-            serverHistory = copyHistory(player.getUid(), GameConstants.SERVER_CONSOLE_UID);
+-        }
+-
+-        if (serverHistory.isEmpty()) {
+-            return;
+-        }
+-
+-        int historyLength = serverHistory.size();
+-        var recentMessages = serverHistory.subList(Math.max(historyLength - 3, 0), historyLength);
++        final boolean needsWelcome;
++        synchronized (history) {
++            var conversations = history.computeIfAbsent(player.getUid(), x -> new HashMap<>());
++            var messages = conversations.get(GameConstants.SERVER_CONSOLE_UID);
++            needsWelcome = messages == null || messages.isEmpty();
++        }
++        if (needsWelcome) this.sendServerWelcomeMessages(player);
++        final List<ChatInfo> snapshot;
++        synchronized (history) {
++            snapshot = List.copyOf(history.getOrDefault(player.getUid(), Map.of())
++                    .getOrDefault(GameConstants.SERVER_CONSOLE_UID, List.of()));
++        }
++        if (snapshot.isEmpty()) return;
++        var recentMessages = snapshot.subList(Math.max(snapshot.size() - 3, 0), snapshot.size());
+         player.sendPacket(new PacketPullRecentChatRsp(recentMessages));
+-        player.sendPacket(new PacketPullPrivateChatRsp(serverHistory));
++        player.sendPacket(new PacketPullPrivateChatRsp(snapshot));
+     }
+ }
+--- a/src/main/java/emu/grasscutter/game/dungeons/DomainDungeonHelper.java
++++ b/src/main/java/emu/grasscutter/game/dungeons/DomainDungeonHelper.java
+@@ -441,7 +441,36 @@
+             Grasscutter.getLogger().warn("Blocked dungeon enter uid={} point={} dungeon={}: player at ({}, {}, {}), entry at ({}, {}, {})", new Object[]{player.getUid(), n, n2, Float.valueOf(position2 != null ? position2.getX() : 0.0f), Float.valueOf(position2 != null ? position2.getY() : 0.0f), Float.valueOf(position2 != null ? position2.getZ() : 0.0f), Float.valueOf(position != null ? position.getX() : 0.0f), Float.valueOf(position != null ? position.getY() : 0.0f), Float.valueOf(position != null ? position.getZ() : 0.0f)});
+             return false;
+         }
+-        return !player.isScenePointForceLocked(scene.getId(), n);
++        if (player.isScenePointForceLocked(scene.getId(), n)) return false;
++        var entries = GameData.getDungeonEntryDataMap().values().stream()
++                .filter(entry -> entry.getSceneId() == scene.getId() && entry.getDungeonEntryId() == n)
++                .toList();
++        return entries.isEmpty() || entries.stream().anyMatch(entry -> meetsEntryConditions(player, entry));
++    }
++
++    private static boolean meetsEntryConditions(Player player, DungeonEntryData entry) {
++        var conditions = entry.getSatisfiedCond();
++        if (conditions == null || conditions.isEmpty()) return true;
++        var comb = entry.getCondComb();
++        boolean or = comb == emu.grasscutter.game.dungeons.enums.DungeonEntryCondCombType.DUNGEON_ENTRY_COND_COMB_LOGIC_OR;
++        if (!or && comb != emu.grasscutter.game.dungeons.enums.DungeonEntryCondCombType.DUNGEON_ENTRY_COND_COMB_LOGIC_AND
++                && conditions.size() != 1) return false;
++        for (var condition : conditions) {
++            boolean met = false;
++            if (condition != null && condition.getType() != null) {
++                met = switch (condition.getType()) {
++                    case DUNGEON_ENTRY_CONDITION_NONE -> true;
++                    case DUNGEON_ENTRY_CONDITION_LEVEL -> condition.getParam1() >= 0 && player.getLevel() >= condition.getParam1();
++                    case DUNGEON_ENTRY_CONDITION_QUEST -> {
++                        var quest = player.getQuestManager() == null ? null : player.getQuestManager().getQuestById(condition.getParam1());
++                        yield quest != null && quest.getState() == emu.grasscutter.game.quest.enums.QuestState.QUEST_STATE_FINISHED;
++                    }
++                };
++            }
++            if (or && met) return true;
++            if (!or && !met) return false;
++        }
++        return !or;
+     }
+ 
+     public static void handleQuickOpen(Player player, int n) {
+--- a/src/main/java/emu/grasscutter/game/dungeons/DungeonManager.java
++++ b/src/main/java/emu/grasscutter/game/dungeons/DungeonManager.java
+@@ -57,7 +57,7 @@
+         return rewardedPlayers.contains(uid);
+     }
+     private final Set<Integer> activeDungeonWayPoints = new HashSet<>();
+-    private boolean ended = false;
++    private volatile boolean ended = false;
+     private int newestWayPoint = 0;
+     @Getter private int startSceneTime = 0;
+     @Setter @Getter private boolean towerDungeon = false;
+--- a/src/main/java/emu/grasscutter/game/dungeons/DungeonSystem.java
++++ b/src/main/java/emu/grasscutter/game/dungeons/DungeonSystem.java
+@@ -138,6 +138,12 @@
+     /** used in tower dungeons handoff */
+     public boolean handoffDungeon(
+             Player player, int dungeonId, List<DungeonSettleListener> dungeonSettleListeners) {
++        return handoffDungeon(player, dungeonId, dungeonSettleListeners, null);
++    }
++
++    public boolean handoffDungeon(
++            Player player, int dungeonId, List<DungeonSettleListener> dungeonSettleListeners,
++            Runnable prepare) {
+         DungeonData data = GameData.getDungeonDataMap().get(dungeonId);
+ 
+         if (data == null) {
+@@ -151,15 +157,11 @@
+                         dungeonId);
+ 
+         Scene current = player.getScene();
+-        if (current != null
+-                && current.getSceneType() == SceneType.SCENE_DUNGEON
+-                && (TowerAbyssFix.isInTowerDungeon(player)
+-                        || (current.getDungeonManager() != null
+-                                && current.getDungeonManager().isTowerDungeon()))) {
++        if (current != null && current.getSceneType() == SceneType.SCENE_DUNGEON) {
+             TowerAbyssFix.endChallengeUi(player);
+         }
+ 
+-        if (!player.getWorld().transferPlayerToScene(player, data.getSceneId(), data)) {
++        if (!player.getWorld().transferPlayerToScene(player, data.getSceneId(), data, prepare)) {
+             return false;
+         }
+         var scene = player.getScene();
+--- a/src/main/java/emu/grasscutter/game/dungeons/enums/DungeonType.java
++++ b/src/main/java/emu/grasscutter/game/dungeons/enums/DungeonType.java
+@@ -41,7 +41,9 @@
+     DUNGEON_EFFIGY_CHALLENGE_V2(false),
+     DUNGEON_CHAR_AMUSEMENT(false),
+     DUNGEON_REPUTATION_SNEZ_TPS(false),
+-    DUNGEON_TPS_SHOOTING_RANGE(false);
++    DUNGEON_TPS_SHOOTING_RANGE(false),
++    DUNGEON_TPS_DEFENSE(false),
++    DUNGEON_TPS_MERCENARIES(false);
+ 
+     @Getter private final boolean countsToBattlepass;
+ 
+--- a/src/main/java/emu/grasscutter/game/entity/EntityAvatar.java
++++ b/src/main/java/emu/grasscutter/game/entity/EntityAvatar.java
+@@ -320,7 +320,8 @@
+     /** Flat elemental energy from an ability; special-energy gauges are left alone. */
+     public void addAbilityEnergy(float amount) {
+         var energySkill = this.getAvatar().getSkillDepot().getEnergySkillData();
+-        if (!this.getPlayer().getEnergyManager().isEnergyUsage()
++        if (!emu.grasscutter.config.Configuration.GAME_OPTIONS.energyUsage
++                || !this.getPlayer().getEnergyManager().isEnergyUsage()
+                 || (energySkill != null && energySkill.getSpecialEnergyMin() > 0)) return;
+         this.addEnergy(
+                 amount,
+@@ -347,7 +348,8 @@
+             amount *= this.getFightProperty(FightProperty.FIGHT_PROP_CHARGE_EFFICIENCY);
+         }
+ 
+-        float newEnergy = Math.min(curEnergy + amount, maxEnergy);
++        if (!Float.isFinite(curEnergy) || !Float.isFinite(maxEnergy) || maxEnergy <= 0f) return;
++        float newEnergy = Math.max(0f, Math.min(curEnergy + amount, maxEnergy));
+ 
+         if (newEnergy != curEnergy) {
+             float delta = newEnergy - curEnergy;
+--- a/src/main/java/emu/grasscutter/game/entity/EntityGadget.java
++++ b/src/main/java/emu/grasscutter/game/entity/EntityGadget.java
+@@ -293,6 +293,7 @@
+ 
+     @Override
+     public void onInteract(Player player, GadgetInteractReq interactReq) {
++        if (interactReq.getGadgetId() != getGadgetId()) return;
+         boolean interactOk = this.interactEnabled;
+         try {
+             interactOk =
+@@ -304,7 +305,7 @@
+ 
+         try {
+             if (emu.grasscutter.game.world.AndriusTrialStartHelper.tryStart(player, this, 0)) {
+-                player.onGadgetInteracted(getGadgetId());
++                creditInteraction(player);
+                 return;
+             }
+         } catch (Throwable ignored) {
+@@ -313,7 +314,7 @@
+         // OfferingGadgets such as the Sacred Sakura must still open the offering page even when content is unset.
+         try {
+             if (emu.grasscutter.game.entity.gadget.OfferingHelper.tryInteract(player, this)) {
+-                player.onGadgetInteracted(getGadgetId());
++                creditInteraction(player);
+                 return;
+             }
+         } catch (Throwable ignored) {
+@@ -321,12 +322,16 @@
+ 
+         boolean shouldDelete = this.getContent() != null && this.getContent().onInteract(player, interactReq);
+         if (!(this.getContent() instanceof emu.grasscutter.game.entity.gadget.CreditsOwnInteraction)) {
+-            player.onGadgetInteracted(getGadgetId());
++            creditInteraction(player);
+         }
+ 
+         if (shouldDelete) {
+             this.getScene().killEntity(this);
+         }
++    }
++
++    protected void creditInteraction(Player player) {
++        player.onGadgetInteracted(getGadgetId());
+     }
+ 
+     @Override
+--- a/src/main/java/emu/grasscutter/game/entity/EntityItem.java
++++ b/src/main/java/emu/grasscutter/game/entity/EntityItem.java
+@@ -109,7 +109,7 @@
+             return;
+         }
+ 
+-        player.onGadgetInteracted(getGadgetId());
++        creditInteraction(player);
+         this.getScene().removeEntity(this);
+ 
+         if (!this.isShare()) { // not shared drop
+@@ -119,6 +119,10 @@
+                     .broadcastPacket(
+                             new PacketGadgetInteractRsp(this, InteractType.InteractType_INTERACT_PICK_ITEM));
+         }
++    }
++
++    protected void creditInteraction(Player player) {
++        player.onGadgetInteracted(getGadgetId());
+     }
+ 
+     @Override
+--- a/src/main/java/emu/grasscutter/game/entity/EntityMonster.java
++++ b/src/main/java/emu/grasscutter/game/entity/EntityMonster.java
+@@ -251,9 +251,13 @@
+             return;
+         }
+         this.envGatherRewarded = true;
+-        player.onGadgetInteracted(interactReq.getGadgetId());
++        creditInteraction(player, interactReq);
+ 
+         this.getScene().killEntity(this);
++    }
++
++    protected void creditInteraction(Player player, GadgetInteractReq request) {
++        player.onGadgetInteracted(request.getGadgetId());
+     }
+ 
+     @Override
+@@ -309,8 +313,13 @@
+                 this, hpBeforeDamage, amount, killerId);
+ 
+         // Invoke energy drop logic.
+-        for (Player player : this.getScene().getPlayers()) {
+-            player.getEnergyManager().handleMonsterEnergyDrop(this, hpBeforeDamage, hpAfterDamage);
++        // One shared pool, not one shared copy per participant. Existing pickup policy awards
++        // only the collector's party; the lowest UID supplies stable drop GUID ownership.
++        if (hpAfterDamage < hpBeforeDamage) {
++            this.getScene().getPlayers().stream()
++                    .min(java.util.Comparator.comparingInt(Player::getUid))
++                    .ifPresent(player -> player.getEnergyManager()
++                            .handleMonsterEnergyDrop(this, hpBeforeDamage, hpAfterDamage));
+         }
+     }
+ 
+--- a/src/main/java/emu/grasscutter/game/entity/EntityTeam.java
++++ b/src/main/java/emu/grasscutter/game/entity/EntityTeam.java
+@@ -10,7 +10,7 @@
+ 
+ public class EntityTeam extends GameEntity {
+ 
+-    private Player player;
++    @lombok.Getter private Player player;
+ 
+     public EntityTeam(Player player) {
+         super(player.getScene());        
+--- a/src/main/java/emu/grasscutter/game/entity/GameEntity.java
++++ b/src/main/java/emu/grasscutter/game/entity/GameEntity.java
+@@ -44,6 +44,7 @@
+ 
+ public abstract class GameEntity {
+     @Getter private final Scene scene;
++
+     private boolean restrictedFromHealing = false;
+     private boolean convertToHpDebt = false;
+     @Getter @Setter public int id;
+--- a/src/main/java/emu/grasscutter/game/entity/gadget/GadgetChest.java
++++ b/src/main/java/emu/grasscutter/game/entity/gadget/GadgetChest.java
+@@ -272,7 +272,7 @@
+         player.sendPacket(
+                 new PacketSceneEntityAppearNotify(
+                         getGadget(), VisionTypeOuterClass.VisionType.VisionType_VISION_REFRESH, 0));
+-        creditChestOpen(player);
++        creditClaim(player);
+     }
+ 
+     /** Opens the flower for good once every eligible player still in the scene has claimed. */
+@@ -342,11 +342,11 @@
+         } catch (Throwable ignored) {
+         }
+         if (credit) {
+-            creditChestOpen(player);
+-        }
+-    }
+-
+-    private void creditChestOpen(Player player) {
++            creditClaim(player);
++        }
++    }
++
++    protected void creditClaim(Player player) {
+         try {
+             int gadgetId = getGadget().getGadgetId();
+             player.getPlayerProgress().addHandbookChestOpen(1);
+--- /dev/null
++++ b/src/main/java/emu/grasscutter/game/gacha/BatchAvatarOwnership.java
+@@ -0,0 +1,22 @@
++package emu.grasscutter.game.gacha;
++
++import java.util.HashMap;
++import java.util.Map;
++import java.util.function.IntUnaryOperator;
++
++/** Ownership view used while reward cards have not yet been delivered. */
++final class BatchAvatarOwnership {
++    private final IntUnaryOperator ownership;
++
++    BatchAvatarOwnership(IntUnaryOperator ownership) {
++        this.ownership = ownership;
++    }
++
++    private final Map<Integer, Integer> provisional = new HashMap<>();
++
++    int beforeCopy(int avatarId) {
++        int before = provisional.computeIfAbsent(avatarId, ownership::applyAsInt);
++        if (before >= -1) provisional.put(avatarId, before < 6 ? before + 1 : 6);
++        return before;
++    }
++}
+--- a/src/main/java/emu/grasscutter/game/gacha/GachaSystem.java
++++ b/src/main/java/emu/grasscutter/game/gacha/GachaSystem.java
+@@ -353,6 +353,8 @@
+         }
+ 
+         var items = new ArrayList<PlayerWishEvent.WishCompute>();
++        var batchOwnership = new BatchAvatarOwnership(id -> InventorySystem.checkPlayerAvatarConstellationLevel(player, id));
++        var provisionalTokens = new java.util.HashSet<Integer>();
+         for (int i = 0; i < times; i++) {
+             // Roll
+             PullResult pull = doPull(banner, gachaInfo, pools);
+@@ -382,7 +384,8 @@
+             boolean isTransferItem = false;
+ 
+             // Const check
+-            int constellation = InventorySystem.checkPlayerAvatarConstellationLevel(player, itemId);
++            int avatarId = InventorySystem.getAvatarIdFromItem(itemId);
++            int constellation = avatarId == 0 ? -2 : batchOwnership.beforeCopy(avatarId);
+             switch (constellation) {
+                 case -2: // Is weapon
+                     switch (itemData.getRankLevel()) {
+@@ -416,8 +419,14 @@
+                                 && ownedAvatar.getSkillDepot().getTalentCostItemId() > 0) {
+                             constItemId = ownedAvatar.getSkillDepot().getTalentCostItemId();
+                         }
+-                        boolean haveConstItem =
+-                                inventory.getInventoryTab(ItemType.ITEM_MATERIAL).getItemById(constItemId) == null;
++                        if (ownedAvatar == null) {
++                            var avatarData = GameData.getAvatarDataMap().get(InventorySystem.getAvatarIdFromItem(itemId));
++                            var depot = avatarData == null ? null : GameData.getAvatarSkillDepotDataMap().get(avatarData.getSkillDepotId());
++                            if (depot != null && depot.getTalentCostItemId() > 0) constItemId = depot.getTalentCostItemId();
++                        }
++                        boolean haveConstItem = !provisionalTokens.contains(constItemId)
++                                && inventory.getInventoryTab(ItemType.ITEM_MATERIAL).getItemById(constItemId) == null;
++                        provisionalTokens.add(constItemId);
+                         gachaItem.addTransferItems(
+                                 GachaTransferItem.newBuilder()
+                                         .setItem(ItemParam.newBuilder().setItemId(constItemId).setCount(1))
+--- a/src/main/java/emu/grasscutter/game/managers/energy/EnergyManager.java
++++ b/src/main/java/emu/grasscutter/game/managers/energy/EnergyManager.java
+@@ -417,12 +417,15 @@
+     public void handleMonsterEnergyDrop(
+             EntityMonster monster, float hpBeforeDamage, float hpAfterDamage) {
+ 
++        if (!Float.isFinite(hpBeforeDamage) || !Float.isFinite(hpAfterDamage)
++                || hpBeforeDamage <= 0f || hpAfterDamage >= hpBeforeDamage) return;
+         MonsterType type = monster.getMonsterData().getType();
+         if (type != MonsterType.MONSTER_ORDINARY && type != MonsterType.MONSTER_BOSS) {
+             return;
+         }
+ 
+         float maxHp = monster.getFightProperty(FightProperty.FIGHT_PROP_MAX_HP);
++        if (!Float.isFinite(maxHp) || maxHp <= 0f) return;
+         float thresholdBefore = hpBeforeDamage / maxHp;
+         float thresholdAfter = hpAfterDamage / maxHp;
+ 
+--- a/src/main/java/emu/grasscutter/game/managers/stamina/StaminaManager.java
++++ b/src/main/java/emu/grasscutter/game/managers/stamina/StaminaManager.java
+@@ -548,7 +548,7 @@
+         }
+     }
+ 
+-    private void handleDrowning() {
++    private synchronized void handleDrowning() {
+         // TODO: fix drowning waverider entity
+         int stamina = getCurrentCharacterStamina();
+         if (stamina < 10) {
+--- a/src/main/java/emu/grasscutter/game/player/TeamManager.java
++++ b/src/main/java/emu/grasscutter/game/player/TeamManager.java
+@@ -13,6 +13,7 @@
+ import emu.grasscutter.game.entity.*;
+ import emu.grasscutter.game.props.*;
+ import emu.grasscutter.game.tps.TpsAvatarSystem;
++import emu.grasscutter.game.tps.TpsWeaponSystem;
+ import emu.grasscutter.game.world.*;
+ import emu.grasscutter.net.packet.*;
+ import emu.grasscutter.net.proto.*;
+@@ -441,6 +442,11 @@
+     }
+ 
+     public void updateTeamEntities(BasePacket responsePacket) {
++        updateTeamEntities(responsePacket, current -> finishTeamUpdate(responsePacket, current));
++    }
++
++    // Roster lifecycle seam; production keeps the normal property/health/transport completion.
++    void updateTeamEntities(BasePacket responsePacket, java.util.function.Consumer<EntityAvatar> completion) {
+ 
+         if (this.getCurrentTeamInfo().getAvatars().size() <= 0) {
+             return;
+@@ -485,6 +491,7 @@
+         }
+ 
+         for (var entity : existingAvatars.values()) {
++            TpsWeaponSystem.retireWeaponEntities(entity);
+             if (entity == currentEntity) {
+                 entity.getAvatar().save();
+                 continue;
+@@ -499,7 +506,10 @@
+                 Math.min(this.currentCharacterIndex, this.getActiveTeam().size() - 1);
+         }
+         this.currentCharacterIndex = prevSelectedAvatarIndex;
+-
++        completion.accept(currentEntity);
++    }
++
++    private void finishTeamUpdate(BasePacket responsePacket, EntityAvatar currentEntity) {
+         this.updateTeamProperties();
+ 
+         try {
+@@ -721,6 +731,7 @@
+                 .noneMatch(avatar -> trialAvatarIds.contains(avatar.getTrialAvatarId()))) return;
+         var player = this.getPlayer();
+         var scene = player.getScene();
++        this.getActiveTeam().forEach(TpsWeaponSystem::retireWeaponEntities);
+         if (scene != null) this.getActiveTeam().forEach(entity -> scene.removeEntity(
+             entity, VisionTypeOuterClass.VisionType.VisionType_VISION_REMOVE));
+         boolean finished = this.retireTrialAvatarRoster(trialAvatarIds);
+@@ -862,11 +873,18 @@
+             return;
+         }
+ 
++        var scene = this.getPlayer().getScene();
+         var event =
+             new PlayerSwitchAvatarEvent(this.getPlayer(), oldEntity.getAvatar(), newEntity.getAvatar());
+         if (!event.call()) return;
+ 
++        // A plugin may reenter switching or transfer scenes while the monitor is held.
++        if (this.getCurrentAvatarEntity() != oldEntity || this.getPlayer().getScene() != scene) return;
++        if (event.getNewAvatar() == null) return;
+         newEntity = event.getNewAvatarEntity();
++        index = this.getActiveTeam().indexOf(newEntity);
++        if (index < 0 || newEntity == oldEntity
++                || !(newEntity.getFightProperty(FightProperty.FIGHT_PROP_CUR_HP) > 0f)) return;
+ 
+         this.setCurrentCharacterIndex(index);
+ 
+@@ -876,7 +894,7 @@
+         // Re-sync elemental energy after VISION_REPLACE so client does not keep a
+         // stale/predicted burst-ready state that disagrees with server props.
+         syncAvatarEnergyToClient(newEntity);
+-        this.getPlayer().sendPacket(new PacketChangeAvatarRsp(guid));
++        this.getPlayer().sendPacket(new PacketChangeAvatarRsp(newEntity.getAvatar().getGuid()));
+     }
+ 
+     private void syncAvatarEnergyToClient(EntityAvatar entity) {
+@@ -1159,6 +1177,21 @@
+         // HandlerWorldPlayerReviveReq sends the one WorldPlayerReviveRsp after this returns.
+     }
+ 
++    private void restoreTeamForRespawn() {
++        for (EntityAvatar entity : this.getActiveTeam()) {
++            if (!entity.isAlive() || entity.getFightProperty(FightProperty.FIGHT_PROP_CUR_HP) <= 0f) {
++                entity.reviveToRatio(.4f);
++            } else {
++                entity.setFightProperty(FightProperty.FIGHT_PROP_CUR_HP,
++                        entity.getFightProperty(FightProperty.FIGHT_PROP_MAX_HP) * .4f);
++            }
++            this.getPlayer().getSatiationManager().removeSatiationDirectly(entity.getAvatar(), 15000);
++            this.getPlayer().sendPacket(new PacketAvatarFightPropUpdateNotify(
++                    entity.getAvatar(), FightProperty.FIGHT_PROP_CUR_HP));
++            this.getPlayer().sendPacket(new PacketAvatarLifeStateChangeNotify(entity.getAvatar()));
++        }
++    }
++
+     public Position getRespawnPosition() {
+         // Prefer nearest unlocked teleport waypoint (TransPointNormal / SceneTransPoint).
+         // Old filter only accepted exact "SceneTransPoint", which matches nothing in 7.0
+--- a/src/main/java/emu/grasscutter/game/systems/MultiplayerSystem.java
++++ b/src/main/java/emu/grasscutter/game/systems/MultiplayerSystem.java
+@@ -1,6 +1,4 @@
+ package emu.grasscutter.game.systems;
+-
+-import static emu.grasscutter.config.Configuration.GAME_OPTIONS;
+ 
+ import emu.grasscutter.game.CoopRequest;
+ import emu.grasscutter.Grasscutter;
+@@ -23,16 +21,22 @@
+         super(server);
+     }
+ 
+-    private static boolean isFull(World world) {
+-        return world.getPlayerCount() >= GAME_OPTIONS.avatarLimits.multiplayerTeam;
++    protected World createWorld(Player host, boolean multiplayer) {
++        return new World(host, multiplayer);
++    }
++
++    private static int supportedPlayerCapacity() {
++        // TeamManager allocates at least one avatar per player from this shared budget.
++        return Math.max(1, emu.grasscutter.config.Configuration.GAME_OPTIONS.avatarLimits.multiplayerTeam);
+     }
+ 
+     public synchronized void applyEnterMp(Player player, int targetUid) {
+         normalizeStaleMultiplayerWorld(player);
+         Player target = getServer().getPlayerByUid(targetUid);
+         if (target == null || target == player || target.getWorld() == null
+-                || target.getWorld() == player.getWorld() || target.getWorld().getHost() != target
+-                || isFull(target.getWorld())) {
++                || target.getWorld().getHost() != target
++                || !target.getWorld().getPlayers().contains(target)
++                || target.getWorld().getPlayerCount() >= supportedPlayerCapacity()) {
+             player.sendPacket(new PacketPlayerApplyEnterMpResultNotify(targetUid, "", false, ReasonOuterClass.Reason.Reason_PLAYER_CANNOT_ENTER_MP));
+             return;
+         }
+@@ -59,40 +63,46 @@
+         if (request == null || request.isExpired()) {
+             return;
+         }
+-
+         Player requester = request.getRequester();
+         normalizeStaleMultiplayerWorld(requester);
+-
+         World hostWorld = hostPlayer.getWorld();
+-        if (requester == hostPlayer || requester.getWorld().isMultiplayer() || hostWorld == null
+-                || hostWorld.getHost() != hostPlayer || isFull(hostWorld)) {
+-            request.getRequester().sendPacket(new PacketPlayerApplyEnterMpResultNotify(hostPlayer, false, ReasonOuterClass.Reason.Reason_PLAYER_CANNOT_ENTER_MP));
+-            return;
+-        }
+-
+-        request.getRequester().sendPacket(new PacketPlayerApplyEnterMpResultNotify(hostPlayer, isAgreed, ReasonOuterClass.Reason.Reason_PLAYER_JUDGE));
+-
+-        if (!isAgreed) {
+-            return;
+-        }
+-
+-        if (!hostPlayer.getWorld().isMultiplayer()) {
+-
+-            World world = new World(hostPlayer, true);
+-
+-            world.addPlayer(hostPlayer);
+-
+-            hostPlayer.sendPacket(new PacketPlayerEnterSceneNotify(hostPlayer, hostPlayer, EnterType.EnterType_ENTER_SELF, EnterReason.HostFromSingleToMp, hostPlayer.getScene().getId(), hostPlayer.getPosition()));
+-        }
+-
+-        requester.getPosition().set(hostPlayer.getPosition());
+-        requester.getRotation().set(hostPlayer.getRotation());
+-        requester.setSceneId(hostPlayer.getSceneId());
+-
+-        hostPlayer.getWorld().addPlayer(requester);
+-        guestHostUids.put(requester.getUid(), hostPlayer.getUid());
+-
+-        requester.sendPacket(new PacketPlayerEnterSceneNotify(requester, hostPlayer, EnterType.EnterType_ENTER_OTHER, EnterReason.TeamJoin, hostPlayer.getScene().getId(), hostPlayer.getPosition()));
++        if (hostWorld == null) {
++            requester.sendPacket(new PacketPlayerApplyEnterMpResultNotify(hostPlayer, false,
++                    ReasonOuterClass.Reason.Reason_PLAYER_CANNOT_ENTER_MP));
++            return;
++        }
++        synchronized (hostWorld) {
++            if (hostPlayer.getWorld() != hostWorld || hostWorld.getHost() != hostPlayer
++                    || !hostWorld.getPlayers().contains(hostPlayer)
++                    || getServer().getPlayerByUid(hostPlayer.getUid()) != hostPlayer
++                    || getServer().getPlayerByUid(applyUid) != requester
++                    || requester == hostPlayer || requester.getWorld() == null
++                    || requester.getWorld().isMultiplayer()
++                    || hostWorld.getPlayerCount() >= supportedPlayerCapacity()) {
++                requester.sendPacket(new PacketPlayerApplyEnterMpResultNotify(hostPlayer, false,
++                        ReasonOuterClass.Reason.Reason_PLAYER_CANNOT_ENTER_MP));
++                return;
++            }
++            requester.sendPacket(new PacketPlayerApplyEnterMpResultNotify(hostPlayer, isAgreed,
++                    ReasonOuterClass.Reason.Reason_PLAYER_JUDGE));
++            if (!isAgreed) {
++                return;
++            }
++            if (!hostWorld.isMultiplayer()) {
++                hostWorld = createWorld(hostPlayer, true);
++                hostWorld.addPlayer(hostPlayer);
++                hostPlayer.sendPacket(new PacketPlayerEnterSceneNotify(hostPlayer, hostPlayer,
++                        EnterType.EnterType_ENTER_SELF, EnterReason.HostFromSingleToMp,
++                        hostPlayer.getScene().getId(), hostPlayer.getPosition()));
++            }
++            requester.getPosition().set(hostPlayer.getPosition());
++            requester.getRotation().set(hostPlayer.getRotation());
++            hostWorld.addPlayer(requester, hostPlayer.getSceneId());
++            guestHostUids.put(requester.getUid(), hostWorld.getHost().getUid());
++            requester.sendPacket(new PacketPlayerEnterSceneNotify(requester, hostPlayer,
++                    EnterType.EnterType_ENTER_OTHER, EnterReason.TeamJoin,
++                    hostPlayer.getScene().getId(), hostPlayer.getPosition()));
++        }
+     }
+ 
+     public synchronized boolean leaveCoop(Player player) {
+@@ -112,7 +122,7 @@
+             }
+         }
+ 
+-        World world = new World(player);
++        World world = createWorld(player, false);
+         world.addPlayer(player);
+ 
+         player.sendPacket(new PacketPlayerEnterSceneNotify(player, EnterType.EnterType_ENTER_OTHER, EnterReason.TeamBack, player.getScene().getId(), player.getPosition()));
+@@ -122,28 +132,27 @@
+     }
+ 
+     public synchronized boolean kickPlayer(Player player, int targetUid) {
+-        World hostWorld = player.getWorld();
+-        if (!hostWorld.isMultiplayer() || hostWorld.getHost() != player) {
++        World party = player.getWorld();
++        if (party == null) {
+             return false;
+         }
+-
+-        Player victim = player.getServer().getPlayerByUid(targetUid);
+-
+-        if (victim == null || victim == player || victim.getWorld() != hostWorld) {
+-            return false;
+-        }
+-
+-        if (victim.getSceneLoadState() != SceneLoadState.LOADED) {
+-            return false;
+-        }
+-        guestHostUids.remove(victim.getUid());
+-
+-        World world = new World(victim);
+-        world.addPlayer(victim);
+-
+-        victim.sendPacket(new PacketPlayerEnterSceneNotify(victim, EnterType.EnterType_ENTER_OTHER, EnterReason.TeamKick, victim.getScene().getId(), victim.getPosition()));
+-        victim.sendPacket(new PacketEnterScenePeerNotify(victim));
+-        return true;
++        synchronized (party) {
++            Player victim = getServer().getPlayerByUid(targetUid);
++            if (player.getWorld() != party || !party.isMultiplayer() || party.getHost() != player
++                    || !party.getPlayers().contains(player) || victim == null || victim == player
++                    || victim.getWorld() != party || !party.getPlayers().contains(victim)
++                    || victim.getSceneLoadState() != SceneLoadState.LOADED) {
++                return false;
++            }
++            guestHostUids.remove(victim.getUid());
++            World world = createWorld(victim, false);
++            world.addPlayer(victim);
++            victim.sendPacket(new PacketPlayerEnterSceneNotify(victim,
++                    EnterType.EnterType_ENTER_OTHER, EnterReason.TeamKick,
++                    victim.getScene().getId(), victim.getPosition()));
++            victim.sendPacket(new PacketEnterScenePeerNotify(victim));
++            return true;
++        }
+     }
+ 
+     /** 7.0 移植：清掉残留的"单人却处于多人世界"状态 */
+@@ -153,7 +162,7 @@
+                 || previousWorld.getHost() != player) {
+             return;
+         }
+-        World singlePlayerWorld = new World(player);
++        World singlePlayerWorld = createWorld(player, false);
+         singlePlayerWorld.addPlayer(player);
+         this.guestHostUids.remove(player.getUid());
+         Grasscutter.getLogger()
+@@ -162,7 +171,7 @@
+     }
+ 
+     /** 7.0 移植：进场景/登录后校正世界归属 */
+-    public World reconcileMultiplayerWorld(Player player) {
++    public synchronized World reconcileMultiplayerWorld(Player player) {
+         Integer hostUid = this.guestHostUids.get(player.getUid());
+         if (hostUid == null) {
+             return player.getWorld();
+@@ -179,6 +188,11 @@
+             return player.getWorld();
+         }
+         if (player.getWorld() != hostWorld) {
++            if (hostWorld.getPlayerCount() >= supportedPlayerCapacity()
++                    || hostWorld.getPlayers().contains(player)) {
++                this.guestHostUids.remove(player.getUid());
++                return player.getWorld();
++            }
+             World previousWorld = player.getWorld();
+             hostWorld.addPlayer(player, host2.getSceneId());
+             this.guestHostUids.put(player.getUid(), host2.getUid());
+--- a/src/main/java/emu/grasscutter/game/world/Scene.java
++++ b/src/main/java/emu/grasscutter/game/world/Scene.java
+@@ -141,15 +141,15 @@
+         if (id == 0x13800001) return this.sceneEntity;
+         else if (id == this.getWorld().getLevelEntityId()) return this.getWorld().getEntity();
+ 
+-        var teamEntityPlayer =
+-                players.stream().filter(p -> p.getTeamManager().getEntity().getId() == id).findAny();
+-        if (teamEntityPlayer.isPresent()) return teamEntityPlayer.get().getTeamManager().getEntity();
++        var teamEntity = players.stream().map(p -> p.getTeamManager().getEntity())
++                .filter(java.util.Objects::nonNull).filter(team -> team.getId() == id).findAny();
++        if (teamEntity.isPresent()) return teamEntity.get();
+ 
+         var entity = this.entities.get(id);
+         if (entity == null) entity = this.weaponEntities.get(id);
+         if (entity == null && (id >> ENTITY_ID_BIT_SHIFT) == EntityIdType.AVATAR.getId()) {
+             for (var player : getPlayers()) {
+-                for (var avatar : player.getTeamManager().getActiveTeam()) {
++                for (var avatar : new ArrayList<>(player.getTeamManager().getActiveTeam())) {
+                     if (avatar.getId() == id) return avatar;
+                 }
+             }
+@@ -157,7 +157,7 @@
+ 
+         if (entity == null && (id >> ENTITY_ID_BIT_SHIFT) == EntityIdType.WEAPON.getId()) {
+             for (var player : this.getPlayers()) {
+-                for (var avatar : player.getTeamManager().getActiveTeam()) {
++                for (var avatar : new ArrayList<>(player.getTeamManager().getActiveTeam())) {
+                     if (avatar.getWeaponEntityId() == id) return avatar;
+                 }
+             }
+@@ -311,6 +311,7 @@
+     private synchronized void removePlayerAvatars(Player player) {
+         var team = player.getTeamManager().getActiveTeam();
+ 
++        team.forEach(emu.grasscutter.game.tps.TpsWeaponSystem::retireWeaponEntities);
+         team.forEach(e -> removeEntity(e, VisionType.VisionType_VISION_REMOVE));
+         // The team is rebuilt with new entities on the next scene, so the off-field members' ids
+         // are dead too.
+@@ -837,13 +838,7 @@
+ 
+         var sceneTime = getSceneTimeSeconds();
+ 
+-        var entities = Map.copyOf(this.getEntities());
+-        entities.forEach(
+-                (eid, e) -> {
+-                    if (!e.isAlive()) {
+-                        this.getEntities().remove(eid);
+-                    } else e.onTick(sceneTime);
+-                });
++        tickEntities(sceneTime);
+ 
+         blossomManager.onTick();
+ 
+@@ -865,6 +860,20 @@
+         this.checkPlayerRespawn();
+         if (this.tickCount % 50 == 0) this.reportFrozenState();
+         if (this.tickCount++ % 10 == 0) this.broadcastPacket(new PacketSceneTimeNotify(this));
++    }
++
++    void tickEntities(int sceneTime) {
++        Map.copyOf(this.getEntities()).forEach((eid, entity) -> {
++            // An entity removed by an earlier callback must not run from the old snapshot.
++            if (this.getEntities().get(eid) != entity) return;
++            try {
++                if (!entity.isAlive()) this.getEntities().remove(eid, entity);
++                else entity.onTick(sceneTime);
++            } catch (RuntimeException failure) {
++                Grasscutter.getLogger().error(
++                        "Scene {} entity {} tick failed", this.getId(), eid, failure);
++            }
++        });
+     }
+ 
+     /**
+@@ -1161,7 +1170,10 @@
+         }
+ 
+         if (toRemove.size() > 0) {
+-            toRemove.forEach(this::removeEntityDirectly);
++            toRemove.forEach(entity -> {
++                emu.grasscutter.game.entity.EntityRuntimeStateCleanup.clear(entity);
++                this.removeEntityDirectly(entity);
++            });
+             this.broadcastPacket(
+                     new PacketSceneEntityDisappearNotify(toRemove, VisionType.VisionType_VISION_REMOVE));
+             blossomManager.recycleGadgetEntity(toRemove);
+@@ -1408,50 +1420,51 @@
+                                                 && (block == null || e.getBlockId() == block.id))
+                         .toList();
+ 
+-        if (toRemove.size() > 0) {
+-            toRemove.forEach(this::removeEntityDirectly);
++        var retired = new ArrayList<GameEntity>();
++        for (var entity : toRemove) {
++            if (!this.getEntities().remove(entity.getId(), entity)) continue;
++            // Retire before callbacks can register a same-ID replacement with fresh runtime state.
++            EntityRuntimeStateCleanup.clear(entity);
++            entity.onRemoved();
++            retired.add(entity);
++        }
++        if (!retired.isEmpty()) {
+             this.broadcastPacket(
+-                    new PacketSceneEntityDisappearNotify(toRemove, VisionType.VisionType_VISION_REMOVE));
+-        }
+-
+-        var group =
+-                block == null || block.groups == null
+-                        ? this.scriptManager.getGroupById(group_id)
+-                        : block.groups.get(group_id);
+-        if (group == null) {
+-            // The group's script never loaded, so there is nothing to tear down. The entities are
+-            // already gone above; tell the client the group is unloaded and stop.
+-            this.broadcastPacket(new PacketGroupUnloadNotify(List.of(group_id)));
+-            return;
+-        }
+-
+-        if (group.triggers != null) {
+-            group.triggers.values().forEach(getScriptManager()::deregisterTrigger);
+-        }
+-        if (group.regions != null) {
+-            group.regions.values().forEach(getScriptManager()::deregisterRegion);
+-        }
+-        if (challenge != null && group.id == challenge.getGroup().id) {
++                    new PacketSceneEntityDisappearNotify(retired, VisionType.VisionType_VISION_REMOVE));
++        }
++
++        // Recover loaded metadata without loading scripts during teardown.
++        var groups = new HashSet<SceneGroup>();
++        if (block != null && block.groups != null && block.groups.get(group_id) != null) {
++            groups.add(block.groups.get(group_id));
++        }
++        this.loadedGroups.stream().filter(g -> g.id == group_id).forEach(groups::add);
++        var instance = scriptManager.getGroupInstanceById(group_id);
++        if (instance != null && instance.getLuaGroup() != null) groups.add(instance.getLuaGroup());
++        var loadedPerBlock = scriptManager.getLoadedGroupSetPerBlock();
++        loadedPerBlock.values().forEach(set ->
++                set.stream().filter(g -> g.id == group_id).forEach(groups::add));
++        for (var group : groups) {
++            if (group.triggers != null) {
++                group.triggers.values().forEach(getScriptManager()::deregisterTrigger);
++            }
++            if (group.regions != null) {
++                group.regions.values().forEach(getScriptManager()::deregisterRegion);
++            }
++            this.scriptManager.unregisterGroup(group);
++        }
++        if (challenge != null && challenge.getGroup() != null
++                && group_id == challenge.getGroup().id) {
+             challenge.fail();
+         }
+ 
+-        // A null block means the group's block is gone; only the per-block bookkeeping is skipped.
+-        if (block != null) {
+-            var blockGroups = scriptManager.getLoadedGroupSetPerBlock().get(block.id);
+-            if (blockGroups != null) {
+-                blockGroups.remove(group);
+-            }
+-        }
+-        this.loadedGroups.remove(group);
+-
+-        if (block != null && scriptManager.getLoadedGroupSetPerBlock().get(block.id) != null
+-                && this.scriptManager.getLoadedGroupSetPerBlock().get(block.id).isEmpty()) {
+-            this.scriptManager.getLoadedGroupSetPerBlock().remove(block.id);
+-            Grasscutter.getLogger().trace("Scene {} block {} is unloaded.", this.getId(), block.id);
+-        }
+-
++        this.loadedGroups.removeIf(g -> g.id == group_id);
++        for (var entry : List.copyOf(loadedPerBlock.entrySet())) {
++            var set = entry.getValue();
++            set.removeIf(g -> g.id == group_id);
++            if (set.isEmpty()) loadedPerBlock.remove(entry.getKey(), set);
++        }
+         this.broadcastPacket(new PacketGroupUnloadNotify(List.of(group_id)));
+-        this.scriptManager.unregisterGroup(group);
+     }
+ 
+     public void onPlayerCreateGadget(EntityClientGadget gadget) {
+@@ -1625,7 +1638,12 @@
+         }
+     }
+ 
++    /**
++     * Group instances are stored per host and group and every scene loads them, so only open-world
++     * progress is saved; a dungeon's end state would come back on its next run.
++     */
+     public void saveGroups() {
++        if (this.getSceneType() != SceneType.SCENE_WORLD) return;
+         this.getScriptManager().getCachedGroupInstances().values().forEach(SceneGroupInstance::save);
+     }
+ }
+--- a/src/main/java/emu/grasscutter/game/world/SceneGroupInstance.java
++++ b/src/main/java/emu/grasscutter/game/world/SceneGroupInstance.java
+@@ -24,6 +24,7 @@
+     // combat kills retain their pre-existing oneoff/persistent spawn policy.
+     private Set<Integer> scriptDestroyedGadgets = new HashSet<>();
+     private boolean isCached;
++    private transient java.util.function.Consumer<SceneGroupInstance> persistence;
+ 
+     @Getter private Map<Integer, Integer> cachedGadgetStates;
+     @Getter private Map<String, Integer> cachedVariables;
+@@ -31,6 +32,12 @@
+     @Getter @Setter private int lastTimeRefreshed;
+ 
+     public SceneGroupInstance(SceneGroup group, Player owner) {
++        this(group, owner, DatabaseHelper::saveGroupInstance);
++    }
++
++    SceneGroupInstance(SceneGroup group, Player owner,
++            java.util.function.Consumer<SceneGroupInstance> persistence) {
++        this.persistence = Objects.requireNonNull(persistence);
+         this.luaGroup = group;
+         this.groupId = group.id;
+         this.targetSuiteId = 0;
+@@ -102,6 +109,7 @@
+     }
+ 
+     public void save() {
+-        DatabaseHelper.saveGroupInstance(this);
++        if (persistence == null) DatabaseHelper.saveGroupInstance(this);
++        else persistence.accept(this);
+     }
+ }
+--- a/src/main/java/emu/grasscutter/game/world/World.java
++++ b/src/main/java/emu/grasscutter/game/world/World.java
+@@ -378,6 +378,11 @@
+         return this.transferPlayerToScene(player, sceneId, TeleportType.DUNGEON, data, null);
+     }
+ 
++    public boolean transferPlayerToScene(Player player, int sceneId, DungeonData data, Runnable prepare) {
++        return transferPlayerToScene(player, sceneId, TeleportType.DUNGEON,
++                EnterReason.DungeonEnter, data, null, prepare);
++    }
++
+     public boolean transferPlayerToScene(
+             Player player,
+             int sceneId,
+@@ -408,12 +413,19 @@
+             EnterReason enterReason,
+             DungeonData dungeonData,
+             Position teleportTo) {
++        return transferPlayerToScene(player, sceneId, teleportType, enterReason, dungeonData, teleportTo, null);
++    }
++
++    private boolean transferPlayerToScene(
++            Player player, int sceneId, TeleportType teleportType, EnterReason enterReason,
++            DungeonData dungeonData, Position teleportTo, Runnable prepare) {
+         // Get enter types
+         val teleportProps =
+                 TeleportProperties.builder()
+                         .sceneId(sceneId)
+                         .teleportType(teleportType)
+                         .enterReason(enterReason)
++                        .beforeTransfer(prepare)
+                         .teleportTo(teleportTo)
+                         .enterType(EnterType.EnterType_ENTER_JUMP);
+ 
+@@ -453,6 +465,10 @@
+             return false;
+         }
+ 
++        if (teleportProperties.getBeforeTransfer() != null) {
++            teleportProperties.getBeforeTransfer().run();
++        }
++
+         // Being soul-attached is bound to the dragon's position in the world, and the client keeps
+         // steering that entity until it is told otherwise. Moving the character out from under the mount
+         // therefore teleports the avatar and leaves the camera, the inputs and the dragon behind at the
+@@ -472,6 +488,7 @@
+         }
+ 
+         Scene oldScene = player.getScene();
++        boolean previousEmptyHold = oldScene != null && oldScene.isDontDestroyWhenEmpty();
+         var newScene = this.getSceneById(teleportProperties.getSceneId());
+         // Re-entering the same dungeon starts a fresh instance instead of keeping the old chamber.
+         if (newScene == oldScene
+@@ -539,6 +556,7 @@
+             // disconnect would keep this scene registered and the next entry would reuse it.
+             if (newScene == oldScene) newScene.setDontDestroyWhenEmpty(false);
+             player.getTeamManager().applyAbilities(newScene);
++            if (newScene == oldScene) oldScene.setDontDestroyWhenEmpty(previousEmptyHold);
+         }
+ 
+         if (oldScene != null && newScene != null && newScene != oldScene) {
+@@ -637,10 +655,14 @@
+ 
+     public void close() {}
+ 
++    protected long nowMillis() {
++        return System.currentTimeMillis();
++    }
++
+     /** Returns the in-game world time in real milliseconds. */
+     public long getWorldTime() {
+         if (!this.isPaused && !this.timeLocked) {
+-            var newUpdateTime = System.currentTimeMillis();
++            var newUpdateTime = nowMillis();
+             this.currentWorldTime += (newUpdateTime - lastUpdateTime);
+             this.lastUpdateTime = newUpdateTime;
+         }
+@@ -690,7 +712,7 @@
+ 
+         // If the world is being un-paused, update the last update time.
+         if (this.isPaused != paused && !paused) {
+-            this.lastUpdateTime = System.currentTimeMillis();
++            this.lastUpdateTime = nowMillis();
+         }
+ 
+         this.isPaused = paused;
+@@ -746,7 +768,7 @@
+         if (this.timeLocked != locked) {
+             // Bank the running time, and restart the clock so locked time is not counted later.
+             this.getWorldTime();
+-            this.lastUpdateTime = System.currentTimeMillis();
++            this.lastUpdateTime = nowMillis();
+             Grasscutter.getLogger()
+                     .info(
+                             "Game time for uid {} is now {}.",
+--- a/src/main/java/emu/grasscutter/game/world/data/TeleportProperties.java
++++ b/src/main/java/emu/grasscutter/game/world/data/TeleportProperties.java
+@@ -16,4 +16,6 @@
+     private Position teleportTo;
+     private Position teleportRot;
+     private EnterTypeOuterClass.EnterType enterType;
++    /** Trusted preparation, run only after teleport authorization and destination validation. */
++    private Runnable beforeTransfer;
+ }
+--- a/src/main/java/emu/grasscutter/scripts/SceneScriptManager.java
++++ b/src/main/java/emu/grasscutter/scripts/SceneScriptManager.java
+@@ -1044,11 +1044,14 @@
+             Grasscutter.getLogger()
+                     .error("Condition Trigger " + params.type + " triggered exception", throwable);
+         } finally {
+-            // make sure it is removed
+-            ScriptLoader.getScriptLib().removeSceneScriptManager();
+-            synchronized (this) {
+-                // A destroy during this event left its final save to us.
+-                if (--executingEvents == 0 && destroyed) clearDestroyedState();
++            try {
++                ScriptLoader.getScriptLib().removeSceneScriptManager();
++            } finally {
++                boolean finalize;
++                synchronized (this) {
++                    finalize = --executingEvents == 0 && destroyed;
++                }
++                if (finalize) clearDestroyedState();
+             }
+         }
+     }
+@@ -1403,6 +1406,7 @@
+     }
+ 
+     public int createGroupTimerEvent(int groupID, String source, double time) {
++        if (destroyed || source == null || !Double.isFinite(time) || time < 0) return 1;
+         if (LiyueCloudDungeonSupport.isTimerGroup(getScene(), groupID))
+             return liyueDungeonTimers.create(groupID, source, time);
+         var group = getGroupById(groupID);
+@@ -1417,7 +1421,7 @@
+         boolean hasTrigger =
+                 group.triggers.values().stream()
+                         .anyMatch(t -> t.getEvent() == EVENT_TIMER_EVENT
+-                                && (t.getSource().isEmpty() || t.getSource().equals(source)));
++                                && (source.equals(t.getSource()) || "".equals(t.getSource()) || "*".equals(t.getSource())));
+         if (!hasTrigger) return 0;
+ 
+         // Lua passes seconds; the scene scheduler counts ticks and stops while the scene is paused.
+@@ -1591,18 +1595,20 @@
+      * states and variables back on the next run of a weekly boss, quest dungeon or Abyss chamber.
+      */
+     private void clearDestroyedState() {
+-        if (scene.getSceneType() == emu.grasscutter.game.props.SceneType.SCENE_WORLD) {
+-            scene.saveGroups();
+-        }
+-        currentTriggers.clear();
+-        ongoingTriggers.clear();
+-        triggersByGroupScene.clear();
+-        triggerInvocations.clear();
+-        regions.clear();
+-        sceneGroups.clear();
+-        sceneGroupsInstances.clear();
+-        cachedSceneGroupsInstances.clear();
+-        loadedGroupSetPerBlock.clear();
+-        variables.clear();
++        try {
++            scene.saveGroups(); // open-world scenes only
++            currentTriggers.clear();
++            ongoingTriggers.clear();
++            triggersByGroupScene.clear();
++            triggerInvocations.clear();
++            regions.clear();
++            sceneGroups.clear();
++            sceneGroupsInstances.clear();
++            cachedSceneGroupsInstances.clear();
++            loadedGroupSetPerBlock.clear();
++            variables.clear();
++        } catch (Throwable failure) {
++            Grasscutter.getLogger().error("Script state cleanup failed for scene {}", scene.getId(), failure);
++        }
+     }
+ }
+--- a/src/main/java/emu/grasscutter/scripts/data/ScriptArgs.java
++++ b/src/main/java/emu/grasscutter/scripts/data/ScriptArgs.java
+@@ -11,6 +11,7 @@
+     public int target_eid;
+     public int group_id;
+     public String source; // source string, used for timers
++    public String source_name; // Native Lua timer event field.
+     public int type; // lua event type, used by scripts and the ScriptManager
+ 
+     public ScriptArgs(int groupId, int eventType) {
+@@ -79,12 +80,12 @@
+ 
+     public ScriptArgs setEventSource(String source) {
+         this.source = source;
++        this.source_name = source;
+         return this;
+     }
+ 
+     public ScriptArgs setEventSource(int source) {
+-        this.source = Integer.toString(source);
+-        return this;
++        return setEventSource(Integer.toString(source));
+     }
+ 
+     public int getGroupId() {
+--- a/src/main/java/emu/grasscutter/server/packet/recv/HandlerCombatInvocationsNotify.java
++++ b/src/main/java/emu/grasscutter/server/packet/recv/HandlerCombatInvocationsNotify.java
+@@ -29,6 +29,10 @@
+ 
+ @Opcodes(PacketOpcodes.CombatInvocationsNotify)
+ public class HandlerCombatInvocationsNotify extends PacketHandler {
++
++    protected long monotonicMillis() {
++        return System.nanoTime() / 1_000_000L;
++    }
+ 
+     @Override
+     public void handle(GameSession session, byte[] header, byte[] payload) throws Exception {
+@@ -217,15 +221,7 @@
+                                 .getStaminaManager()
+                                 .handleCombatInvocationsNotify(session, moveInfo, entity);
+ 
+-                        if (motionState == MotionState.MotionState_MOTION_LAND_SPEED) {
+-                            session.setLandingSpeed(motionInfo.getSpeed().getY());
+-                            session.setLandingTimeMillis(System.currentTimeMillis());
+-                        }
+-                        if (motionState == MotionState.MotionState_MOTION_FALL_ON_GROUND
+-                                && session.getLandingTimeMillis() != 0) {
+-                            handleFallOnGround(session, entity);
+-                            session.setLandingTimeMillis(0);
+-                        }
++                        handleLandingMovement(session, entity, motionInfo);
+ 
+                         if (motionState == MotionState.MotionState_MOTION_NOTIFY
+                                 || motionState == MotionState.MotionState_MOTION_FIGHT) {
+@@ -270,27 +266,37 @@
+         }
+     }
+ 
+-    private void handleFallOnGround(GameSession session, GameEntity entity) {
++    private void handleLandingMovement(GameSession session, GameEntity entity, MotionInfo motion) {
++        var sample = session.getFallDamageSample();
++        long now = monotonicMillis();
++        if (sample != null && (sample.scene() != session.getPlayer().getScene()
++                || now - sample.atMillis() > 200 || now < sample.atMillis())) {
++            session.setFallDamageSample(null);
++            sample = null;
++        }
++        if (!(entity instanceof EntityAvatar avatar)
++                || avatar != session.getPlayer().getTeamManager().getCurrentAvatarEntity()
++                || avatar.getScene() != session.getPlayer().getScene() || !avatar.isAlive()) return;
++        if (motion.getState() == MotionState.MotionState_MOTION_LAND_SPEED) {
++            float speed = motion.getSpeed().getY();
++            session.setFallDamageSample(Float.isFinite(speed)
++                    ? new emu.grasscutter.game.player.FallDamageSample(avatar, avatar.getScene(), speed, now)
++                    : null);
++        } else if (motion.getState() == MotionState.MotionState_MOTION_FALL_ON_GROUND) {
++            session.setFallDamageSample(null);
++            if (sample != null && sample.entity() == avatar) {
++                handleFallOnGround(session, avatar, sample.speed());
++            }
++        }
++    }
++
++    private void handleFallOnGround(GameSession session, GameEntity entity, float cachedLandingSpeed) {
+         if (session.getPlayer().isInGodMode()) {
+             return;
+         }
+ 
+-        int maxDelay = 200;
+-        long actualDelay = System.currentTimeMillis() - session.getLandingTimeMillis();
+-        Grasscutter.getLogger()
+-                .trace(
+-                        "MOTION_FALL_ON_GROUND received after "
+-                                + actualDelay
+-                                + "/"
+-                                + maxDelay
+-                                + "ms."
+-                                + (actualDelay > maxDelay ? " Discard" : ""));
+-        if (actualDelay > maxDelay) {
+-            return;
+-        }
+         float currentHP = entity.getFightProperty(FightProperty.FIGHT_PROP_CUR_HP);
+         float maxHP = entity.getFightProperty(FightProperty.FIGHT_PROP_MAX_HP);
+-        float cachedLandingSpeed = session.getLandingSpeed();
+         float damageFactor = 0;
+         if (cachedLandingSpeed < -23.5) {
+             damageFactor = 0.33f;
+--- a/src/main/java/emu/grasscutter/server/packet/recv/HandlerPlayerEnterDungeonReq.java
++++ b/src/main/java/emu/grasscutter/server/packet/recv/HandlerPlayerEnterDungeonReq.java
+@@ -2,6 +2,7 @@
+ 
+ import emu.grasscutter.game.dungeons.DomainDungeonHelper;
+ import emu.grasscutter.net.packet.*;
++import emu.grasscutter.game.dungeons.DomainDungeonHelper;
+ import emu.grasscutter.net.proto.PlayerEnterDungeonReqOuterClass.PlayerEnterDungeonReq;
+ import emu.grasscutter.server.game.GameSession;
+ import emu.grasscutter.server.packet.send.PacketPlayerEnterDungeonRsp;
+--- a/src/main/java/emu/grasscutter/utils/Utils.java
++++ b/src/main/java/emu/grasscutter/utils/Utils.java
+@@ -365,7 +365,8 @@
+             try {
+                 Thread.sleep(100);
+             } catch (InterruptedException e) {
+-                e.printStackTrace();
++                Thread.currentThread().interrupt();
++                throw new java.util.concurrent.CancellationException("Interrupted waiting for dependency");
+             }
+         }
+     }
