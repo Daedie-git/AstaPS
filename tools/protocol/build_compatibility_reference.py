@@ -1,20 +1,26 @@
 #!/usr/bin/env python3
-"""Freeze hash-bound native evidence, not a server-derived protocol specification.
+"""Project user-supplied evidence into a minimal comparison reference.
 
-Only independently documented command names become semantic aliases. Server names
-are candidates. Completeness refers to canonical normal disk-code paths; loaded
-hotfix execution remains unobserved. No baseline field names are copied.
+Inputs may contain sensitive or restricted material: keep them private and use
+only data you are authorized to process. Projection does not grant publication
+rights, establish evidence truth, or constitute a privacy/licensing review.
 """
 import argparse
-import copy
 import hashlib
 import json
 from pathlib import Path
 import re
 
+from wire_facts import validate_directional_wire_facts
+
 FORMAT = 'astaps.protocol-compatibility-reference.v1'
-EXPECTED_COUNT = 4896
-SCOPE = re.compile(r'Quest|Teleport|TransPoint|Gadget|Platform|Achievement|Reward|Investigation|PlayerLevel|Dungeon|Team')
+SCOPE = re.compile(r'.*')
+KINDS = {'double', 'float', 'int64', 'uint64', 'int32', 'fixed64', 'fixed32',
+         'bool', 'string', 'group', 'message', 'bytes', 'uint32', 'enum',
+         'sfixed32', 'sfixed64', 'sint32', 'sint64', 'map'}
+STATUSES = {'verified', 'verified_client', 'verified_client_static', 'observed_client',
+            'candidate', 'unknown'}
+PROOF = [{'source': 'user-supplied assertion; not independently verified by producer'}]
 
 
 def canonical_bytes(value):
@@ -26,11 +32,7 @@ def digest(value):
 
 
 def file_hash(path):
-    h = hashlib.sha256()
-    with open(path, 'rb') as stream:
-        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
-            h.update(chunk)
-    return h.hexdigest()
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
 def require(condition, message):
@@ -52,11 +54,6 @@ def parse_opcodes(source):
     return values, sorted(unknown)
 
 
-def stable_records(records):
-    # Preserve every actual address and source, without arbitrary evidence caps.
-    return [json.loads(item) for item in sorted({canonical_bytes(r).decode() for r in records})]
-
-
 def unique_index(records, key, label):
     result = {}
     for record in records:
@@ -75,7 +72,7 @@ def validate_schema(types, enums, registered):
             roots[command] = identity
         fields = unique_index(t['fields'], 'number', 'field number')
         for number, field in fields.items():
-            require(type(number) is int and number > 0, 'invalid field number')
+            require(type(number) is int and 0 < number < 2**29, 'invalid field number')
             if field['local_field_complete']:
                 require(not field['blockers'], 'false field completeness')
         if t['schema_complete']:
@@ -91,14 +88,47 @@ def validate_schema(types, enums, registered):
     require(roots == registered, 'canonical registry identities do not match')
 
 
-def build_reference(registry, schema, evidence, opcode_source, hashes, expected_count=EXPECTED_COUNT):
-    """Pure producer API; hashes must be computed from the exact input files."""
+def project_field(field, identities):
+    """Allowlist scalar facts, never recursively copy properties or evidence."""
+    properties = {}
+    for key, value in field['properties'].items():
+        if key == 'type' and value in KINDS:
+            properties[key] = value
+        elif key == 'label' and value in ('optional', 'repeated', 'required'):
+            properties[key] = value
+        elif key == 'type_name' and value in identities:
+            properties[key] = identities[value]
+        elif key == 'wire_type' and type(value) is int and 0 <= value <= 5:
+            properties[key] = value
+        elif key in ('accepted_wire_types', 'serialized_tags'):
+            validate_directional_wire_facts(field['number'], key, value)
+            properties[key] = sorted(set(value))
+    statuses = {key: status if status in STATUSES else 'unknown'
+                for key, status in field['property_statuses'].items()
+                if key == 'number' or key in properties}
+    # The checker needs only to know whether a nontrivial transform was asserted,
+    # not its implementation, constants, instructions or source locations.
+    transforms = [[{'operation': 'user_supplied_nontrivial_transform'}]] if any(
+        field.get('value_transform_chains', [])) else [[]]
+    return {'number': field['number'], 'properties': properties, 'property_statuses': statuses,
+            'local_field_complete': bool(field['local_field_complete']),
+            'blockers': ['incomplete user-supplied field'] if field['blockers'] else [],
+            'value_transform_chains': transforms}
+
+
+def build_reference(registry, schema, evidence, opcode_source, hashes, expected_count=None):
+    """Validate supplied joins and project facts; does not verify their provenance."""
+    for key in ('registry_sha256', 'schema_sha256', 'evidence_sha256', 'opcode_source_sha256'):
+        require(re.fullmatch(r'[0-9a-f]{64}', hashes[key]) is not None, 'invalid input hash')
     require(schema['registry_sha256'] == hashes['registry_sha256'], 'mixed registry hash')
     snapshot = schema.get('input_snapshots', {}).get('registry', '')
     require(Path(snapshot).name == hashes['registry_sha256'] + '.registry.json', 'mixed registry snapshot')
     require(registry['artifact'] == schema['artifact'], 'mixed artifact identity')
     artifact_hash = registry['artifact']['sha256']
+    require(re.fullmatch(r'[0-9a-f]{64}', artifact_hash) is not None, 'invalid artifact hash')
     coverage = registry['coverage']
+    expected_count = len(registry['entries']) if expected_count is None else expected_count
+    require(expected_count > 0, 'empty registry')
     for key in ('actual_constructor_entries', 'static_type_slots', 'verified_command_class_pairs'):
         require(coverage.get(key) == expected_count, 'incomplete registry coverage: ' + key)
     require(coverage.get('unresolved_command_ids') == 0, 'unresolved registry ids')
@@ -107,118 +137,101 @@ def build_reference(registry, schema, evidence, opcode_source, hashes, expected_
     by_command = unique_index(entries, 'command_id', 'registry command id')
     unique_index(entries, 'type_identity', 'registry type identity')
     for command, entry in by_command.items():
-        require(type(command) is int and command > 0, 'invalid registry command id')
+        require(type(command) is int and 0 < command <= 65535, 'invalid registry command id')
         require(entry.get('network_cached_command_id') == command, 'registry cached id mismatch')
         require(entry.get('status') == 'verified_dictionary_class_slot_leaf_getter_reader', 'unverified registry identity')
     types = unique_index(schema['types'], 'type_identity', 'canonical type identity')
     enums = unique_index(schema['enums'], 'type_identity', 'canonical enum identity')
     require(not (types.keys() & enums.keys()), 'ambiguous canonical identity')
     validate_schema(types, enums, {c: e['type_identity'] for c, e in by_command.items()})
-    opcodes, unknown = parse_opcodes(opcode_source)
-    aliases, joins, unjoined = {}, {}, []
+    opcodes, _ = parse_opcodes(opcode_source)
+    aliases, joins = {}, {}
     for record in evidence['records']:
         require(record['binary_sha256'] == artifact_hash, 'mixed manual artifact hash')
         name, command = record['message'], record.get('opcode')
+        require(re.fullmatch(r'[A-Za-z_][A-Za-z0-9_]*', name) is not None, 'invalid semantic alias')
         direction = record['direction']
         require(direction in ('client_to_server', 'server_to_client', 'unknown'), 'invalid alias direction')
         if name in joins:
             require(joins[name] == (command, direction), 'ambiguous semantic alias: ' + name)
         joins[name] = (command, direction)
         if command is None:
-            unjoined.append(name)
-            continue  # Metadata offsets alone cannot attach a nested semantic name.
+            continue
         require(record.get('confidence') == 'verified' and record.get('evidence'), 'unproved semantic alias: ' + name)
-        # The exact join is to the captured registry, not the server constants
-        # being audited (those may intentionally be zero or incorrect).
         require(command in by_command, 'manual alias outside registry: ' + name)
         status = record.get('client_status')
         require(status in ('verified_client_static', 'observed_client'), 'unknown alias evidence status')
         identity = by_command[command]['type_identity']
         group = aliases.setdefault(identity, {})
-        alias = group.setdefault(name, {'name': name, 'status': 'observed' if status == 'observed_client' else 'verified',
-                                       'direction': direction, 'evidence': [], 'wire_observations': []})
+        alias = group.setdefault(name, {'name': name, 'status': 'observed', 'direction': direction,
+                                       'evidence': PROOF})
         if status == 'verified_client_static':
             alias['status'] = 'verified'
-        alias['evidence'].extend(record['evidence'])
-        if 'wire_schema' in record:
-            alias['wire_observations'].append({'client_status': status, 'wire_schema': copy.deepcopy(record['wire_schema']),
-                                              'evidence': copy.deepcopy(record['evidence'])})
     candidates = {}
     for name, command in opcodes.items():
         if SCOPE.search(name) and command in by_command:
             candidates.setdefault(by_command[command]['type_identity'], []).append(name)
     selected = set(candidates) | set(aliases)
-    pending = list(selected)
+    require(selected, 'empty selected schema')
+    pending, selected_enums = list(selected), set()
     while pending:
         t = types[pending.pop()]
-        for dep in t.get('dependencies', []):
+        dependencies = set(t.get('dependencies', [])) | {
+            f['properties'].get('type_name') for f in t['fields']}
+        for dep in dependencies:
+            if dep in enums:
+                selected_enums.add(dep)
             if dep in types and dep not in selected:
                 selected.add(dep)
                 pending.append(dep)
+    identities = {name: 'type_' + str(i) for i, name in enumerate(sorted(selected | selected_enums))}
     messages = []
     for identity in sorted(selected):
         t = types[identity]
-        message = {k: copy.deepcopy(t[k]) for k in ('type_identity', 'command_id', 'wire_schema_complete',
-                   'schema_complete', 'normal_path_only', 'blockers', 'oneofs')}
-        message['dependencies'] = sorted(t.get('dependencies', []))
-        message['unresolved_dependencies'] = copy.deepcopy(t.get('unresolved_dependencies', []))
-        message['semantic_aliases'] = []
-        for name, alias in sorted(aliases.get(identity, {}).items()):
-            alias['evidence'] = stable_records(alias['evidence'])
-            alias['wire_observations'] = stable_records(alias['wire_observations'])
-            message['semantic_aliases'].append(alias)
-        message['candidate_aliases'] = sorted(set(candidates.get(identity, [])))
-        message['fields'] = []
-        for field in sorted(t['fields'], key=lambda f: f['number']):
-            compact = {k: copy.deepcopy(field[k]) for k in ('number', 'properties', 'property_statuses',
-                       'local_field_complete', 'blockers', 'value_transform_chains')}
-            compact['evidence'] = stable_records(field['evidence'])
-            message['fields'].append(compact)
-        message['oneofs'] = stable_records(message['oneofs'])
-        messages.append(message)
+        messages.append({'type_identity': identities[identity], 'command_id': t['command_id'],
+            'wire_schema_complete': bool(t['wire_schema_complete']), 'schema_complete': bool(t['schema_complete']),
+            'normal_path_only': bool(t['normal_path_only']),
+            'blockers': ['incomplete user-supplied schema'] if t['blockers'] else [],
+            'dependencies': sorted(identities[d] for d in t.get('dependencies', []) if d in identities),
+            'semantic_aliases': [aliases[identity][n] for n in sorted(aliases.get(identity, {}))],
+            'candidate_aliases': sorted(set(candidates.get(identity, []))),
+            'fields': [project_field(f, identities) for f in sorted(t['fields'], key=lambda f: f['number'])]})
     compact_enums = []
-    for identity, enum in sorted(enums.items()):
+    for identity in sorted(selected_enums):
+        enum = enums[identity]
         domain = enum['numeric_domain_evidence']
+        require(all(type(n) is int for n in enum['values']), 'invalid enum values')
         require(not enum['schema_complete'] or (not enum['blockers'] and not domain.get('unresolved_field_indices')
                 and domain.get('status') == 'verified_all_declared_literal_values'
-                and sorted(set(enum['values'])) == sorted(set(domain.get('values', [])))),
-                'false enum completeness')
-        compact_enums.append({'type_identity': identity, 'values': sorted(set(enum['values'])),
-                              'complete': enum['schema_complete'], 'numeric_domain_status': domain['status'],
-                              'evidence': copy.deepcopy(domain)})
-    result = {'format': FORMAT, 'artifact': copy.deepcopy(registry['artifact']), 'provenance': dict(hashes),
+                and sorted(set(enum['values'])) == sorted(set(domain.get('values', [])))), 'false enum completeness')
+        compact_enums.append({'type_identity': identities[identity], 'values': sorted(set(enum['values'])),
+                              'complete': bool(enum['schema_complete'])})
+    result = {'format': FORMAT, 'artifact': {'sha256': artifact_hash},
+              'provenance': {key: hashes[key] for key in ('registry_sha256', 'schema_sha256',
+                                                        'evidence_sha256', 'opcode_source_sha256')},
               'registry': {'complete': True, 'expected_count': expected_count, 'command_ids': sorted(by_command)},
-              'normal_path_only': schema['normal_path_only'], 'hotfix_execution_verified': False,
-              'limitations': ['Canonical completeness covers normal native disk-code paths only; loaded hotfix behavior is unobserved.',
-                              'Server opcode names are unverified candidates, never independent semantic evidence.',
-                              'Observed wire fixtures prove only their documented fields; they do not replace canonical completeness.'],
-              'scope': {'name_pattern': SCOPE.pattern, 'unparseable_opcode_constants': unknown,
-                        'unjoined_manual_aliases': sorted(set(unjoined))},
+              'normal_path_only': bool(schema['normal_path_only']), 'hotfix_execution_verified': False,
               'messages': messages, 'enums': compact_enums}
     result['content_sha256'] = digest(result)
     return result
 
 
 def main():
-    root = Path(__file__).resolve().parents[2]
     parser = argparse.ArgumentParser(description=__doc__)
-    for flag, default in [('registry', root / 'captures/full-protocol/client-registry.json'),
-                          ('schema', root / 'captures/full-protocol/client-schema-canonical.json'),
-                          ('evidence', root / 'captures/full-protocol/known-client-evidence.json'),
-                          ('opcode-source', root / 'src/main/java/emu/grasscutter/net/packet/PacketOpcodes.java'),
-                          ('output', root / 'protocol/7.1/client-compatibility-reference.json')]:
-        parser.add_argument('--' + flag, type=Path, default=default)
+    for flag in ('registry', 'schema', 'evidence', 'opcode-source', 'output'):
+        parser.add_argument('--' + flag, type=Path, required=True)
+    parser.add_argument('--expected-count', type=int, help='Optional independently established registry count')
     args = parser.parse_args()
-    hashes = {key + '_sha256': file_hash(getattr(args, key)) for key in ('registry', 'schema', 'evidence', 'opcode_source')}
-    inputs = []
-    for key in ('registry', 'schema', 'evidence'):
-        with getattr(args, key).open() as stream:
-            inputs.append(json.load(stream))
-    result = build_reference(*inputs, args.opcode_source.read_text(), hashes)
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_bytes(canonical_bytes(result) + b'\n')
-    print(json.dumps({'output': str(args.output), 'messages': len(result['messages']), 'enums': len(result['enums']),
-                      'content_sha256': result['content_sha256'], 'bytes': args.output.stat().st_size}, sort_keys=True))
+    try:
+        hashes = {key + '_sha256': file_hash(getattr(args, key)) for key in ('registry', 'schema', 'evidence', 'opcode_source')}
+        inputs = [json.loads(getattr(args, key).read_text(encoding="utf-8")) for key in ('registry', 'schema', 'evidence')]
+        result = build_reference(*inputs, args.opcode_source.read_text(encoding="utf-8"), hashes, args.expected_count)
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_bytes(canonical_bytes(result) + b'\n')
+        print(json.dumps({'messages': len(result['messages']), 'enums': len(result['enums']),
+                          'content_sha256': result['content_sha256']}, sort_keys=True))
+    except (OSError, ValueError, KeyError, TypeError, AttributeError) as error:
+        parser.exit(2, f'Cannot build reference: {error}\n')
 
 
 if __name__ == '__main__':

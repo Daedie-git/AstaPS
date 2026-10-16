@@ -1,4 +1,4 @@
-name: Protocol compatibility
+name: Protocol checker tests (synthetic inputs)
 
 on:
   pull_request:
@@ -6,16 +6,12 @@ on:
       - "protocol/**"
       - "tools/protocol/**"
       - "gradle/protocol-generation.gradle"
-      - "src/main/java/emu/grasscutter/net/packet/**"
-      - "src/main/java/emu/grasscutter/server/packet/**"
       - ".github/workflows/protocol-compatibility.yml"
   push:
     paths:
       - "protocol/**"
       - "tools/protocol/**"
       - "gradle/protocol-generation.gradle"
-      - "src/main/java/emu/grasscutter/net/packet/**"
-      - "src/main/java/emu/grasscutter/server/packet/**"
       - ".github/workflows/protocol-compatibility.yml"
   workflow_dispatch:
 
@@ -23,11 +19,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: protocol-compatibility-${{ github.ref }}
+  group: protocol-checker-tests-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  audit:
+  checker-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -42,17 +38,17 @@ jobs:
           python-version: "3.13"
       - name: Install the descriptor reader
         run: python -m pip install -r tools/protocol/compatibility-requirements.txt
-      - name: Test evidence qualification and audit regressions
+      - name: Test checker, producer and CLI with invented nonauthoritative fixtures
         run: python -m unittest discover -s tools/protocol -p 'test_*compatibility*.py' -v
-      - name: Generate the actual merged server descriptor
-        run: bash gradlew generateProtocolJava --build-cache -Dorg.gradle.jvmargs=-Xmx4g
-      - name: Audit declared packet contracts
-        run: python tools/protocol/check_compatibility.py --output build/reports/protocol-compatibility.json
-      - name: Upload the complete report, including review and unknown cases
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: protocol-compatibility-report
-          path: build/reports/protocol-compatibility.json
-          if-no-files-found: ignore
-          retention-days: 14
+      - name: Verify merged server descriptor generation (not a client compatibility audit)
+        run: bash gradlew generateProtocolJava --build-cache --max-workers=2 -Dorg.gradle.jvmargs=-Xmx4g
+      - name: Validate generated server descriptor provenance
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, "tools/protocol")
+          from check_compatibility import load_server_descriptor
+          load_server_descriptor(Path("."), Path("build/generated/protocol/7.1/server.desc"))
+          print("Generated server descriptor and implementation hashes match.")
+          PY

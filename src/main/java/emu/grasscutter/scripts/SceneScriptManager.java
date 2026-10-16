@@ -121,6 +121,30 @@ public class SceneScriptManager {
         return scene;
     }
 
+    /** Used under this monitor before nonlethal commission suspension. */
+    public synchronized boolean isExecutingScripts() {
+        return executingEvents != 0;
+    }
+
+    public int getTriggerInvocationCount(String name) {
+        var count = triggerInvocations.get(name);
+        return count == null ? 0 : count.get();
+    }
+
+    public void restoreTriggerInvocation(SceneTrigger trigger, int count) {
+        if (count < 0) throw new IllegalArgumentException("Negative trigger invocation count");
+        registerTrigger(trigger);
+        triggerInvocations.get(trigger.getName()).set(count);
+    }
+
+    public Set<Integer> getRegisteredRegionConfigs(int groupId) {
+        Set<Integer> result = new HashSet<>();
+        for (var region : regions.values()) {
+            if (region.getGroupId() == groupId) result.add(region.getMetaRegion().config_id);
+        }
+        return result;
+    }
+
     public SealBattleManager getSealBattleManager() {
         return sealBattleManager;
     }
@@ -839,7 +863,11 @@ public class SceneScriptManager {
                             return shouldSpawnGadget(
                                     entity != null && entity.getGroupId() == group.id,
                                     groupInstance.isScriptGadgetDestroyed(m.config_id),
-                                    m.isOneoff, m.persistent,
+                                    m.isOneoff,
+                                    // Many oculus gather points are oneoff without persistent.
+                                    m.persistent
+                                            || emu.grasscutter.game.world.OpenWorldSpawnHelper
+                                                    .isPermanentGatherPoint(m.point_type),
                                     groupInstance.getDeadEntities().contains(m.config_id));
                         })
                 .map(g -> createGadget(group.id, group.block_id, g, groupInstance.getCachedGadgetState(g)))
@@ -1218,6 +1246,7 @@ public class SceneScriptManager {
     }
 
     public EntityGadget createGadget(int groupId, int blockId, SceneGadget g, int state) {
+        if (!emu.grasscutter.game.dailytask.DailyTaskGroupLifecycle.maySpawn(this, groupId)) return null;
         if (g.isOneoff) {
             var hasEntity =
                     getScene().getEntities().values().stream()
@@ -1256,6 +1285,7 @@ public class SceneScriptManager {
     /** Same as {@link #createMonster}, but the caller chooses where it appears. Backs ScriptLib. */
     public EntityMonster createMonsterByConfigIdByPos(
             SceneGroup group, int configId, Position pos, Position rot) {
+        if (!emu.grasscutter.game.dailytask.DailyTaskGroupLifecycle.maySpawnFromGroup(this, group)) return null;
         if (group == null || group.monsters == null) return null;
 
         var monster = group.monsters.get(configId);
@@ -1290,6 +1320,7 @@ public class SceneScriptManager {
     }
 
     public EntityMonster createMonster(int groupId, int blockId, SceneMonster monster) {
+        if (!emu.grasscutter.game.dailytask.DailyTaskGroupLifecycle.maySpawn(this, groupId)) return null;
         if (monster == null) {
             return null;
         }

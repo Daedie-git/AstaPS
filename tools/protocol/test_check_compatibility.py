@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-"""Offline regression tests; no application, client, database, or native execution."""
-import copy
+"""Invented, nonauthoritative contracts; no game files, client data or database."""
 import json
 from pathlib import Path
 import re
@@ -12,297 +11,307 @@ import unittest
 from google.protobuf import descriptor_pb2 as pb
 import check_compatibility as c
 
-
-def native(number=5, kind="uint32", complete=True, **properties):
-    values = {"type": kind, "wire_type": c.WIRES[kind], "label": "optional",
-              "accepted_wire_types": [c.WIRES[kind]], "serialized_tags": [(number << 3) | c.WIRES[kind]], **properties}
-    return {"type_identity": "native_A", "command_id": 100, "schema_complete": complete,
-            "wire_schema_complete": complete, "blockers": [], "semantic_aliases": [],
-            "fields": [{"number": number, "properties": values,
-                        "property_statuses": {k: "verified_client_static" for k in ["number", *values]},
-                        "evidence": [{"source": "proof", "addresses": ["0x123"]}],
-                        "value_transform_chains": [[]]}]}
+# These sentinels are invented test values, not real command identities.
+COMMAND = 60001
 
 
-def server(number=5, kind="uint32", repeated=False, packed=False):
-    return {"name": ".DemoRewardRsp", "fields": {number: {"number": number, "name": "value",
-        "type": kind, "type_name": "", "label": "repeated" if repeated else "optional",
-        "packed": packed, "wire_type": c.WIRES[kind],
-        "serialization_wire_type": 2 if packed else c.WIRES[kind],
-        "accepted_wire_types": [0, 2] if repeated and c.WIRES[kind] == 0 else [c.WIRES[kind]]}}}
+def native(number=5, kind='uint32', complete=True, **properties):
+    values = {'type': kind, 'wire_type': c.WIRES[kind], 'label': 'optional',
+              'accepted_wire_types': [c.WIRES[kind]],
+              'serialized_tags': [(number << 3) | c.WIRES[kind]], **properties}
+    return {'type_identity': 'synthetic_A', 'command_id': COMMAND, 'schema_complete': complete,
+            'wire_schema_complete': complete, 'blockers': [], 'semantic_aliases': [],
+            'fields': [{'number': number, 'properties': values,
+                        'property_statuses': {k: 'verified_client_static' for k in ['number', *values]},
+                        'value_transform_chains': [[]]}]}
+
+
+def server(number=5, kind='uint32', repeated=False, packed=False):
+    return {'name': '.ExampleRsp', 'fields': {number: {'number': number, 'name': 'value',
+        'type': kind, 'type_name': '', 'label': 'repeated' if repeated else 'optional',
+        'packed': packed, 'wire_type': c.WIRES[kind],
+        'serialization_wire_type': 2 if packed else c.WIRES[kind],
+        'accepted_wire_types': [0, 2] if repeated and c.WIRES[kind] == 0 else [c.WIRES[kind]]}}}
 
 
 def reference(row):
-    r = {"format": "astaps.protocol-compatibility-reference.v1", "artifact": {"sha256": "a" * 64},
-         "registry": {"complete": True, "expected_count": 1, "command_ids": [100]},
-         "messages": [row], "enums": []}
-    r["content_sha256"] = c.digest(c.canonical_bytes(r))
-    return r
+    result = {'format': 'astaps.protocol-compatibility-reference.v1', 'artifact': {'sha256': 'a' * 64},
+              'registry': {'complete': True, 'expected_count': 1, 'command_ids': [COMMAND]},
+              'messages': [row], 'enums': []}
+    result['content_sha256'] = c.digest(c.canonical_bytes(result))
+    return result
 
 
-def compare(s, n, strong=True, direction="server_to_client", **kwargs):
-    return c.compare_message("DemoRewardRsp", s, n, {s["name"]: s}, {}, {n["type_identity"]: n}, {},
-                             strong, direction, **kwargs)
+def compare(s, n, strong=True, direction='server_to_client'):
+    return c.compare_message('ExampleRsp', s, n, {s['name']: s}, {}, {n['type_identity']: n}, {}, strong, direction)
+
+
+def fixture(root, mismatch=False, unrelated=False):
+    """Build an entirely synthetic source tree and hash-bound protobuf descriptor."""
+    proto = root / 'protocol/7.1'
+    (proto / 'compat').mkdir(parents=True)
+    (proto / 'compat-imports').mkdir()
+    (proto / 'protocol.desc').write_bytes(b'synthetic base descriptor identity')
+    generator = root / 'tools/protocol/java/SyntheticGenerator.java'
+    generator.parent.mkdir(parents=True)
+    generator.write_text('class SyntheticGenerator {}')
+    row = native()
+    row['semantic_aliases'] = [{'name': 'ExampleRsp', 'status': 'verified',
+                               'direction': 'server_to_client', 'evidence': ['synthetic assertion']}]
+    ref = root / 'synthetic-reference.json'
+    ref.write_text(json.dumps(reference(row)))
+    desc = pb.FileDescriptorSet()
+    message = desc.file.add(name='Example.proto', syntax='proto3').message_type.add(
+        name='Unrelated' if unrelated else 'ExampleRsp')
+    message.field.add(name='value', number=6 if mismatch else 5,
+                      type=pb.FieldDescriptorProto.TYPE_UINT32, label=pb.FieldDescriptorProto.LABEL_OPTIONAL)
+    path = root / 'build/generated/protocol/7.1/server.desc'
+    path.parent.mkdir(parents=True)
+    path.write_bytes(desc.SerializeToString())
+    metadata = {'format': 'astaps.server-protocol-descriptor.v1', 'descriptor_sha256': c.digest(path.read_bytes()),
+                'base_sha256': c.digest((proto / 'protocol.desc').read_bytes()),
+                'proto_sources_sha256': c.proto_source_fingerprint(root),
+                'generator_sources_sha256': c.generator_source_fingerprint(root)}
+    Path(str(path) + '.json').write_text(json.dumps(metadata))
+    code = root / 'src/main/java/emu/grasscutter'
+    (code / 'net/packet').mkdir(parents=True)
+    (code / 'net/packet/PacketOpcodes.java').write_text(f'public static final int ExampleRsp = {COMMAND};')
+    (code / 'server/packet/send').mkdir(parents=True)
+    (code / 'server/packet/send/PacketExampleRsp.java').write_text('super(PacketOpcodes.ExampleRsp);')
+    return ref, path
+
+
+def cli(root, *args):
+    return subprocess.run([sys.executable, c.__file__, '--repo', str(root), *map(str, args)],
+                          text=True, capture_output=True)
 
 
 class FieldComparisonTest(unittest.TestCase):
     def test_correct_field_is_clean(self):
         self.assertEqual([], compare(server(), native()))
 
-    def test_historical_team_wrong_number_is_red(self):
-        errors = compare(server(number=7), native(number=5))
-        self.assertIn("missing_client_field", [f["code"] for f in errors if f["severity"] == "error"])
+    def test_wrong_field_number_is_red(self):
+        self.assertIn('missing_client_field', [f['code'] for f in compare(server(7), native()) if f['severity'] == 'error'])
 
-    def test_unverified_opcode_name_cannot_make_hard_schema_errors(self):
-        errors = compare(server(number=7), native(number=5), strong=False)
-        self.assertTrue(errors)
-        self.assertFalse(any(f["severity"] == "error" for f in errors))
+    def test_unverified_name_cannot_make_hard_schema_errors(self):
+        rows = compare(server(7), native(), strong=False)
+        self.assertTrue(rows)
+        self.assertFalse(any(f['severity'] == 'error' for f in rows))
 
     def test_unverified_property_is_not_promoted(self):
-        n = native(kind="string")
-        n["fields"][0]["property_statuses"] = {"number": "verified_client_static", "type": "candidate"}
-        result = compare(server(), n)
-        self.assertEqual(["directional_wire_contract_unproved"], [f["code"] for f in result])
-        self.assertFalse(any(f["severity"] == "error" for f in result))
+        row = native(kind='string')
+        row['fields'][0]['property_statuses'] = {'number': 'verified_client_static', 'type': 'candidate'}
+        self.assertEqual(['directional_wire_contract_unproved'], [r['code'] for r in compare(server(), row)])
 
     def test_incomplete_schema_does_not_invent_absent_fields(self):
-        n = native(number=1, complete=False)
-        s = server(number=1)
-        s["fields"][2] = server(number=2)["fields"][2]
-        result = compare(s, n)
-        self.assertEqual(["incomplete_native_schema"], [r["code"] for r in result])
+        s = server(1); s['fields'][2] = server(2)['fields'][2]
+        self.assertEqual(['incomplete_native_schema'], [r['code'] for r in compare(s, native(1, complete=False))])
 
     def test_reader_accepts_packed_scalar(self):
-        n = native(label="repeated", accepted_wire_types=[0, 2])
-        self.assertEqual([], compare(server(repeated=True, packed=True), n))
+        self.assertEqual([], compare(server(repeated=True, packed=True), native(label='repeated', accepted_wire_types=[0, 2])))
 
-    def test_reader_rejects_proved_unsupported_packed_wire(self):
-        n = native(label="repeated", accepted_wire_types=[0])
-        self.assertIn("wire_type_mismatch", [f["code"] for f in compare(server(repeated=True, packed=True), n)])
+    def test_reader_rejects_proved_unsupported_wire(self):
+        self.assertIn('wire_type_mismatch', [r['code'] for r in compare(server(repeated=True, packed=True), native(label='repeated'))])
 
-    def test_writer_packed_tag_is_accepted_by_unpacked_server_descriptor(self):
-        n = native(label="repeated", serialized_tags=[42], accepted_wire_types=[])
-        self.assertEqual([], compare(server(repeated=True, packed=False), n, direction="client_to_server"))
+    def test_writer_packed_tag_is_accepted_by_unpacked_descriptor(self):
+        self.assertEqual([], compare(server(repeated=True), native(label='repeated', serialized_tags=[42]), direction='client_to_server'))
 
-    def test_scalar_signedness_and_cardinality_are_checked(self):
-        result = compare(server(kind="int32", repeated=True), native())
-        codes = {f["code"] for f in result}
-        self.assertEqual({"scalar_or_container_type_mismatch", "cardinality_mismatch"}, codes)
-        self.assertTrue(all(f["severity"] == "review" for f in result))
+    def test_signedness_and_cardinality_are_review(self):
+        rows = compare(server(kind='int32', repeated=True), native())
+        self.assertEqual({'scalar_or_container_type_mismatch', 'cardinality_mismatch'}, {r['code'] for r in rows})
+        self.assertTrue(all(r['severity'] == 'review' for r in rows))
 
-    def test_nontrivial_transform_requires_review_not_invented_absence(self):
-        n = native()
-        n["fields"][0]["value_transform_chains"] = [[{"operation": "xor", "value": 17}]]
-        result = compare(server(), n)
-        self.assertEqual("review", result[0]["severity"])
-        self.assertEqual("value_transform_requires_code_review", result[0]["code"])
+    def test_transform_requires_code_review(self):
+        row = native(); row['fields'][0]['value_transform_chains'] = [[{'operation': 'synthetic_transform'}]]
+        self.assertEqual('value_transform_requires_code_review', compare(server(), row)[0]['code'])
 
-    def test_nested_proof_inherits_parent_binding_confidence(self):
-        child = native(number=2)
-        child.update(type_identity="native_B", command_id=None)
-        n = native(kind="message", type_name="native_B")
-        s = server(kind="message")
-        s["fields"][5]["type_name"] = ".Child"
-        other = server(number=1)
-        other["name"] = ".Child"
-        result = c.compare_message("DemoRewardRsp", s, n, {".Child": other}, {},
-                                   {"native_A": n, "native_B": child}, {}, False, "server_to_client")
-        self.assertIn("missing_client_field", [f["code"] for f in result])
-        self.assertFalse(any(f["severity"] == "error" for f in result))
+    def test_nested_binding_inherits_confidence(self):
+        child = native(2); child.update(type_identity='synthetic_B', command_id=None)
+        row = native(kind='message', type_name='synthetic_B')
+        s = server(kind='message'); s['fields'][5]['type_name'] = '.ExampleChild'
+        other = server(1); other['name'] = '.ExampleChild'
+        rows = c.compare_message('ExampleRsp', s, row, {'.ExampleChild': other}, {},
+                                 {'synthetic_A': row, 'synthetic_B': child}, {}, False, 'server_to_client')
+        self.assertIn('missing_client_field', [r['code'] for r in rows])
+        self.assertFalse(any(r['severity'] == 'error' for r in rows))
 
-    def test_recursive_message_stops_without_dropping_parent_fields(self):
-        n = native(kind="message", type_name="native_A")
-        s = server(kind="message")
-        s["fields"][5]["type_name"] = s["name"]
-        self.assertEqual([], compare(s, n))
+    def test_recursive_message_stops(self):
+        s = server(kind='message'); s['fields'][5]['type_name'] = s['name']
+        self.assertEqual([], compare(s, native(kind='message', type_name='synthetic_A')))
 
-    def test_enum_numeric_difference_is_review_not_delivery_claim(self):
-        n = native(kind="enum", type_name="enum_A")
-        s = server(kind="enum")
-        s["fields"][5]["type_name"] = ".Enum"
-        result = c.compare_message("DemoRewardRsp", s, n, {}, {".Enum": [0]}, {},
-                                   {"enum_A": {"complete": True, "values": [0, 1]}}, True, "server_to_client")
-        self.assertEqual("enum_values_missing", result[0]["code"])
-        self.assertEqual("review", result[0]["severity"])
+    def enum_compare(self, expected, actual):
+        row = native(kind='enum', type_name='synthetic_enum')
+        s = server(kind='enum'); s['fields'][5]['type_name'] = '.ExampleEnum'
+        return c.compare_message('ExampleRsp', s, row, {}, {'.ExampleEnum': actual}, {},
+                                 {'synthetic_enum': {'complete': True, 'values': expected}}, True, 'server_to_client')
 
+    def test_enum_missing_is_review(self):
+        row = self.enum_compare([0, 1], [0])[0]
+        self.assertEqual(('enum_values_missing', 'review'), (row['code'], row['severity']))
 
-    def test_writer_only_fact_cannot_prove_reader_acceptance(self):
-        n = native(label="repeated", accepted_wire_types=[], serialized_tags=[42])
-        result = compare(server(repeated=True, packed=True), n)
-        self.assertEqual(["directional_wire_contract_unproved"], [f["code"] for f in result])
+    def test_enum_extra_is_review(self):
+        row = self.enum_compare([0], [0, 9])[0]
+        self.assertEqual(('server_enum_values_not_in_client_domain', 'review'), (row['code'], row['severity']))
 
-    def test_nominal_wire_type_cannot_create_a_directional_error(self):
-        n = native(kind="string", accepted_wire_types=[], serialized_tags=[])
-        result = compare(server(), n)
-        self.assertFalse(any(f["severity"] == "error" for f in result))
-        self.assertNotIn("wire_type_mismatch", [f["code"] for f in result])
+    def test_writer_fact_cannot_prove_reader(self):
+        rows = compare(server(repeated=True, packed=True), native(label='repeated', accepted_wire_types=[]))
+        self.assertEqual(['directional_wire_contract_unproved'], [r['code'] for r in rows])
 
-    def test_map_component_gap_is_visible(self):
-        result = compare(server(kind="map", repeated=True), native(kind="map", label="repeated"))
-        self.assertEqual(["map_component_comparison_unavailable"], [f["code"] for f in result])
+    def test_nominal_wire_type_cannot_create_directional_error(self):
+        rows = compare(server(), native(kind='string', accepted_wire_types=[], serialized_tags=[]))
+        self.assertFalse(any(r['severity'] == 'error' for r in rows))
 
-    def test_server_only_enum_value_is_not_silently_accepted(self):
-        n = native(kind="enum", type_name="enum_A")
-        s = server(kind="enum")
-        s["fields"][5]["type_name"] = ".Enum"
-        result = c.compare_message("DemoRewardRsp", s, n, {}, {".Enum": [0, 9]}, {},
-                                   {"enum_A": {"complete": True, "values": [0]}}, True, "server_to_client")
-        self.assertEqual("server_enum_values_not_in_client_domain", result[0]["code"])
-        self.assertEqual("review", result[0]["severity"])
+    def test_map_gap_is_visible(self):
+        self.assertEqual(['map_component_comparison_unavailable'], [r['code'] for r in compare(server(kind='map', repeated=True), native(kind='map', label='repeated'))])
 
 
 class RegistryAndDebtTest(unittest.TestCase):
-    def usage(self, opcode=100):
-        return [{"symbol": "DemoRewardRsp", "opcode": opcode, "direction": "server_to_client", "path": "send.java", "line": 1}]
+    def usage(self, opcode=COMMAND):
+        return [{'symbol': 'ExampleRsp', 'opcode': opcode, 'direction': 'server_to_client', 'path': 'send.java', 'line': 1}]
 
-    def test_unregistered_positive_command_is_error_without_name_guess(self):
-        result, _ = c.audit(reference(native()), {}, self.usage(200), {}, {})
-        self.assertIn("opcode_not_registered", [f["code"] for f in result if f["severity"] == "error"])
+    def test_unregistered_command_is_error(self):
+        rows, _ = c.audit(reference(native()), {}, self.usage(60002), {}, {})
+        self.assertIn('opcode_not_registered', [r['code'] for r in rows if r['severity'] == 'error'])
 
-    def test_unknown_zero_is_review_not_unconditional_send_failure(self):
-        result, _ = c.audit(reference(native()), {}, self.usage(0), {}, {})
-        self.assertEqual(["opcode_unavailable"], [f["code"] for f in result])
+    def test_unknown_zero_is_review(self):
+        rows, _ = c.audit(reference(native()), {}, self.usage(0), {}, {})
+        self.assertEqual(['opcode_unavailable'], [r['code'] for r in rows])
 
-    def test_verified_zero_mapping_is_error_and_still_checks_schema(self):
-        n = native()
-        n["semantic_aliases"] = [{"name": "DemoRewardRsp", "status": "verified", "direction": "server_to_client", "evidence": ["proof"]}]
-        result, _ = c.audit(reference(n), {}, self.usage(0), {".DemoRewardRsp": server(number=7)}, {})
-        self.assertTrue({"semantic_opcode_mismatch", "missing_client_field"} <= {f["code"] for f in result if f["severity"] == "error"})
+    def test_verified_zero_checks_schema(self):
+        row = native(); row['semantic_aliases'] = [{'name': 'ExampleRsp', 'status': 'verified', 'direction': 'server_to_client', 'evidence': ['synthetic assertion']}]
+        rows, _ = c.audit(reference(row), {}, self.usage(0), {'.ExampleRsp': server(7)}, {})
+        self.assertTrue({'semantic_opcode_mismatch', 'missing_client_field'} <= {r['code'] for r in rows if r['severity'] == 'error'})
 
     def test_exact_debt_does_not_whitelist_other_fields(self):
-        old = c.finding("missing_client_field", "error", "DemoRewardRsp", expected=5, field=5)
-        new = c.finding("missing_client_field", "error", "DemoRewardRsp", expected=6, field=6)
-        baseline = {"format": "astaps.protocol-compatibility-debt.v1", "entries": [{"fingerprint": old["fingerprint"], "reason": "tracked issue"}]}
-        self.assertEqual([], c.classify_debt([old, new], baseline))
-        self.assertTrue(old["known_debt"])
-        self.assertFalse(new["known_debt"])
-        self.assertEqual([old["fingerprint"]], c.classify_debt([], baseline))
+        old = c.finding('missing_client_field', 'error', 'ExampleRsp', field=5)
+        new = c.finding('missing_client_field', 'error', 'ExampleRsp', field=6)
+        debt = {'format': 'astaps.protocol-compatibility-debt.v1', 'entries': [{'fingerprint': old['fingerprint'], 'reason': 'synthetic regression test'}]}
+        self.assertEqual([], c.classify_debt([old, new], debt))
+        self.assertTrue(old['known_debt']); self.assertFalse(new['known_debt'])
+        self.assertEqual([old['fingerprint']], c.classify_debt([], debt))
 
     def test_fingerprint_ignores_line_changes(self):
-        a = c.finding("opcode_not_registered", "error", "DemoRewardRsp", actual=20, line=1)
-        b = c.finding("opcode_not_registered", "error", "DemoRewardRsp", actual=20, line=99)
-        self.assertEqual(a["fingerprint"], b["fingerprint"])
+        self.assertEqual(c.finding('example', 'error', 'ExampleRsp', line=1)['fingerprint'],
+                         c.finding('example', 'error', 'ExampleRsp', line=99)['fingerprint'])
 
     def test_reference_tampering_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
-            p = Path(tmp) / "reference.json"
-            r = reference(native())
-            p.write_text(json.dumps(r))
-            self.assertEqual(1, len(c.load_reference(p)["messages"]))
-            r["registry"]["command_ids"] = [100, 100]
-            p.write_text(json.dumps(r))
-            with self.assertRaisesRegex(ValueError, "content hash"):
-                c.load_reference(p)
-            r["content_sha256"] = c.digest(c.canonical_bytes({k: v for k, v in r.items() if k != "content_sha256"}))
-            p.write_text(json.dumps(r))
-            with self.assertRaisesRegex(ValueError, "unique command inventory"):
-                c.load_reference(p)
+            path = Path(tmp) / 'reference.json'; row = reference(native())
+            path.write_text(json.dumps(row)); c.load_reference(path)
+            row['registry']['command_ids'] *= 2
+            path.write_text(json.dumps(row))
+            with self.assertRaisesRegex(ValueError, 'content hash'): c.load_reference(path)
+            row['content_sha256'] = c.digest(c.canonical_bytes({k: v for k, v in row.items() if k != 'content_sha256'}))
+            path.write_text(json.dumps(row))
+            with self.assertRaisesRegex(ValueError, 'unique command inventory'): c.load_reference(path)
 
+    def test_conflicting_aliases_rejected(self):
+        row = native(); row['semantic_aliases'] = [{'name': 'ExampleRsp', 'status': 'verified', 'direction': d, 'evidence': ['synthetic assertion']} for d in ['server_to_client', 'client_to_server']]
+        with self.assertRaisesRegex(ValueError, 'Conflicting verified alias'):
+            c.audit(reference(row), {}, self.usage(), {}, {})
 
-    def test_contradictory_alias_directions_are_rejected(self):
-        n = native()
-        n["semantic_aliases"] = [{"name": "DemoRewardRsp", "status": "verified", "direction": direction, "evidence": ["proof"]}
-                                 for direction in ["server_to_client", "client_to_server"]]
-        with self.assertRaisesRegex(ValueError, "Conflicting verified alias"):
-            c.audit(reference(n), {}, self.usage(), {}, {})
-
-    def test_writer_tag_number_contradiction_is_rejected(self):
+    def test_bad_writer_tag_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
-            n = native()
-            n["fields"][0]["properties"]["serialized_tags"] = [48]
-            path = Path(tmp) / "reference.json"
-            path.write_text(json.dumps(reference(n)))
-            with self.assertRaisesRegex(ValueError, "Writer tag contradicts"):
-                c.load_reference(path)
+            row = native(); row['fields'][0]['properties']['serialized_tags'] = [48]
+            path = Path(tmp) / 'reference.json'; path.write_text(json.dumps(reference(row)))
+            with self.assertRaisesRegex(ValueError, 'Writer tag contradicts'): c.load_reference(path)
 
-    def test_existing_but_unresolved_binding_is_a_ci_coverage_error(self):
+    def test_lost_binding_is_error_until_source_removed(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            (root / "send.java").write_text("unsupported expression")
-            baseline = {"monitored_bindings": [{"path": "send.java", "symbol": "DemoRewardRsp", "direction": "server_to_client"}]}
-            self.assertEqual("source_binding_no_longer_resolved", c.lost_bindings(root, re.compile(c.SCOPE), [], baseline)[0]["code"])
+            root = Path(tmp); path = root / 'send.java'; path.write_text('unsupported expression')
+            baseline = {'monitored_bindings': [{'path': 'send.java', 'symbol': 'ExampleRsp', 'direction': 'server_to_client'}]}
+            self.assertEqual('source_binding_no_longer_resolved', c.lost_bindings(root, re.compile(c.SCOPE), [], baseline)[0]['code'])
             self.assertEqual([], c.lost_bindings(root, re.compile(c.SCOPE), self.usage(), baseline))
-            (root / "send.java").unlink()
-            self.assertEqual([], c.lost_bindings(root, re.compile(c.SCOPE), [], baseline))
+            path.unlink(); self.assertEqual([], c.lost_bindings(root, re.compile(c.SCOPE), [], baseline))
 
 
-class SourceAndDescriptorTest(unittest.TestCase):
-    def test_source_scanner_ignores_comments_strings_and_arithmetic(self):
+class SourceAndCliTest(unittest.TestCase):
+    def test_scanner_ignores_comments_strings_arithmetic(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            path = root / "src/main/java/emu/grasscutter/server/packet/send/PacketDemoRewardRsp.java"
-            path.parent.mkdir(parents=True)
-            path.write_text('class PacketDemoRewardRsp { /* super(PacketOpcodes.Fake); */ String s="super(PacketOpcodes.Fake)"; PacketDemoRewardRsp(){super(PacketOpcodes.DemoRewardRsp + 1);} }')
-            usage, unknown = c.scan_packets(root, {"DemoRewardRsp": 100}, re.compile(c.SCOPE))
-            self.assertEqual([], usage)
-            self.assertEqual(1, len(unknown))
-            path.write_text('class PacketDemoRewardRsp { PacketDemoRewardRsp(){super(PacketOpcodes.DemoRewardRsp);} }')
-            usage, unknown = c.scan_packets(root, {"DemoRewardRsp": 100}, re.compile(c.SCOPE))
-            self.assertEqual(100, usage[0]["opcode"])
-            self.assertEqual([], unknown)
+            root = Path(tmp); fixture(root)
+            path = root / 'src/main/java/emu/grasscutter/server/packet/send/PacketExampleRsp.java'
+            path.write_text('/* super(PacketOpcodes.Fake); */ String s="super(PacketOpcodes.Fake)"; super(PacketOpcodes.ExampleRsp + 1);')
+            usage, unknown = c.scan_packets(root, {'ExampleRsp': COMMAND}, re.compile(c.SCOPE))
+            self.assertEqual([], usage); self.assertEqual(1, len(unknown))
+            path.write_text('super(PacketOpcodes.ExampleRsp);')
+            self.assertEqual(COMMAND, c.scan_packets(root, {'ExampleRsp': COMMAND}, re.compile(c.SCOPE))[0][0]['opcode'])
 
-    def test_opcode_parser_resolves_only_literals_and_aliases(self):
+    def test_literal_alias_parser(self):
         with tempfile.TemporaryDirectory() as tmp:
-            path = Path(tmp) / "opcodes.java"
-            path.write_text('public static final int A = 0x64; public static final int B = A; public static final int C = -1; public static final int D = A + 1;')
-            self.assertEqual(({"A": 100, "B": 100, "C": -1}, ["D"]), c.read_opcodes(path))
+            path = Path(tmp) / 'opcodes.java'
+            path.write_text('public static final int A = 0xea61; public static final int B = A; public static final int C = -1; public static final int D = A + 1;')
+            self.assertEqual(({'A': COMMAND, 'B': COMMAND, 'C': -1}, ['D']), c.read_opcodes(path))
 
-    def test_java_hex_int_signedness_is_not_python_unsigned_int(self):
-        self.assertEqual(-1, c.java_int_literal("0xffffffff"))
-        self.assertEqual(-2147483648, c.java_int_literal("0x80000000"))
-        self.assertEqual(100, c.java_int_literal("0x64"))
-        self.assertEqual(-2147483648, c.java_int_literal("-2147483648"))
+    def test_hex_signedness(self):
+        self.assertEqual(-1, c.java_int_literal('0xffffffff'))
+        self.assertEqual(-2147483648, c.java_int_literal('0x80000000'))
 
-    def test_unsupported_octal_or_overflow_is_not_guessed(self):
-        for text in ["0123", "2147483648", "0x100000000", "1_000", "100L"]:
-            self.assertIsNone(c.java_int_literal(text))
+    def test_unsupported_literals(self):
+        for value in ['0123', '2147483648', '0x100000000', '1_000', '100L']:
+            self.assertIsNone(c.java_int_literal(value))
 
-    def test_descriptor_hashes_bind_compat_sources_and_import_stubs(self):
+    def test_descriptor_source_hash_binding(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            proto = root / "protocol/7.1"
-            (proto / "compat").mkdir(parents=True)
-            (proto / "compat-imports").mkdir()
-            (proto / "protocol.desc").write_bytes(b"base")
-            desc = pb.FileDescriptorSet()
-            file = desc.file.add(name="Demo.proto", syntax="proto3")
-            message = file.message_type.add(name="DemoRewardRsp")
-            message.field.add(name="ids", number=1, type=pb.FieldDescriptorProto.TYPE_UINT32, label=pb.FieldDescriptorProto.LABEL_REPEATED)
-            path = root / "server.desc"
-            path.write_bytes(desc.SerializeToString())
-            metadata = {"format": "astaps.server-protocol-descriptor.v1", "descriptor_sha256": c.digest(path.read_bytes()), "base_sha256": c.digest(b"base"), "proto_sources_sha256": c.proto_source_fingerprint(root)}
-            Path(str(path) + ".json").write_text(json.dumps(metadata))
-            messages, _, _ = c.load_server_descriptor(root, path)
-            self.assertEqual(2, messages[".DemoRewardRsp"]["fields"][1]["serialization_wire_type"])
-            (proto / "compat-imports/Stub.proto").write_text('syntax="proto3";')
-            with self.assertRaisesRegex(ValueError, "stale"):
-                c.load_server_descriptor(root, path)
+            root = Path(tmp); _, path = fixture(root)
+            c.load_server_descriptor(root, path)
+            (root / 'protocol/7.1/compat-imports/Example.proto').write_text('synthetic change')
+            with self.assertRaisesRegex(ValueError, 'stale'): c.load_server_descriptor(root, path)
 
-
-    def test_cli_rejects_usages_with_zero_descriptor_comparisons(self):
+    def test_cli_reference_is_required(self):
         with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            proto = root / "protocol/7.1"
-            (proto / "compat").mkdir(parents=True)
-            (proto / "compat-imports").mkdir()
-            (proto / "protocol.desc").write_bytes(b"base")
-            (proto / "client-compatibility-reference.json").write_text(json.dumps(reference(native())))
-            desc = pb.FileDescriptorSet()
-            desc.file.add(name="Unrelated.proto", syntax="proto3").message_type.add(name="Unrelated")
-            path = root / "build/generated/protocol/7.1/server.desc"
-            path.parent.mkdir(parents=True)
-            path.write_bytes(desc.SerializeToString())
-            metadata = {"format": "astaps.server-protocol-descriptor.v1", "descriptor_sha256": c.digest(path.read_bytes()), "base_sha256": c.digest(b"base"), "proto_sources_sha256": c.proto_source_fingerprint(root)}
-            Path(str(path) + ".json").write_text(json.dumps(metadata))
-            code = root / "src/main/java/emu/grasscutter"
-            (code / "net/packet").mkdir(parents=True)
-            (code / "net/packet/PacketOpcodes.java").write_text("public static final int DemoRewardRsp = 100;")
-            (code / "server/packet/send").mkdir(parents=True)
-            (code / "server/packet/send/PacketDemoRewardRsp.java").write_text("super(PacketOpcodes.DemoRewardRsp);")
-            result = subprocess.run([sys.executable, str(Path(c.__file__)), "--repo", str(root)], text=True, capture_output=True)
-            self.assertEqual(2, result.returncode)
-            self.assertIn("No descriptor comparisons", result.stderr)
+            root = Path(tmp); fixture(root)
+            result = cli(root)
+            self.assertEqual(2, result.returncode); self.assertIn('--reference', result.stderr)
+
+    def test_cli_synthetic_end_to_end_success(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); ref, _ = fixture(root)
+            report = root / 'report.json'
+            result = cli(root, '--reference', ref, '--output', report)
+            self.assertEqual(0, result.returncode, result.stderr)
+            summary = json.loads(report.read_text())['summary']
+            self.assertEqual((1, 1, 0), (summary['packet_usages'], summary['message_comparisons'], summary['new_errors']))
+
+    def test_cli_synthetic_mismatch_is_new_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); ref, _ = fixture(root, mismatch=True)
+            result = cli(root, '--reference', ref)
+            self.assertEqual(1, result.returncode, result.stderr)
+            self.assertIn('NEW missing_client_field', result.stdout)
+
+    def test_cli_empty_schema_audit_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); ref, _ = fixture(root, unrelated=True)
+            result = cli(root, '--reference', ref)
+            self.assertEqual(2, result.returncode); self.assertIn('No descriptor comparisons', result.stderr)
+
+    def test_cli_empty_source_audit_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); ref, _ = fixture(root)
+            result = cli(root, '--reference', ref, '--scope', '^Absent$')
+            self.assertEqual(2, result.returncode); self.assertIn('no supported packet usages', result.stderr)
+
+    def test_cli_explicit_missing_baseline_fails(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); ref, _ = fixture(root)
+            self.assertEqual(2, cli(root, '--reference', ref, '--baseline', root / 'missing.json').returncode)
+
+    def test_cli_baseline_proposal_does_not_hide_error(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp); ref, _ = fixture(root, mismatch=True)
+            debt = root / 'debt.json'
+            self.assertEqual(1, cli(root, '--reference', ref, '--write-baseline', debt).returncode)
+            # The proposal is not a baseline until a person replaces its placeholder reason.
+            self.assertEqual(2, cli(root, '--reference', ref, '--baseline', debt).returncode)
+            row = json.loads(debt.read_text())
+            for entry in row['entries']:
+                entry['reason'] = 'Tracked in a test'
+            debt.write_text(json.dumps(row))
+            self.assertEqual(0, cli(root, '--reference', ref, '--baseline', debt).returncode)
+            row = json.loads(debt.read_text()); row['reference_sha256'] = 'b' * 64
+            debt.write_text(json.dumps(row))
+            self.assertEqual(2, cli(root, '--reference', ref, '--baseline', debt).returncode)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

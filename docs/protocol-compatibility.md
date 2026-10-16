@@ -1,60 +1,69 @@
-# Offline protocol compatibility checks
+# Offline protocol checker tooling
 
-This checker compares declared server packet contracts with a compact, hash-bound client evidence snapshot. It never launches or attaches to the game, starts a server/database, grants rewards, or changes protocol mappings. It is not a proof of client acceptance or gameplay correctness.
+This contribution contains checker/producer code, invented tests and merged server-descriptor output support. It does **not** bundle a client reference, client evidence, or a real compatibility-debt baseline. Passing public CI validates the tooling with synthetic inputs; it does **not** establish compatibility of the upstream server with any client.
 
-## Run
+## Public validation
 
 Use JDK 21 and Python with `tools/protocol/compatibility-requirements.txt` installed:
 
 ```sh
-bash gradlew generateProtocolJava
+python -m pip install -r tools/protocol/compatibility-requirements.txt
 python -m unittest discover -s tools/protocol -p 'test_*compatibility*.py' -v
-python tools/protocol/check_compatibility.py --output build/reports/protocol-compatibility.json
+bash gradlew generateProtocolJava --max-workers=2
 ```
 
-For a one-off Python environment, the last command can also run through `uv run --with protobuf==6.33.6 python ...`. Windows can use the normal Gradle wrapper/Python commands. The descriptor is generated from the actual base descriptor, supplemental overrides and existing TPS patches, not from the legacy checked-in Java dump. Its sidecar hashes the descriptor, base and both supplemental source directories; stale inputs fail with instructions to regenerate.
+`.github/workflows/protocol-compatibility.yml` runs these checks. The tests construct nonauthoritative `ExampleReq`/`ExampleRsp` contracts, sentinel command IDs, Java source snippets and protobuf descriptors in temporary directories. They exercise the actual command-line checker for success, mismatches, missing inputs, empty audits and exact debt handling. No game files, capture directory, server or database is needed. CI reloads the freshly generated server descriptor through the checker to verify the generator's manifest hashes across Java and Python. It does not load a real client reference, audit actual client compatibility, or upload references/reports.
 
-The default scope covers quests, teleports/trans-points, gadgets/platforms, rewards/achievements/handbook, dungeons and teams. `--scope REGEX` narrows or expands the source-name selection. All 4,896 registered command IDs are available for ID checks, but only the documented selected message/nested closure is in the compact schema reference. A broader scope therefore has explicitly unknown schema cases.
+Descriptor generation uses the existing base descriptor, supplemental sources and current descriptor patches, not the legacy checked-in Java dump. Its sidecar binds the descriptor, base descriptor, both supplemental source directories and the complete Java generator source tree by SHA-256. Gradle explicitly tracks that implementation directory as an input; direct checker runs also reject retained descriptors after generator/helper source changes or when an older sidecar lacks that binding. Changed/stale inputs fail with instructions to regenerate. This validates server build inputs, not client behavior.
 
-## Evidence and verdicts
+## Audit with your own authorized reference
 
-- **Error:** a declared positive command ID is absent from the complete native inventory, an independently identified command has the wrong ID/direction, or its direction-proved field contract disagrees with the generated server descriptor. These are conditional contract discrepancies, not assertions that an unused packet class is actually sent.
-- **Review:** structural differences joined only by a server opcode/name candidate, wire-compatible type/cardinality differences, unavailable opcodes, enum-domain differences, extra server fields and nontrivial value transformations. A matching ID does not verify a semantic name. A `.proto` descriptor cannot establish whether handwritten server code already implements a value transform.
-- **Unknown:** incomplete/protected native schemas, unsupported source expressions, missing descriptor bindings, unavailable directional wire proof, and map-component contracts not compared by this version.
-
-The checker uses reader acceptance for server-to-client packets and writer tags for client-to-server packets. It distinguishes packed serialization from the accepted packed/unpacked scalar forms. Synthetic native field names are not compared with server field names. Nested comparisons inherit their parent binding confidence; enum differences do not prove rejection of unknown proto3 enum values. Loaded hotfix behavior is unobserved.
-
-The tool reads simple literal/alias opcode constants and direct packet-constructor/handler annotations, ignoring comments and string literals. It does not execute or fully analyze Java control flow, custom serialization, registration fallbacks or sender guards. Map key/value contracts, oneof behavior and runtime message semantics need further support; the report explicitly lists these limitations. Source bindings previously covered by the baseline cannot silently become unsupported while their source files still exist. Empty packet or descriptor-comparison runs fail rather than pass.
-
-## CI and existing debt
-
-`.github/workflows/protocol-compatibility.yml` runs the tests and descriptor generation, performs the audit, and uploads the complete JSON report. No game files or private capture directory are needed in CI.
-
-Exit codes are 0 for no **new** hard errors, 1 for new hard errors, and 2 for missing/stale/inconsistent inputs or an empty audit. Exit 0 does not mean every schema is compatible: existing debt, review items and unknowns remain in the report.
-
-`protocol/7.1/compatibility-debt.json` records exact finding fingerprints and human tracking reasons, bound to this client artifact and reference hash. It does not whitelist whole message names or error categories. Fixes are reported as resolved debt; a new field, changed mismatch or lost source binding still fails CI. Reference updates require deliberate debt review.
-
-The initial committed-branch audit includes known achievement/team corrections already submitted in PR 141, the unsubmitted category-response contract, a legacy outgoing request wrapper, and five declared IDs absent from this native inventory. It does not imply that the privately patched running server has those same defects. The baseline keeps these outstanding contracts visible without making the first CI adoption permanently red.
-
-To propose a baseline update explicitly:
+Supply a reference that you are authorized to use. Keep sensitive inputs and reports outside public repositories; do not assume that projection or factual-looking data grants redistribution rights. This document makes no determination about ownership, legality, licences or the publication history of other material.
 
 ```sh
-python tools/protocol/check_compatibility.py --write-baseline /tmp/proposed-protocol-debt.json
+python tools/protocol/check_compatibility.py \
+  --reference /path/to/authorized-reference.json \
+  --scope 'YourPacketNamePattern' \
+  --output /private/path/report.json
 ```
 
-This writes a proposal but does not suppress errors in that run. Review every fingerprint and replace placeholder reasons with specific tracking context before adopting it. Do not use rebaselining to make a new regression disappear.
+`--reference` is mandatory. There is no bundled/default reference and no implicit debt file. Omit `--baseline` to treat every hard error as new; explicitly supplying a missing baseline fails. Use `--repo` or `--descriptor` for nondefault server inputs. The default scope selects all source names, but a reference may cover only a subset; broader scopes yield unknown schema cases. Empty packet or descriptor-comparison runs fail rather than pass.
 
-## Rebuild the compact reference
+Exit codes: 0 means no new hard errors in the selected comparisons; 1 means new hard errors; 2 means missing/stale/inconsistent inputs or an empty audit. Exit 0 is not proof of client acceptance, runtime delivery or gameplay correctness.
 
-The frozen `protocol/7.1/client-compatibility-reference.json` contains all registered IDs, selected canonical message fields, nested dependencies, numeric enum domains and original evidence addresses/statuses. Its provenance retains the exact registry/schema/manual-evidence/source hashes. It does not contain a client executable, memory dump or network credentials.
+### Verdicts and limits
+
+- **Error:** a declared positive command ID is absent from a supplied complete inventory, an independently identified command has a discrepant ID/direction, or a direction-proved field contract disagrees with the server descriptor. Evidence truth and completeness are user-supplied assertions, not established by this tool.
+- **Review:** differences joined only by server opcode/name candidates; wire-compatible type/cardinality differences; extra server fields; enum-domain differences; unavailable opcodes; nontrivial transformations. Matching IDs do not verify semantic names. Descriptors cannot establish whether handwritten server code implements a transformation.
+- **Unknown:** incomplete schemas, unsupported source expressions, missing descriptor bindings or directional wire proof, and unsupported map-component contracts.
+
+Provided directional wire facts must be lists of genuine integers, not booleans or strings. Reader wire types must be in 0–5; writer tags must be positive, use a wire type in that range, and identify their own field. Invalid facts are input errors (exit 2), not compatibility mismatches, even for externally prepared references. The producer and loader share these syntax checks.
+
+The checker uses supplied reader acceptance for server-to-client packets and writer tags for client-to-server packets, distinguishing packed emission from accepted packed/unpacked scalar forms. Synthetic field names are not compared with server field names. Nested comparisons inherit parent confidence; enum differences do not prove rejection of unknown proto3 values. Reports do not prove oneof semantics, loaded hotfix behavior or runtime message semantics.
+
+Java scanning handles simple literal/alias opcode constants and direct packet constructor/handler declarations, ignoring comments and literals. Receive annotations support named opcode constants, decimal/hex integer literals and the optional `value =` spelling. Unsupported bindings remain explicit unknown findings, retain source context in the report, and count in the printed unknown summary; unknowns alone do not make the exit status fail. The scanner does not execute Java, analyze general control flow, establish actual delivery or prove handler-registration completeness. These caveats apply even when a reference labels its inputs verified.
+
+### Optional debt
+
+`--baseline /private/path/debt.json` accepts exact finding fingerprints with specific human tracking reasons, bound to the supplied reference/artifact hashes. It never whitelists message names or error categories. Lost previously monitored source bindings also fail when the source still exists. Resolved debt is reported.
+
+`--write-baseline /private/path/proposed-debt.json` writes a proposal and does not suppress errors in that run. Review every finding before adopting it; do not rebaseline to hide regressions. No real debt baseline is included in this contribution.
+
+## Optional reference producer
+
+The producer consumes your own authorized registry, canonical schema, semantic evidence and opcode-source files. All input/output paths are explicit:
 
 ```sh
 python tools/protocol/build_compatibility_reference.py \
-  --registry /path/to/client-registry.json \
-  --schema /path/to/client-schema-canonical.json \
-  --evidence /path/to/known-client-evidence.json \
+  --registry /private/path/registry.json \
+  --schema /private/path/schema.json \
+  --evidence /private/path/evidence.json \
   --opcode-source src/main/java/emu/grasscutter/net/packet/PacketOpcodes.java \
-  --output protocol/7.1/client-compatibility-reference.json
+  --output /private/path/reference.json
 ```
 
-This optional producer needs the saved large evidence inputs and validates their registry identity/hash joins, completeness claims and aliases. Normal audits and CI need only the small frozen reference. Schema completeness remains normal-path-only; no server-derived candidate is promoted to verified client identity. Rebuilding is deterministic and does not need a running client.
+The source/API and synthetic tests specify the input structure. Required sections include registry artifact identity, complete inventory/coverage assertions and type identities; schema input hashes, message fields/dependencies/completeness and enum domains; and independently justified semantic aliases. `--expected-count N` optionally checks an independently established inventory count. Otherwise coverage counts must agree with the supplied inventory length; this does not independently prove inventory completeness. Names derived only from server constants remain candidates, never verified identities.
+
+Output is an explicit allowlist projection: artifact/input hashes, command inventory, remapped type identities, selected messages and dependent enum domains, directional wire facts, scalar kinds/cardinality, completeness/status flags, candidate/semantic names and a flag for nontrivial transformations. Unknown properties are discarded. Raw evidence, bytes, native addresses, metadata indices, source paths, wire examples, oneof implementation details and transformation constants are not copied. Alias evidence is replaced with a fixed user-supplied-assertion marker. Public synthetic sentinel tests guard against accidental recursive copying, not all possible sensitive content or encoding. Necessary retained facts (including names, IDs, enum values and hashes) can still carry restrictions; projection is **not** a legal/privacy clearance or an assurance that output may be published.
+
+The checker may also accept externally prepared references carrying additional evidence. Their reports may retain that evidence. Review inputs and outputs yourself; do not upload them automatically.

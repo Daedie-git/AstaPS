@@ -8,9 +8,10 @@ from pathlib import Path
 
 from google.protobuf import descriptor_pb2
 from google.protobuf.message import DecodeError
+from wire_facts import validate_directional_wire_facts
 
 ROOT = Path(__file__).resolve().parents[2]
-SCOPE = r"Quest|Teleport|TransPoint|Gadget|Platform|Achievement|Reward|Investigation|PlayerLevel|Dungeon|Team"
+SCOPE = r".*"
 VERIFIED = {"verified", "verified_client", "verified_client_static", "observed_client"}
 TYPES = {1: "double", 2: "float", 3: "int64", 4: "uint64", 5: "int32", 6: "fixed64",
          7: "fixed32", 8: "bool", 9: "string", 10: "group", 11: "message", 12: "bytes",
@@ -30,7 +31,7 @@ def canonical_bytes(value):
 
 
 def load_reference(path):
-    reference = json.loads(Path(path).read_text())
+    reference = json.loads(Path(path).read_text(encoding="utf-8"))
     if reference.get("format") != "astaps.protocol-compatibility-reference.v1":
         raise ValueError("Unsupported client reference format")
     unsigned = {k: v for k, v in reference.items() if k != "content_sha256"}
@@ -59,9 +60,10 @@ def load_reference(path):
         if len(numbers) != len(set(numbers)) or any(type(n) is not int or not 0 < n < 2**29 for n in numbers):
             raise ValueError("Invalid or duplicate native field numbers")
         for field in row.get("fields", []):
-            if field.get("property_statuses", {}).get("serialized_tags") in VERIFIED:
-                if any(type(tag) is not int or tag >> 3 != field["number"] for tag in field.get("properties", {}).get("serialized_tags", [])):
-                    raise ValueError("Writer tag contradicts its verified field number")
+            properties = field.get("properties", {})
+            for key in ("serialized_tags", "accepted_wire_types"):
+                if key in properties:
+                    validate_directional_wire_facts(field["number"], key, properties[key])
     return reference
 
 
@@ -76,14 +78,26 @@ def proto_source_fingerprint(repo):
     return digest("".join(sorted(rows)).encode())
 
 
+def generator_source_fingerprint(repo):
+    root = repo / "tools/protocol/java"
+    if not root.is_dir():
+        raise ValueError(f"Missing protocol generator source directory: {root}")
+    paths = sorted(path for path in root.rglob("*.java") if path.is_file())
+    if not paths:
+        raise ValueError(f"Missing protocol generator Java sources: {root}")
+    rows = [f"{path.relative_to(root).as_posix()}\0{digest(path.read_bytes())}\n" for path in paths]
+    return digest("".join(sorted(rows)).encode("utf-8"))
+
+
 def load_server_descriptor(repo, path):
     data = path.read_bytes()
-    metadata = json.loads(Path(str(path) + ".json").read_text())
+    metadata = json.loads(Path(str(path) + ".json").read_text(encoding="utf-8"))
     if metadata.get("format") != "astaps.server-protocol-descriptor.v1":
         raise ValueError("Unsupported server descriptor manifest")
     expected = {"descriptor_sha256": digest(data),
                 "base_sha256": digest((repo / "protocol/7.1/protocol.desc").read_bytes()),
-                "proto_sources_sha256": proto_source_fingerprint(repo)}
+                "proto_sources_sha256": proto_source_fingerprint(repo),
+                "generator_sources_sha256": generator_source_fingerprint(repo)}
     if any(metadata.get(k) != v for k, v in expected.items()):
         raise ValueError("Server descriptor is stale or modified; run ./gradlew generateProtocolJava")
     file_set = descriptor_pb2.FileDescriptorSet.FromString(data)
@@ -149,7 +163,7 @@ def java_int_literal(text):
 
 
 def read_opcodes(path):
-    text = mask_java(path.read_text())
+    text = mask_java(path.read_text(encoding="utf-8"))
     expressions = dict(re.findall(r"\bpublic\s+static\s+final\s+int\s+(\w+)\s*=\s*([^;]+);", text))
     result = {}
     for _ in range(len(expressions) + 1):
@@ -174,18 +188,24 @@ def scan_packets(repo, opcodes, scope):
              ("client_to_server", repo / "src/main/java/emu/grasscutter/server/packet/recv")]
     for direction, root in roots:
         for path in sorted(root.rglob("*.java")):
-            text = mask_java(path.read_text())
+            text = mask_java(path.read_text(encoding="utf-8"))
             if direction == "server_to_client":
                 matches = list(re.finditer(r"\bsuper\s*\(\s*(?:emu\.grasscutter\.net\.packet\.)?PacketOpcodes\.(\w+)\s*(?=[,)])", text))
                 literal = list(re.finditer(r"\bsuper\s*\(\s*(-?(?:0[xX][0-9a-fA-F]+|0|[1-9][0-9]*))\s*[,)]", text))
                 matches += literal
             else:
-                matches = list(re.finditer(r"@Opcodes\s*\(\s*PacketOpcodes\.(\w+)\s*\)", text))
+                # Match the complete annotation argument, not a prefix of an expression.
+                # Extra attributes may disable registration and are deliberately unsupported.
+                matches = list(re.finditer(
+                    r"@Opcodes\s*\(\s*(?:value\s*=\s*)?"
+                    r"(?:PacketOpcodes\.(\w+)|(-?(?:0[xX][0-9a-fA-F]+|0|[1-9][0-9]*)))\s*\)", text))
             if not matches and scope.search(path.stem):
-                unresolved.append({"path": path.relative_to(repo).as_posix(), "reason": "no supported literal opcode binding"})
+                unresolved.append({"path": path.relative_to(repo).as_posix(), "direction": direction,
+                                   "reason": "no supported literal opcode binding"})
             for match in matches:
-                name = match.group(1)
-                symbol = name if name in opcodes else path.stem.removeprefix("Packet") if java_int_literal(name) is not None else name
+                name = match.group(1) or match.group(2)
+                prefix = "Packet" if direction == "server_to_client" else "Handler"
+                symbol = path.stem.removeprefix(prefix) if java_int_literal(name) is not None else name
                 if not scope.search(symbol) and not scope.search(path.stem):
                     continue
                 number = opcodes.get(name)
@@ -204,6 +224,8 @@ def finding(code, severity, symbol, expected=None, actual=None, field=None, **co
     item = {"code": code, "severity": severity, "symbol": symbol, "field": field,
             "expected": expected, "actual": actual, **context}
     stable = {k: item.get(k) for k in ("code", "symbol", "field", "expected", "actual", "direction", "native_type")}
+    if code == "source_binding_unresolved":
+        stable.update({k: item.get(k) for k in ("path", "reason")})
     item["fingerprint"] = digest(canonical_bytes(stable))
     return item
 
@@ -369,12 +391,17 @@ def lost_bindings(repo, scope, usage, baseline):
     return result
 
 
+PLACEHOLDER_REASON = "Existing mismatch; review and add a tracking reference"
+
+
 def classify_debt(findings, baseline):
     if baseline.get("format") != "astaps.protocol-compatibility-debt.v1":
         raise ValueError("Unsupported compatibility debt format")
     entries = baseline.get("entries", [])
     if any(not e.get("reason") or not re.fullmatch(r"[0-9a-f]{64}", e.get("fingerprint", "")) for e in entries):
         raise ValueError("Debt entries require exact fingerprints and reasons")
+    if any(e.get("reason", "").strip() == PLACEHOLDER_REASON for e in entries):
+        raise ValueError("Debt entries still carry the proposed placeholder reason")
     if len({e["fingerprint"] for e in entries}) != len(entries):
         raise ValueError("Duplicate debt fingerprints")
     known = {e["fingerprint"]: e["reason"] for e in entries}
@@ -390,7 +417,8 @@ def classify_debt(findings, baseline):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", type=Path, default=ROOT)
-    parser.add_argument("--reference", type=Path)
+    parser.add_argument("--reference", type=Path, required=True,
+                        help="User-supplied reference you are authorized to use; none is bundled")
     parser.add_argument("--descriptor", type=Path)
     parser.add_argument("--baseline", type=Path)
     parser.add_argument("--scope", default=SCOPE, help="Regex selecting source packet names")
@@ -399,7 +427,7 @@ def main():
     args = parser.parse_args()
     repo = args.repo.resolve()
     try:
-        reference = load_reference(args.reference or repo / "protocol/7.1/client-compatibility-reference.json")
+        reference = load_reference(args.reference)
         messages, enums, provenance = load_server_descriptor(repo, args.descriptor or repo / "build/generated/protocol/7.1/server.desc")
         opcodes, unresolved_constants = read_opcodes(repo / "src/main/java/emu/grasscutter/net/packet/PacketOpcodes.java")
         scope = re.compile(args.scope)
@@ -409,11 +437,15 @@ def main():
         findings, comparisons = audit(reference, opcodes, usage, messages, enums)
         if not comparisons:
             raise ValueError("No descriptor comparisons were possible; refusing an empty schema audit")
-        baseline_path = args.baseline or repo / "protocol/7.1/compatibility-debt.json"
-        baseline = json.loads(baseline_path.read_text()) if baseline_path.exists() else {"format": "astaps.protocol-compatibility-debt.v1", "entries": []}
-        if baseline_path.exists() and (baseline.get("client_artifact_sha256") != reference["artifact"]["sha256"]
+        # No implicit repository debt: a missing explicitly requested baseline is an error.
+        baseline = json.loads(args.baseline.read_text(encoding="utf-8")) if args.baseline else {"format": "astaps.protocol-compatibility-debt.v1", "entries": []}
+        if args.baseline and (baseline.get("client_artifact_sha256") != reference["artifact"]["sha256"]
                 or baseline.get("reference_sha256") != reference["content_sha256"]):
             raise ValueError("Debt belongs to a different reference; review it before rebaselining")
+        for item in unresolved_usage:
+            context = {k: v for k, v in item.items() if k != "symbol"}
+            findings.append(finding("source_binding_unresolved", "unknown",
+                item.get("symbol", Path(item["path"]).stem), **context))
         findings += lost_bindings(repo, scope, usage, baseline)
         resolved = classify_debt(findings, baseline)
         if args.write_baseline:
@@ -422,11 +454,11 @@ def main():
                     "reference_sha256": reference["content_sha256"],
                     "monitored_bindings": sorted({(u["path"], u["symbol"], u["direction"]) for u in usage}),
                     "entries": [
-                {"fingerprint": row["fingerprint"], "reason": "Existing mismatch; review and add a tracking reference",
+                {"fingerprint": row["fingerprint"], "reason": PLACEHOLDER_REASON,
                  "code": row["code"], "symbol": row["symbol"]} for row in findings if row["severity"] == "error"]}
             debt["monitored_bindings"] = [dict(zip(("path", "symbol", "direction"), item)) for item in debt["monitored_bindings"]]
             args.write_baseline.parent.mkdir(parents=True, exist_ok=True)
-            args.write_baseline.write_text(json.dumps(debt, sort_keys=True, indent=2) + "\n")
+            args.write_baseline.write_text(json.dumps(debt, sort_keys=True, indent=2) + "\n", encoding="utf-8")
         summary = {"packet_usages": len(usage), "message_comparisons": comparisons,
                    "new_errors": sum(f["severity"] == "error" and not f["known_debt"] for f in findings),
                    "known_errors": sum(f["known_debt"] for f in findings),
@@ -445,12 +477,12 @@ def main():
                   "resolved_debt_fingerprints": resolved, "findings": findings}
         if args.output:
             args.output.parent.mkdir(parents=True, exist_ok=True)
-            args.output.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n")
+            args.output.write_text(json.dumps(report, sort_keys=True, indent=2) + "\n", encoding="utf-8")
         print(json.dumps(summary, sort_keys=True))
         for row in [f for f in findings if f["severity"] == "error"][:30]:
             print(f"{'KNOWN' if row['known_debt'] else 'NEW'} {row['code']}: {row['symbol']} field={row['field']} expected={row['expected']} actual={row['actual']}")
         return 1 if summary["new_errors"] else 0
-    except (OSError, ValueError, KeyError, TypeError, DecodeError, re.error) as error:
+    except (OSError, ValueError, KeyError, TypeError, AttributeError, DecodeError, re.error) as error:
         parser.exit(2, f"Cannot audit protocol: {error}\n")
 
 
