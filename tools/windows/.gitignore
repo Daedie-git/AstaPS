@@ -1,0 +1,7 @@
+/.game-directory.txt
+/payload/
+/originals/
+/patch-source/
+/package-manifest.json
+/SHA256SUMS.txt
+/__pycache__/

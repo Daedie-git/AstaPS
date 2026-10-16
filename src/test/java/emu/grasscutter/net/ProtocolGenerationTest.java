@@ -93,8 +93,8 @@ public final class ProtocolGenerationTest {
     @Test
     public void achievementGoalResponseUsesNativeCommandAndFields() throws Exception {
         assertEquals(22054, PacketOpcodes.TakeAchievementGoalRewardRsp);
-        // Request identity is still unverified; do not guess or enable its handler.
-        assertEquals(0, PacketOpcodes.TakeAchievementGoalRewardReq);
+        // The independently validated category request is now integrated as well.
+        assertEquals(28295, PacketOpcodes.TakeAchievementGoalRewardReq);
         var descriptor = TakeAchievementGoalRewardRsp.getDescriptor();
         assertEquals(7, descriptor.findFieldByName("retcode").getNumber());
         assertEquals(8, descriptor.findFieldByName("id_list").getNumber());

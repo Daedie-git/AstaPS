@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "client_version": "Global 7.1.0",
+  "executable_sha256": "08a3086d5f3fe695f01dab61efa42e442006b18e5e475b2520df356f6a073b7d",
+  "plugin_sha256": "d09977107fba3c264c43f24ec68108e7becc17524b51cc0ed3c9fbcc5c743e4e",
+  "patch_sha256": "b067813ef3fa643f6fdc861a447780b7bcfc2a194885298c412d94c79a3bd3f3",
+  "bootstrap_sha256": "c7b4795a41fd8c0d9377eb3334d4ef291752850624fb0b5062c95ff920f0a28c",
+  "wine_bootstrap_sha256": "042efb8885b51d45ff5bd15a3329468d69b4dbd38e2e2800339421996ad1e96d",
+  "patch_source": "https://github.com/capyb2222/animegamepatch.git",
+  "patch_commit": "562248bf212518872e3027d579fa511716f39294",
+  "dispatch_url": "http://127.0.0.1:8088",
+  "validation": "Proxy binary used successfully under Wine. Native Windows gameplay is not yet tested."
+}

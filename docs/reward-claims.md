@@ -1,5 +1,7 @@
 # Reward claims
 
+These notes retain the historical deployment details from October 10–13. The Windows source handoff additionally integrates the published category-request validation and subsequent upstream changes; it is not a byte-identical reproduction of the private running server. See [Windows handoff](windows-handoff.md).
+
 ## Adventure Rank
 
 Katheryne's 7.1 claim request is opcode `7321`, with `level` in protobuf field 15. The user confirmed rank 2/3/4 clicks corresponding to captured payloads `7802`, `7803`, `7804` on 2026-10-10. The prior constant was zero, so no handler registered; the legacy generated request descriptor also incorrectly used field 11. The canonical `compat/TakePlayerLevelRewardReq.proto` now uses native/captured field 15; this schema correction is deployed as of 2026-10-13 12:26 Europe/Brussels. Changing only the opcode still failed the captured-click tests.
@@ -16,7 +18,7 @@ Both handbook request parsers now validate the entire payload before returning a
 
 ## Achievement Categories
 
-The category/goal reward response is independently identified as command 22054, with retcode field 7, packed IDs field 8 and ItemParam messages field 9. Canonical `compat/TakeAchievementGoalRewardRsp.proto` and the response constant now match those native proofs. Real packet-builder golden tests cover success/error bytes without grants or database writes. This response correction is deployed; the goal request remains command zero and unverified, so it alone does not restore category claims.
+The category/goal reward response is independently identified as command 22054, with retcode field 7, packed IDs field 8 and ItemParam messages field 9. Canonical `compat/TakeAchievementGoalRewardRsp.proto` and the response constant now match those native proofs. Real packet-builder golden tests cover success/error bytes without grants or database writes. The source handoff now also includes the separately verified request at command 28295, repeated uint32 field 14, with full-message framing and overflow validation. The private installed claim path has been visually tested for category 10, including cold-login persistence; that does not establish every category or failure case.
 
 ## Validate
 
